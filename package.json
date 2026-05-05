@@ -1,0 +1,15 @@
+{
+  "name": "agentic-store-root",
+  "version": "1.0.0",
+  "scripts": {
+    "install-all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "dev": "concurrently \"npm run dev-frontend\" \"npm run dev-backend\"",
+    "dev-frontend": "cd frontend && npm run dev",
+    "dev-backend": "node backend/server.js",
+    "start-backend": "node backend/server.js",
+    "seed": "node backend/utils/seedData.js"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

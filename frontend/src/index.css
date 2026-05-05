@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-primary-light: #059669;
+  --color-primary-dark: #10B981;
+  --color-secondary-light: #1E293B;
+  --color-secondary-dark: #020617;
+  --color-accent-light: #B8860B;
+  --color-accent-dark: #FACC15;
+  --color-background-light: #F8FAFC;
+  --color-background-dark: #020617;
+  --color-surface-light: #FFFFFF;
+  --color-surface-dark: #0F172A;
+  --color-text-primary-light: #111827;
+  --color-text-primary-dark: #F1F5F9;
+  --color-text-secondary-light: #475569;
+  --color-text-secondary-dark: #94A3B8;
+  --color-border-light: #E2E8F0;
+  --color-border-dark: #1E293B;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  
+  --shadow-premium: 0 20px 50px -12px rgba(0, 0, 0, 0.08);
+  --shadow-premium-dark: 0 20px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply transition-colors duration-300;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-6 py-3 bg-primary-light dark:bg-primary-dark text-white rounded-xl font-semibold hover:opacity-90 transition-all active:scale-95 flex items-center justify-center gap-2;
+  }
+  
+  .btn-secondary {
+    @apply px-6 py-3 bg-secondary-light dark:bg-secondary-dark text-white dark:text-text-primary-dark rounded-xl font-semibold hover:opacity-90 transition-all active:scale-95 flex items-center justify-center gap-2;
+  }
+
+  .btn-outline {
+    @apply px-6 py-3 border-2 border-primary-light dark:border-primary-dark text-primary-light dark:text-primary-dark rounded-xl font-semibold hover:bg-primary-light/10 dark:hover:bg-primary-dark/10 transition-all active:scale-95 flex items-center justify-center gap-2;
+  }
+
+  .card-premium {
+    @apply bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl p-6 shadow-premium dark:shadow-premium-dark hover:shadow-xl transition-all duration-300;
+  }
+
+  .glass-card {
+    @apply bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6;
+  }
+}
+
+.gold-gradient {
+  background: linear-gradient(135deg, #D4AF37 0%, #FACC15 100%);
+}
+
+.emerald-gradient {
+  background: linear-gradient(135deg, #047857 0%, #10B981 100%);
+}
