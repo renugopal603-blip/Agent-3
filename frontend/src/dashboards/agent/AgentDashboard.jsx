@@ -62,8 +62,15 @@ const AgentDashboard = () => {
     { id: 4, name: 'Sneha Patel', role: 'Agent', location: 'Pune', status: 'Active', joined: '2026-03-10' },
   ]);
   const [shops, setShops] = useState(() => {
-    const saved = localStorage.getItem('agentShops');
-    if (saved) return JSON.parse(saved);
+    try {
+      const saved = localStorage.getItem('agentShops');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {
+      console.error('Failed to load shops from localStorage', e);
+    }
     return [
       { id: 1, name: 'Fresh Mart Grocery', category: 'Grocery', owner: 'Ramesh K.', sales: '₹1.2L', status: 'Active', rating: '4.8', date: 'May 01, 2026' },
       { id: 2, name: 'Electro World', category: 'Electronics', owner: 'Vijay M.', sales: '₹4.5L', status: 'Active', rating: '4.5', date: 'May 02, 2026' },
@@ -97,23 +104,24 @@ const AgentDashboard = () => {
       return;
     }
 
-    const newId = shops.length + 1;
+    const currentShops = Array.isArray(shops) ? shops : [];
+    const newId = currentShops.length > 0 ? Math.max(...currentShops.map(s => s.id)) + 1 : 1;
     const newShop = { 
       id: newId, 
       name: shopForm.name, 
-      category: shopForm.category, 
+      category: shopForm.category || 'Grocery', 
       owner: shopForm.owner, 
       sales: '₹0', 
       status: 'Pending Review', 
       rating: 'N/A',
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: '2026' }),
       documents: {
-        license: shopForm.documents.licenseName,
-        gst: shopForm.documents.gstName
+        license: shopForm.documents?.licenseName || '',
+        gst: shopForm.documents?.gstName || ''
       }
     };
 
-    setShops([...shops, newShop]);
+    setShops([...currentShops, newShop]);
     setShowShopModal(false);
     
     // Reset form
