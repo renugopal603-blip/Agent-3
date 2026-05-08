@@ -50,6 +50,7 @@ const SubAdminDashboard = () => {
   const [showShopDetailModal, setShowShopDetailModal] = useState(false);
   const [selectedShopDetail, setSelectedShopDetail] = useState(null);
   const [reportSubmitted, setReportSubmitted] = useState(false);
+  const [showTicketModal, setShowTicketModal] = useState(false);
 
   const handleDownload = (docName) => {
     addNotification({ title: 'Download Started', message: `Preparing ${docName} for secure download...`, type: 'info' });
@@ -903,7 +904,10 @@ const SubAdminDashboard = () => {
                 <h3 className="text-2xl font-bold dark:text-white">Support / Tickets</h3>
                 <p className="text-sm text-text-secondary-light mt-1">Manage, escalate and track all support requests from your territory.</p>
               </div>
-              <button className="btn-primary px-4 py-2 text-sm flex items-center gap-2">
+              <button 
+                onClick={() => setShowTicketModal(true)}
+                className="btn-primary px-4 py-2 text-sm flex items-center gap-2"
+              >
                 <LifeBuoy size={16} /> Raise New Ticket
               </button>
             </div>
@@ -1298,6 +1302,15 @@ const SubAdminDashboard = () => {
           isOpen={showCommissionModal}
           onClose={() => setShowCommissionModal(false)}
         />
+
+        <SupportTicketModal 
+          isOpen={showTicketModal}
+          onClose={() => setShowTicketModal(false)}
+          onAdd={() => {
+            addNotification({ title: 'Ticket Created', message: 'Your support ticket has been logged successfully.', type: 'success' });
+            setShowTicketModal(false);
+          }}
+        />
       </main>
     </div>
   );
@@ -1630,6 +1643,58 @@ const SidebarLink = ({ icon, label, active, onClick, badge }) => (
     )}
   </div>
 );
+
+
+const SupportTicketModal = ({ isOpen, onClose, onAdd }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
+      <div className="relative w-full max-w-lg bg-surface-light dark:bg-surface-dark rounded-[32px] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="p-8 border-b dark:border-border-dark flex justify-between items-center bg-primary-light text-white">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center"><LifeBuoy size={24}/></div>
+            <div>
+              <h3 className="text-xl font-black">Raise Support Ticket</h3>
+              <p className="text-xs font-bold uppercase opacity-80">Territory Support Request</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-3 hover:bg-white/10 rounded-2xl transition-all"><X size={24}/></button>
+        </div>
+        <div className="p-8 space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase text-text-secondary-light">Issue Category</label>
+              <select className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold appearance-none">
+                <option>Agent Verification</option>
+                <option>Shop Onboarding</option>
+                <option>Payout Dispute</option>
+                <option>Technical Bug</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase text-text-secondary-light">Priority</label>
+              <select className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold appearance-none">
+                <option>High</option>
+                <option>Medium</option>
+                <option>Low</option>
+              </select>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-text-secondary-light">Subject</label>
+            <input type="text" placeholder="Brief summary of the issue..." className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-text-secondary-light">Description</label>
+            <textarea rows="3" placeholder="Provide full details here..." className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold resize-none"></textarea>
+          </div>
+          <button onClick={onAdd} className="w-full py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] transition-all">Submit Support Ticket</button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 
 export default SubAdminDashboard;
