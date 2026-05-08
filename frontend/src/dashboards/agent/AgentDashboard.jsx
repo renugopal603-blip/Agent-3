@@ -2446,11 +2446,8 @@ const AgentDashboard = () => {
               <button 
                 type="button"
                 onClick={handleSubmitShop}
-                disabled={!shopForm.name || !shopForm.owner || !shopForm.contact || isProcessing}
-                className={`flex-1 py-4 rounded-2xl font-black text-sm shadow-xl transition-all flex items-center justify-center gap-2 ${
-                  (!shopForm.name || !shopForm.owner || !shopForm.contact || isProcessing)
-                    ? 'bg-gray-300 cursor-not-allowed opacity-50' 
-                    : 'bg-emerald-500 text-white shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98]'
+                className={`flex-1 py-4 rounded-2xl font-black text-sm shadow-xl transition-all flex items-center justify-center gap-2 bg-emerald-500 text-white shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] ${
+                  isProcessing ? 'opacity-70 cursor-wait' : ''
                 }`}
               >
                 {isProcessing ? (
