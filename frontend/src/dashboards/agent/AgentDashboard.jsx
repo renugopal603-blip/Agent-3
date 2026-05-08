@@ -8,7 +8,7 @@ import {
   Wallet, History, Award, ArrowUpRight, TrendingUp, BarChart2,
   Bell, LifeBuoy, MessageSquare, Settings, LogOut, Search, Filter,
   ChevronRight, ArrowRight, MoreVertical, Edit, Trash2, CheckCircle, Clock,
-  FileText, PieChart, Info, AlertCircle, Globe, Download, Sun, Moon, Star
+  FileText, PieChart, Info, AlertCircle, Globe, Download, Sun, Moon, Star, X, UserPlus, Mail, Phone
 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -24,6 +24,46 @@ const AgentDashboard = () => {
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [applicationStep, setApplicationStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showMap, setShowMap] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('UPI'); // 'UPI' or 'Manual'
+  const [showOnboardModal, setShowOnboardModal] = useState(false);
+  const [onboardForm, setOnboardForm] = useState({ name: '', email: '', phone: '', role: 'Agent', location: '' });
+  const [shopForm, setShopForm] = useState({ name: '', category: 'Grocery', owner: '', location: '', contact: '' });
+  const [showShopModal, setShowShopModal] = useState(false);
+  const [settings, setSettings] = useState({
+    twoFactor: true,
+    emailAlerts: true,
+    smsNotifications: true,
+    browserPushes: false,
+    commissionAlerts: true,
+    language: 'English'
+  });
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
+  const [showCommissionModal, setShowCommissionModal] = useState(false);
+  const [members, setMembers] = useState([
+    { id: 1, name: 'Rahul Sharma', role: 'Agent', location: 'Pune', status: 'Active', joined: '2026-04-15' },
+    { id: 2, name: 'Priya Verma', role: 'Premium Agent', location: 'Mumbai', status: 'Active', joined: '2026-04-20' },
+    { id: 3, name: 'Amit Singh', role: 'Agent', location: 'Nashik', status: 'Pending', joined: '2026-05-01' },
+    { id: 4, name: 'Sneha Patel', role: 'Agent', location: 'Pune', status: 'Active', joined: '2026-03-10' },
+  ]);
+  const [shops, setShops] = useState([
+    { id: 1, name: 'Fresh Mart Grocery', category: 'Grocery', owner: 'Ramesh K.', sales: '₹1.2L', status: 'Active', rating: '4.8' },
+    { id: 2, name: 'Electro World', category: 'Electronics', owner: 'Vijay M.', sales: '₹4.5L', status: 'Active', rating: '4.5' },
+    { id: 3, name: 'Style Studio', category: 'Fashion', owner: 'Anjali S.', sales: '₹85K', status: 'Pending', rating: 'N/A' },
+    { id: 4, name: 'Gourmet Kitchen', category: 'Restaurant', owner: 'Suresh R.', sales: '₹2.1L', status: 'Active', rating: '4.9' },
+    { id: 5, name: 'Comfort Beds', category: 'Furniture', owner: 'Vikram B.', sales: '₹1.8L', status: 'Inactive', rating: '4.2' },
+    { id: 6, name: 'City Inn Hotel', category: 'Hotel', owner: 'Priya X.', sales: '₹6.2L', status: 'Active', rating: '4.7' },
+  ]);
+
+  const handleDeleteShop = (id) => {
+    if (window.confirm('Are you sure you want to remove this shop onboarding?')) {
+      setShops(shops.filter(s => s.id !== id));
+      addNotification({ title: 'Shop Removed', message: 'The shop has been removed from your list.', type: 'success' });
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -122,11 +162,27 @@ const AgentDashboard = () => {
                 </div>
                 <button className="w-full btn-outline py-2 text-sm">View All History</button>
               </div>
+
+              {/* Quick Onboarding Card */}
+              <div className="card-premium bg-gradient-to-br from-emerald-500 to-emerald-600 border-none text-white p-6 relative overflow-hidden group">
+                <div className="relative z-10 space-y-4">
+                  <h3 className="text-xl font-black">Expand Your Network</h3>
+                  <p className="text-xs opacity-90 leading-relaxed">Onboard new members directly to your downline and start earning multi-level commissions today.</p>
+                  <button 
+                    onClick={() => setActiveTab('Onboard New Member')}
+                    className="w-full bg-white text-emerald-600 font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:scale-[1.02] transition-all shadow-lg"
+                  >
+                    <PlusSquare size={18} />
+                    Onboard New Member
+                  </button>
+                </div>
+                <Users size={120} className="absolute -right-8 -bottom-8 opacity-10 group-hover:scale-110 transition-transform duration-700" />
+              </div>
             </div>
           </div>
         );
 
-      case 'My Profile':
+      case 'My Profile': {
         const agentLevels = {
           'Pincode Agent': { level: 'PINCODE LEVEL', territoryLabel: 'Assigned Pincode', territoryValue: '400001', commission: '5% + Referral' },
           'Divisional Agent': { level: 'DIVISIONAL LEVEL', territoryLabel: 'Assigned Division', territoryValue: 'Mumbai South', commission: '7% + Royalty' },
@@ -210,21 +266,43 @@ const AgentDashboard = () => {
                   <h4 className="font-black dark:text-white uppercase tracking-widest text-sm">Quick Actions</h4>
                   <div className="space-y-3">
                     <button 
-                      onClick={() => alert('Opening profile editor... You can update your contact details and business information here.')}
+                      onClick={() => {
+                        setActiveTab('Settings');
+                        addNotification({ title: 'Edit Profile', message: 'You can update your personal information in Settings.', type: 'info' });
+                      }}
                       className="w-full btn-primary py-3 rounded-xl font-bold text-sm shadow-lg shadow-primary-light/20 hover:scale-[1.02] transition-all"
                     >
                       Edit Profile Info
                     </button>
                     <button 
-                      onClick={() => alert('Generating your Digital Agent ID Card... Your PDF download will start in a moment.')}
-                      className="w-full btn-outline py-3 rounded-xl font-bold text-sm hover:bg-gray-50 dark:hover:bg-secondary-dark transition-all"
+                      onClick={() => {
+                        setIsDownloading(true);
+                        addNotification({ title: 'Generating ID Card', message: 'Fetching your credentials and generating secure PDF...', type: 'info' });
+                        setTimeout(() => {
+                          setIsDownloading(false);
+                          addNotification({ title: 'Download Complete', message: 'Agent_ID_Card.pdf has been saved to your device.', type: 'success' });
+                        }, 3000);
+                      }}
+                      disabled={isDownloading}
+                      className={`w-full btn-outline py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${isDownloading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 dark:hover:bg-secondary-dark'}`}
                     >
-                      Download ID Card
+                      {isDownloading ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-primary-light border-t-transparent rounded-full animate-spin"></div>
+                          Downloading...
+                        </>
+                      ) : (
+                        <>
+                          <Download size={16} />
+                          Download ID Card
+                        </>
+                      )}
                     </button>
                     <button 
-                      onClick={() => alert('Role Upgrade Request submitted to Admin. Our compliance team will review your performance metrics and contact you within 48 hours.')}
-                      className="w-full py-3 text-error font-bold text-sm hover:bg-error/5 rounded-xl transition-all"
+                      onClick={() => setShowUpgradeModal(true)}
+                      className="w-full py-3 text-error font-bold text-sm hover:bg-error/5 rounded-xl transition-all flex items-center justify-center gap-2"
                     >
+                      <TrendingUp size={16} />
                       Request Role Upgrade
                     </button>
                   </div>
@@ -243,6 +321,7 @@ const AgentDashboard = () => {
             </div>
           </div>
         );
+      }
 
       case 'KYC Status':
         return (
@@ -459,62 +538,9 @@ const AgentDashboard = () => {
           </div>
         );
 
-      case 'Downline Tree':
-        return (
-          <div className="p-8 space-y-8 animate-in slide-in-from-bottom-4 duration-500">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-2xl font-bold dark:text-white">Network Hierarchy</h3>
-                <p className="text-sm text-text-secondary-light">Visualize your downline and multi-level network structure.</p>
-              </div>
-              <div className="flex gap-2">
-                <button className="btn-outline px-4 py-2 text-sm">Expand All</button>
-                <button className="btn-primary px-4 py-2 text-sm">Refresh View</button>
-              </div>
-            </div>
-
-            <div className="card-premium min-h-[500px] flex items-center justify-center overflow-auto">
-              {/* Mockup of a tree structure */}
-              <div className="flex flex-col items-center gap-12">
-                <div className="w-20 h-20 bg-primary-light rounded-2xl flex items-center justify-center text-white font-black shadow-xl ring-4 ring-primary-light/20 relative">
-                  YOU
-                  <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-0.5 h-12 bg-border-light dark:border-border-dark"></div>
-                </div>
-                
-                <div className="flex gap-20 relative">
-                  <div className="absolute top-0 left-1/4 right-1/4 h-0.5 bg-border-light dark:border-border-dark -translate-y-12"></div>
-                  {[
-                    { name: 'L1: Karan', color: 'bg-emerald-500', children: 3 },
-                    { name: 'L1: Meera', color: 'bg-blue-500', children: 5 },
-                    { name: 'L1: Rahul', color: 'bg-orange-500', children: 2 },
-                  ].map((node, i) => (
-                    <div key={i} className="flex flex-col items-center gap-8 relative">
-                      <div className={`w-16 h-16 ${node.color} rounded-xl flex items-center justify-center text-white font-bold text-xs shadow-lg relative`}>
-                        {node.name}
-                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-0.5 h-8 bg-border-light dark:border-border-dark"></div>
-                      </div>
-                      <div className="flex gap-4">
-                        {Array.from({ length: node.children }).map((_, j) => (
-                          <div key={j} className="w-8 h-8 bg-gray-200 dark:bg-secondary-dark rounded-lg flex items-center justify-center text-[8px] dark:text-white">L2</div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-12 p-4 bg-gray-50 dark:bg-secondary-dark/50 rounded-xl border border-dashed border-border-light dark:border-border-dark">
-                  <p className="text-xs text-text-secondary-light font-bold flex items-center gap-2">
-                    <Info size={14} /> Only top 2 levels are shown. Click on a node to explore deeper levels.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-
       case 'Referral Links':
         return (
-          <div className="p-8 max-w-4xl animate-in slide-in-from-bottom-4 duration-500">
+          <div className="p-8 max-w-5xl animate-in slide-in-from-bottom-4 duration-500 mx-auto">
             <div className="card-premium space-y-8">
               <div className="border-b dark:border-border-dark pb-6">
                 <h3 className="text-2xl font-bold dark:text-white">Referral Program</h3>
@@ -527,105 +553,170 @@ const AgentDashboard = () => {
                   { title: 'Shop Partner Invitation', link: `https://agenticstore.com/partner?ref=AGT882901`, desc: 'Invite local shops to join the platform as verified partners.' },
                   { title: 'Customer Invitation', link: `https://agenticstore.com/join?ref=AGT882901`, desc: 'Direct link for customers to explore local luxury services.' },
                 ].map((item, i) => (
-                  <div key={i} className="space-y-3">
-                    <h4 className="text-sm font-bold dark:text-white">{item.title}</h4>
-                    <div className="flex gap-2">
-                      <div className="flex-1 p-3 bg-gray-50 dark:bg-secondary-dark rounded-xl border border-border-light dark:border-border-dark font-mono text-xs dark:text-white overflow-hidden text-ellipsis whitespace-nowrap">
+                  <div key={i} className="space-y-2.5">
+                    <h4 className="text-[11px] font-black text-text-secondary-light uppercase tracking-widest ml-1">{item.title}</h4>
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 p-3.5 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark font-mono text-[11px] dark:text-white overflow-hidden text-ellipsis whitespace-nowrap h-[52px] flex items-center shadow-inner">
                         {item.link}
                       </div>
-                      <button className="btn-primary px-4 py-2 text-xs flex items-center gap-2 whitespace-nowrap">
-                        <LinkIcon size={14} /> Copy Link
+                      <button 
+                        onClick={() => {
+                          navigator.clipboard.writeText(item.link);
+                          addNotification({ title: 'Link Copied', message: 'Referral link copied to clipboard.', type: 'success' });
+                        }}
+                        className="btn-primary h-[52px] px-6 rounded-2xl text-xs font-black flex items-center gap-2 whitespace-nowrap shadow-lg shadow-primary-light/20 transition-transform active:scale-95"
+                      >
+                        <LinkIcon size={16} /> Copy Link
                       </button>
                     </div>
-                    <p className="text-[10px] text-text-secondary-light">{item.desc}</p>
+                    <p className="text-[10px] text-text-secondary-light ml-1 opacity-70 font-medium">{item.desc}</p>
                   </div>
                 ))}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
                 {[
-                  { label: 'Total Clicks', value: '1,240' },
-                  { label: 'Conversions', value: '156' },
-                  { label: 'Bonus Earned', value: '₹12,500' },
+                  { label: 'Total Clicks', value: '1,240', sub: 'Last 30 days' },
+                  { label: 'Conversions', value: '156', sub: '12.5% rate' },
+                  { label: 'Bonus Earned', value: '₹12,500', sub: 'MTD Earning' },
                 ].map((stat, i) => (
-                  <div key={i} className="p-4 bg-primary-light/5 rounded-2xl border border-primary-light/10 text-center">
-                    <p className="text-[10px] font-bold text-primary-light uppercase tracking-widest">{stat.label}</p>
-                    <p className="text-xl font-black dark:text-white mt-1">{stat.value}</p>
+                  <div key={i} className="p-6 bg-primary-light/5 rounded-[24px] border border-primary-light/10 text-center hover:bg-primary-light/10 transition-colors">
+                    <p className="text-[10px] font-black text-primary-light uppercase tracking-widest mb-1">{stat.label}</p>
+                    <p className="text-2xl font-black dark:text-white">{stat.value}</p>
+                    <p className="text-[9px] font-bold text-text-secondary-light uppercase mt-1 opacity-60">{stat.sub}</p>
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
-        );
 
-      case 'Territory Management':
-        return (
-          <div className="p-8 space-y-8 animate-in slide-in-from-bottom-4 duration-500">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-2xl font-bold dark:text-white">Territory Insights</h3>
-                <p className="text-sm text-text-secondary-light">Managing: West District - Mumbai Zone</p>
-              </div>
-              <button className="btn-outline px-4 py-2 text-sm flex items-center gap-2">
-                <Globe size={18} /> View Global Map
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-              <div className="xl:col-span-2 card-premium h-[450px] relative overflow-hidden bg-gray-100 dark:bg-secondary-dark/50 flex items-center justify-center border-dashed">
-                <div className="text-center space-y-4 relative z-10">
-                  <div className="w-16 h-16 bg-primary-light/10 text-primary-light rounded-full flex items-center justify-center mx-auto animate-pulse">
-                    <Map size={32} />
+              {/* Referral Benefits & Rewards */}
+              <div className="pt-10 space-y-8">
+                <div className="flex items-center gap-3 border-b dark:border-border-dark pb-5">
+                  <div className="p-2 bg-yellow-500/10 rounded-xl">
+                    <Award className="text-yellow-500" size={22} />
                   </div>
-                  <div>
-                    <h4 className="font-bold dark:text-white text-lg">Interactive Zone Map</h4>
-                    <p className="text-sm text-text-secondary-light max-w-xs mx-auto">Visualizing active members and partner shops in West District.</p>
-                  </div>
-                  <div className="flex gap-4 justify-center">
-                    <div className="flex items-center gap-2"><span className="w-3 h-3 bg-emerald-500 rounded-full"></span> <span className="text-xs dark:text-white">Active Shops (12)</span></div>
-                    <div className="flex items-center gap-2"><span className="w-3 h-3 bg-blue-500 rounded-full"></span> <span className="text-xs dark:text-white">Members (156)</span></div>
-                  </div>
+                  <h4 className="font-black dark:text-white uppercase tracking-[0.1em] text-sm">Referral Benefits & Rewards</h4>
                 </div>
-                {/* Mockup Map Lines */}
-                <svg className="absolute inset-0 w-full h-full opacity-10 pointer-events-none">
-                  <path d="M0,100 Q100,50 200,100 T400,100 T600,100" fill="none" stroke="currentColor" strokeWidth="2" />
-                  <path d="M0,200 Q150,150 300,200 T600,200" fill="none" stroke="currentColor" strokeWidth="2" />
-                  <path d="M100,0 Q150,200 100,400" fill="none" stroke="currentColor" strokeWidth="2" />
-                  <path d="M300,0 Q350,250 300,500" fill="none" stroke="currentColor" strokeWidth="2" />
-                </svg>
-              </div>
 
-              <div className="space-y-6">
-                <div className="card-premium">
-                  <h4 className="font-bold dark:text-white mb-4">Pincode Coverage</h4>
-                  <div className="space-y-4">
-                    {[
-                      { code: '400001', name: 'South Fort', count: 42, health: 'High' },
-                      { code: '400005', name: 'Colaba', count: 28, health: 'Medium' },
-                      { code: '400012', name: 'Parel', count: 56, health: 'High' },
-                      { code: '400021', name: 'Nariman Point', count: 30, health: 'Medium' },
-                    ].map((pin, i) => (
-                      <div key={i} className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-bold dark:text-white">{pin.code}</p>
-                          <p className="text-xs text-text-secondary-light">{pin.name}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-bold dark:text-white">{pin.count}</p>
-                          <span className={`text-[10px] font-bold ${pin.health === 'High' ? 'text-success' : 'text-warning'}`}>{pin.health}</span>
-                        </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {[
+                    { 
+                      title: 'Direct Referral Commission', 
+                      reward: 'UP TO 10%', 
+                      desc: 'Earn a percentage on every purchase made by customers you refer.',
+                      icon: <TrendingUp className="text-emerald-500" size={20} />,
+                      color: 'bg-emerald-500/10'
+                    },
+                    { 
+                      title: 'Onboarding Bonus', 
+                      reward: '₹500 / SHOP', 
+                      desc: 'Get a fixed reward for every shop partner that successfully completes KYC.',
+                      icon: <Store className="text-blue-500" size={20} />,
+                      color: 'bg-blue-500/10'
+                    },
+                    { 
+                      title: 'Member Network Growth', 
+                      reward: '₹200 / AGENT', 
+                      desc: 'Fixed bonus for every new agent joining under your network.',
+                      icon: <Users className="text-purple-500" size={20} />,
+                      color: 'bg-purple-500/10'
+                    },
+                    { 
+                      title: 'Milestone Rewards', 
+                      reward: 'PREMIUM STATUS', 
+                      desc: 'Unlock exclusive benefits and higher rates after reaching 50 conversions.',
+                      icon: <Target className="text-orange-500" size={20} />,
+                      color: 'bg-orange-500/10'
+                    }
+                  ].map((benefit, i) => (
+                    <div key={i} className="p-6 bg-gray-50 dark:bg-secondary-dark/30 rounded-[28px] border border-border-light dark:border-border-dark flex gap-5 hover:border-primary-light/40 transition-all group shadow-sm">
+                      <div className={`w-14 h-14 rounded-2xl ${benefit.color} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-sm`}>
+                        {benefit.icon}
                       </div>
-                    ))}
-                  </div>
-                  <button className="w-full btn-outline mt-6 py-2 text-sm">Expand Coverage</button>
+                      <div className="space-y-1.5 flex-1">
+                        <div className="flex justify-between items-start gap-2">
+                          <h5 className="font-black dark:text-white text-sm leading-tight">{benefit.title}</h5>
+                          <span className="text-[9px] font-black text-primary-light bg-primary-light/10 px-2 py-1 rounded-lg uppercase whitespace-nowrap border border-primary-light/20">
+                            {benefit.reward}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-text-secondary-light leading-relaxed font-medium opacity-80">{benefit.desc}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
-                <div className="card-premium bg-primary-light text-white border-none">
-                  <h4 className="font-bold mb-2">Expansion Opportunity!</h4>
-                  <p className="text-xs opacity-90 leading-relaxed mb-4">
-                    District 400033 currently has zero agent coverage. Apply to extend your territory and earn additional 2% royalty.
-                  </p>
-                  <button className="w-full bg-white text-primary-light font-bold py-2 rounded-xl text-sm">Learn More</button>
+                <div className="p-8 bg-gradient-to-br from-secondary-dark to-background-dark rounded-[32px] border border-white/5 text-white overflow-hidden relative group shadow-2xl">
+                  <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+                    <div className="space-y-3">
+                      <h4 className="text-2xl font-black tracking-tight">Ready to boost your earnings?</h4>
+                      <p className="text-sm opacity-60 max-w-md leading-relaxed">Our multi-level reward system is designed to help you grow. More referrals mean higher commission tiers and exclusive perks!</p>
+                    </div>
+                    <button 
+                      onClick={() => setShowCommissionModal(true)}
+                      className="bg-primary-light hover:bg-primary-dark text-white font-black px-10 py-4 rounded-[20px] shadow-2xl shadow-primary-light/30 transition-all hover:scale-[1.05] active:scale-[0.95] whitespace-nowrap text-sm flex items-center gap-2 group/btn"
+                    >
+                      View Compensation Plan
+                      <ArrowRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />
+                    </button>
+                  </div>
+                  <Award size={180} className="absolute -right-12 -top-12 text-white/5 -rotate-12 group-hover:scale-110 transition-transform duration-1000" />
+                </div>
+
+                {/* Recent Referral Activity */}
+                <div className="pt-10 space-y-5">
+                  <div className="flex items-center justify-between border-b dark:border-border-dark pb-5">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-primary-light/10 rounded-xl">
+                        <History className="text-primary-light" size={22} />
+                      </div>
+                      <h4 className="font-black dark:text-white uppercase tracking-[0.1em] text-sm">Recent Referral Activity</h4>
+                    </div>
+                    <button className="text-xs font-black text-primary-light hover:underline tracking-widest uppercase">View Full Ledger</button>
+                  </div>
+
+                  <div className="overflow-hidden border border-border-light dark:border-border-dark rounded-[28px] shadow-sm">
+                    <table className="w-full text-left">
+                      <thead>
+                        <tr className="bg-gray-50 dark:bg-secondary-dark/40 border-b border-border-light dark:border-border-dark">
+                          <th className="p-5 text-[10px] font-black uppercase text-text-secondary-light tracking-[0.15em] w-[40%]">Referred Entity</th>
+                          <th className="p-5 text-[10px] font-black uppercase text-text-secondary-light tracking-[0.15em] w-[20%] text-center">Type</th>
+                          <th className="p-5 text-[10px] font-black uppercase text-text-secondary-light tracking-[0.15em] w-[20%] text-center">Date</th>
+                          <th className="p-5 text-[10px] font-black uppercase text-text-secondary-light tracking-[0.15em] text-right w-[20%]">Reward Earned</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border-light dark:divide-border-dark">
+                        {[
+                          { name: 'John Doe', type: 'Customer', date: 'May 02, 2026', reward: '₹120.00', status: 'Commission' },
+                          { name: 'Organic Foods Store', type: 'Shop Partner', date: 'Apr 28, 2026', reward: '₹500.00', status: 'Onboarding' },
+                          { name: 'Sarah Miller', type: 'Agent', date: 'Apr 25, 2026', reward: '₹200.00', status: 'Network Growth' },
+                          { name: 'Mike Johnson', type: 'Customer', date: 'Apr 20, 2026', reward: '₹85.50', status: 'Commission' },
+                        ].map((ref, i) => (
+                          <tr key={i} className="hover:bg-gray-50/50 dark:hover:bg-secondary-dark/20 transition-colors">
+                            <td className="p-5">
+                              <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-surface-dark flex items-center justify-center font-bold text-xs dark:text-white border dark:border-border-dark">
+                                  {ref.name[0]}
+                                </div>
+                                <span className="text-sm font-bold dark:text-white tracking-tight">{ref.name}</span>
+                              </div>
+                            </td>
+                            <td className="p-5 text-center">
+                              <span className="text-[10px] font-black text-text-secondary-light uppercase tracking-widest bg-gray-100 dark:bg-secondary-dark/50 px-2.5 py-1 rounded-md">{ref.type}</span>
+                            </td>
+                            <td className="p-5 text-center">
+                              <span className="text-xs text-text-secondary-light font-medium">{ref.date}</span>
+                            </td>
+                            <td className="p-5 text-right">
+                              <div className="flex flex-col items-end">
+                                <span className="text-sm font-black text-emerald-500 tracking-tight">+{ref.reward}</span>
+                                <span className="text-[8px] font-black uppercase text-text-secondary-light tracking-tighter opacity-60">{ref.status}</span>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
@@ -641,78 +732,14 @@ const AgentDashboard = () => {
                 <p className="text-text-secondary-light mt-1">Register local shops and track their approval process.</p>
               </div>
               <button 
-                onClick={() => {
-                  alert('Opening New Shop Tie-Up Form...');
-                  // Logic to toggle form visibility
-                }} 
+                onClick={() => setShowShopModal(true)} 
                 className="btn-primary px-6 py-3 rounded-xl flex items-center gap-2 font-bold"
               >
                 <PlusSquare size={20} /> Add New Shop
               </button>
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-              {/* Registration Form UI */}
-              <div className="card-premium space-y-8">
-                <div className="border-b dark:border-border-dark pb-4 flex items-center gap-3">
-                  <div className="p-2 bg-orange-500/10 text-orange-500 rounded-lg"><Store size={20} /></div>
-                  <h3 className="text-lg font-bold dark:text-white">New Shop Details</h3>
-                </div>
-
-                <form className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-text-secondary-light uppercase tracking-wider">Shop Name</label>
-                      <input type="text" placeholder="e.g. Royal Electronics" className="w-full px-4 py-3 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl outline-none" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-text-secondary-light uppercase tracking-wider">Owner Name</label>
-                      <input type="text" placeholder="Full legal name" className="w-full px-4 py-3 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl outline-none" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-text-secondary-light uppercase tracking-wider">Category</label>
-                      <select className="w-full px-4 py-3 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl outline-none dark:text-white">
-                        <option>Electronics</option>
-                        <option>Groceries</option>
-                        <option>Fashion</option>
-                        <option>Hotels & Dining</option>
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-text-secondary-light uppercase tracking-wider">Contact Number</label>
-                      <input type="tel" placeholder="+91 00000 00000" className="w-full px-4 py-3 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl outline-none" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-4 pt-4 border-t dark:border-border-dark">
-                    <h4 className="font-bold dark:text-white text-sm">Upload Documents</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {['GST Certificate', 'Trade License', 'Owner ID Proof'].map((doc, i) => (
-                        <div key={i} className="p-4 border-2 border-dashed border-border-light dark:border-border-dark rounded-xl flex flex-col items-center gap-2 hover:border-primary-light transition-colors cursor-pointer bg-white dark:bg-surface-dark">
-                          <PlusSquare className="text-text-secondary-light" />
-                          <span className="text-[10px] font-bold text-text-secondary-light text-center">{doc}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <button 
-                    type="button" 
-                    onClick={() => {
-                      addNotification({
-                        title: 'Shop Tie-Up Submitted',
-                        message: `New request for "Royal Electronics" has been sent to Sub-Admin for verification.`,
-                        type: 'info'
-                      });
-                      alert('Shop details uploaded. Status changed to Pending.');
-                    }} 
-                    className="w-full btn-primary py-4 rounded-xl font-bold"
-                  >
-                    Submit Tie-Up Request
-                  </button>
-                </form>
-              </div>
-
+            <div className="grid grid-cols-1 gap-8">
               {/* Status Tracking UI */}
               <div className="card-premium space-y-6 bg-gray-50 dark:bg-secondary-dark/50">
                 <h3 className="text-lg font-bold dark:text-white">Tie-Up Status Tracker</h3>
@@ -798,23 +825,38 @@ const AgentDashboard = () => {
               </div>
               <div className="flex gap-2">
                 <button className="btn-outline px-4 py-2 text-sm flex items-center gap-2"><Filter size={18} /> Filters</button>
-                <button onClick={() => setActiveTab('Shop Onboarding')} className="btn-primary px-4 py-2 text-sm flex items-center gap-2"><PlusSquare size={18} /> Add Shop</button>
+                <button onClick={() => setShowShopModal(true)} className="btn-primary px-4 py-2 text-sm flex items-center gap-2"><PlusSquare size={18} /> Add Shop</button>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {[
-                { name: 'Fresh Mart Grocery', category: 'Grocery', owner: 'Ramesh K.', sales: '₹1.2L', status: 'Active', rating: '4.8' },
-                { name: 'Electro World', category: 'Electronics', owner: 'Vijay M.', sales: '₹4.5L', status: 'Active', rating: '4.5' },
-                { name: 'Style Studio', category: 'Fashion', owner: 'Anjali S.', sales: '₹85K', status: 'Pending', rating: 'N/A' },
-                { name: 'Gourmet Kitchen', category: 'Restaurant', owner: 'Suresh R.', sales: '₹2.1L', status: 'Active', rating: '4.9' },
-                { name: 'Comfort Beds', category: 'Furniture', owner: 'Vikram B.', sales: '₹1.8L', status: 'Inactive', rating: '4.2' },
-                { name: 'City Inn Hotel', category: 'Hotel', owner: 'Priya X.', sales: '₹6.2L', status: 'Active', rating: '4.7' },
-              ].map((shop, i) => (
+              {shops.map((shop, i) => (
                 <div key={i} className="card-premium space-y-4 hover:border-primary-light/50 transition-colors cursor-pointer group">
                   <div className="flex justify-between items-start">
-                    <div className="w-12 h-12 bg-orange-500/10 text-orange-500 rounded-xl flex items-center justify-center font-bold text-xl">
-                      {shop.name[0]}
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-orange-500/10 text-orange-500 rounded-xl flex items-center justify-center font-bold text-xl">
+                        {shop.name[0]}
+                      </div>
+                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            addNotification({ title: 'Edit Shop', message: `Opening editor for ${shop.name}`, type: 'info' });
+                          }}
+                          className="p-1.5 hover:bg-primary-light/10 text-text-secondary-light hover:text-primary-light rounded-lg transition-all"
+                        >
+                          <Edit size={14} />
+                        </button>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteShop(shop.id);
+                          }}
+                          className="p-1.5 hover:bg-error/10 text-text-secondary-light hover:text-error rounded-lg transition-all"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </div>
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                       shop.status === 'Active' ? 'bg-success/10 text-success' : 
@@ -1437,193 +1479,362 @@ const AgentDashboard = () => {
           </div>
         );
 
-      case 'Reports':
+      case 'Onboard New Member':
         return (
-          <div className="p-8 max-w-4xl animate-in slide-in-from-bottom-4 duration-500">
+          <div className="p-8 max-w-4xl mx-auto animate-in slide-in-from-bottom-4 duration-500">
             <div className="card-premium space-y-8">
-              <div className="flex justify-between items-center border-b dark:border-border-dark pb-6">
-                <div>
-                  <h3 className="text-2xl font-bold dark:text-white">Business Reports</h3>
-                  <p className="text-text-secondary-light">Download professional reports for your business audit.</p>
+              <div className="flex items-center gap-4 border-b dark:border-border-dark pb-6">
+                <div className="w-12 h-12 bg-primary-light/10 text-primary-light rounded-2xl flex items-center justify-center">
+                  <UserPlus size={24} />
                 </div>
-                <div className="p-3 bg-primary-light/10 text-primary-light rounded-xl">
-                  <BarChart2 size={24} />
+                <div>
+                  <h3 className="text-2xl font-black dark:text-white">New Member Onboarding</h3>
+                  <p className="text-sm text-text-secondary-light font-bold">Fill in the details to register a new agent to your downline.</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {[
-                  { title: 'Monthly Earnings Summary', desc: 'Detailed breakdown of all shop and membership commissions.', type: 'PDF / Excel' },
-                  { title: 'Network Growth Audit', desc: 'Level-wise downline performance and onboarding stats.', type: 'PDF' },
-                  { title: 'Territory Health Report', desc: 'Pincode-wise sales density and shop performance audit.', type: 'PDF' },
-                  { title: 'Tax & Compliance', desc: 'Annual commission summary for tax filing purposes.', type: 'Excel' },
-                ].map((report, i) => (
-                  <div key={i} className="p-5 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark group hover:border-primary-light transition-all cursor-pointer">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="p-2 bg-white dark:bg-surface-dark rounded-lg shadow-sm">
-                        <FileText className="text-primary-light" size={20} />
-                      </div>
-                      <button className="p-2 text-text-secondary-light hover:text-primary-light transition-colors"><Download size={18} /></button>
-                    </div>
-                    <h4 className="font-bold dark:text-white mb-1">{report.title}</h4>
-                    <p className="text-xs text-text-secondary-light leading-relaxed mb-4">{report.desc}</p>
-                    <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 bg-primary-light/10 text-primary-light text-[10px] font-bold rounded-md">{report.type}</span>
-                      <span className="text-[10px] text-text-secondary-light font-bold">Ready for download</span>
-                    </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Full Name</label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary-light" size={18} />
+                    <input 
+                      type="text" 
+                      placeholder="Enter full name" 
+                      className="w-full pl-12 pr-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all"
+                      value={onboardForm.name}
+                      onChange={(e) => setOnboardForm({...onboardForm, name: e.target.value})}
+                    />
                   </div>
-                ))}
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Email Address</label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary-light" size={18} />
+                    <input 
+                      type="email" 
+                      placeholder="email@example.com" 
+                      className="w-full pl-12 pr-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all"
+                      value={onboardForm.email}
+                      onChange={(e) => setOnboardForm({...onboardForm, email: e.target.value})}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Phone Number</label>
+                  <div className="relative">
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary-light" size={18} />
+                    <input 
+                      type="text" 
+                      placeholder="+91 XXXXX XXXXX" 
+                      className="w-full pl-12 pr-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all"
+                      value={onboardForm.phone}
+                      onChange={(e) => setOnboardForm({...onboardForm, phone: e.target.value})}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Agent Role</label>
+                  <select 
+                    className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold appearance-none transition-all cursor-pointer"
+                    value={onboardForm.role}
+                    onChange={(e) => setOnboardForm({...onboardForm, role: e.target.value})}
+                  >
+                    <option>Agent</option>
+                    <option>Premium Agent</option>
+                    <option>Territory Head</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Primary Location / Territory</label>
+                <div className="relative">
+                  <Map className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary-light" size={18} />
+                  <input 
+                    type="text" 
+                    placeholder="Enter city or district" 
+                    className="w-full pl-12 pr-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all"
+                    value={onboardForm.location}
+                    onChange={(e) => setOnboardForm({...onboardForm, location: e.target.value})}
+                  />
+                </div>
+              </div>
+
+              <div className="p-6 bg-primary-light/5 border-2 border-dashed border-primary-light/20 rounded-[32px] space-y-4">
+                <p className="text-[10px] text-text-secondary-light font-black mb-2 uppercase tracking-widest">Initial Documentation</p>
+                <div className="flex gap-6">
+                  <button className="flex-1 py-4 bg-white dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-2xl text-sm font-bold dark:text-white hover:border-primary-light hover:shadow-lg transition-all flex items-center justify-center gap-3">
+                    <FileText size={20} className="text-primary-light" /> ID Proof (Aadhar/Voter)
+                  </button>
+                  <button className="flex-1 py-4 bg-white dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-2xl text-sm font-bold dark:text-white hover:border-primary-light hover:shadow-lg transition-all flex items-center justify-center gap-3">
+                    <FileText size={20} className="text-primary-light" /> Address Proof
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex gap-6 pt-6 border-t dark:border-border-dark">
+                <button 
+                  onClick={() => setActiveTab('My Members')}
+                  className="flex-1 py-5 border-2 border-border-light dark:border-border-dark rounded-[24px] font-black text-sm dark:text-white hover:bg-gray-50 transition-all"
+                >
+                  Discard & Exit
+                </button>
+                <button 
+                  onClick={() => {
+                    const newId = members.length + 1;
+                    setMembers([...members, { ...onboardForm, id: newId, status: 'Pending', joined: new Date().toISOString().split('T')[0] }]);
+                    setActiveTab('My Members');
+                    addNotification({ title: 'Onboarding Successful', message: `${onboardForm.name} has been added to your downline.`, type: 'success' });
+                  }}
+                  className="flex-1 py-5 bg-primary-light text-white rounded-[24px] font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                >
+                  Confirm & Onboard Member
+                </button>
               </div>
             </div>
           </div>
         );
 
-      case 'Notifications':
+
+      case 'Territory Management':
         return (
-          <div className="p-8 max-w-4xl animate-in slide-in-from-bottom-4 duration-500">
-            <div className="card-premium space-y-6">
-              <div className="flex justify-between items-center border-b dark:border-border-dark pb-6">
-                <div>
-                  <h3 className="text-2xl font-bold dark:text-white">Notifications</h3>
-                  <p className="text-sm text-text-secondary-light">Stay updated with your business activities.</p>
+          <div className="p-8 space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-2xl font-bold dark:text-white">Territory Management</h3>
+                <p className="text-sm text-text-secondary-light">Monitor and expand your assigned geographic regions.</p>
+              </div>
+              <button 
+                onClick={() => setShowMap(true)}
+                className="px-6 py-3 bg-white dark:bg-secondary-dark border-2 border-emerald-500 rounded-2xl text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-2 hover:bg-emerald-50 transition-all shadow-lg shadow-emerald-500/10"
+              >
+                <Globe size={20} /> View Global Map
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 card-premium space-y-6">
+                <h4 className="font-bold dark:text-white">Active Regions</h4>
+                <div className="space-y-4">
+                  {[
+                    { region: 'South Mumbai', status: 'Primary', agents: 24, growth: '+12%' },
+                    { region: 'Pune Central', status: 'Secondary', agents: 18, growth: '+8%' },
+                    { region: 'Nashik District', status: 'Expanding', agents: 12, growth: '+15%' },
+                  ].map((region, i) => (
+                    <div key={i} className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-primary-light/10 text-primary-light rounded-xl flex items-center justify-center font-bold">
+                          <Map size={20} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold dark:text-white">{region.region}</p>
+                          <p className="text-[10px] text-text-secondary-light font-bold uppercase">{region.status}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-bold dark:text-white">{region.agents} Agents</p>
+                        <p className="text-xs text-success font-bold">{region.growth}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <button className="text-xs font-bold text-primary-light hover:underline">Mark all as read</button>
               </div>
 
-              <div className="space-y-4">
-                {[
-                  { title: 'Payout Successful', desc: '₹15,000 has been credited to your bank account.', time: '2h ago', type: 'success', icon: <CheckCircle /> },
-                  { title: 'New Member Registered', desc: 'Rahul Sharma joined your downline via your link.', time: '5h ago', type: 'info', icon: <Users /> },
-                  { title: 'Target Alert!', desc: 'You are only ₹75,000 away from your monthly target.', time: '1d ago', type: 'warning', icon: <AlertCircle /> },
-                  { title: 'System Update', desc: 'AgentHub will be down for maintenance tonight at 2 AM.', time: '2d ago', type: 'error', icon: <Settings /> },
-                ].map((notif, i) => (
-                  <div key={i} className="flex gap-4 p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl group cursor-pointer hover:bg-gray-100 dark:hover:bg-secondary-dark/80 transition-all">
-                    <div className={`p-3 rounded-xl h-fit ${
-                      notif.type === 'success' ? 'bg-success/10 text-success' : 
-                      notif.type === 'info' ? 'bg-blue-500/10 text-blue-500' : 
-                      notif.type === 'warning' ? 'bg-warning/10 text-warning' : 'bg-error/10 text-error'
-                    }`}>
-                      {React.cloneElement(notif.icon, { size: 20 })}
+              <div className="card-premium space-y-6">
+                <h4 className="font-bold dark:text-white">Expansion Requests</h4>
+                <div className="p-6 bg-primary-light/5 border-2 border-dashed border-primary-light/20 rounded-[32px] text-center space-y-4">
+                  <div className="w-16 h-16 bg-white dark:bg-surface-dark rounded-2xl flex items-center justify-center mx-auto text-primary-light shadow-lg">
+                    <PlusSquare size={32} />
+                  </div>
+                  <p className="text-sm dark:text-white font-bold">Request New Territory</p>
+                  <p className="text-xs text-text-secondary-light">Apply for exclusive rights in adjacent pincodes or districts.</p>
+                  <button className="w-full btn-primary py-3 rounded-xl">Apply Now</button>
+                </div>
+              </div>
+            </div>
+
+            {/* Global Map Overlay */}
+            {showMap && (
+              <div className="fixed inset-0 z-[200] flex items-center justify-center p-8">
+                <div className="absolute inset-0 bg-background-dark/90 backdrop-blur-xl animate-in fade-in duration-500" onClick={() => setShowMap(false)}></div>
+                <div className="relative w-full max-w-6xl h-full max-h-[80vh] bg-surface-light dark:bg-surface-dark rounded-[40px] shadow-2xl border border-white/10 overflow-hidden flex flex-col animate-in zoom-in-95 duration-500">
+                  <div className="p-6 border-b dark:border-border-dark flex justify-between items-center bg-emerald-500 text-white">
+                    <div className="flex items-center gap-3">
+                      <Globe size={24} />
+                      <h3 className="text-xl font-black">Global Territory Network</h3>
                     </div>
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start">
-                        <h4 className="font-bold dark:text-white text-sm">{notif.title}</h4>
-                        <span className="text-[10px] text-text-secondary-light font-medium">{notif.time}</span>
-                      </div>
-                      <p className="text-xs text-text-secondary-light mt-1">{notif.desc}</p>
+                    <button onClick={() => setShowMap(false)} className="p-2 hover:bg-white/20 rounded-xl transition-all"><X size={24}/></button>
+                  </div>
+                  
+                  <div className="flex-1 relative bg-[#0F172A] p-8 overflow-hidden">
+                    {/* Simulated Map Background */}
+                    <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(#3B82F6 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
+                    
+                    <div className="relative w-full h-full border-2 border-white/5 rounded-[32px] flex items-center justify-center overflow-hidden">
+                       {/* SVG Map Mockup */}
+                       <svg viewBox="0 0 1000 500" className="w-full h-full opacity-40">
+                          <path d="M150,150 Q400,50 800,200 T900,400" fill="none" stroke="#3B82F6" strokeWidth="2" strokeDasharray="5,5" />
+                          <circle cx="200" cy="150" r="80" fill="#3B82F6" fillOpacity="0.1" />
+                          <circle cx="500" cy="250" r="120" fill="#10B981" fillOpacity="0.1" />
+                          <circle cx="800" cy="350" r="60" fill="#F59E0B" fillOpacity="0.1" />
+                       </svg>
+
+                       {/* Map Markers */}
+                       {[
+                         { x: '20%', y: '30%', label: 'North Zone', active: true },
+                         { x: '50%', y: '50%', label: 'Central Hub', active: true },
+                         { x: '75%', y: '70%', label: 'South Zone', active: false },
+                         { x: '40%', y: '20%', label: 'West Region', active: true },
+                       ].map((marker, i) => (
+                         <div key={i} className="absolute flex flex-col items-center group cursor-pointer" style={{ left: marker.x, top: marker.y }}>
+                            <div className={`w-4 h-4 rounded-full border-4 border-white shadow-lg animate-pulse ${marker.active ? 'bg-emerald-500' : 'bg-gray-400'}`}></div>
+                            <div className="mt-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-lg border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity">
+                               <span className="text-[10px] font-black text-white whitespace-nowrap">{marker.label}</span>
+                            </div>
+                         </div>
+                       ))}
+
+                       <div className="absolute bottom-8 left-8 p-6 bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 max-w-xs space-y-4">
+                          <h4 className="text-white font-bold text-sm">Live Network Stats</h4>
+                          <div className="grid grid-cols-2 gap-4">
+                             <div>
+                                <p className="text-[10px] text-white/50 uppercase font-black">Active Regions</p>
+                                <p className="text-xl font-bold text-white">12</p>
+                             </div>
+                             <div>
+                                <p className="text-[10px] text-white/50 uppercase font-black">Total Reach</p>
+                                <p className="text-xl font-bold text-emerald-400">85%</p>
+                             </div>
+                          </div>
+                       </div>
                     </div>
                   </div>
-                ))}
+                </div>
               </div>
-              <button className="w-full btn-outline py-3 text-sm">Load Older Notifications</button>
+            )}
+          </div>
+        );
+
+
+
+
+
+      case 'Notifications':
+        return (
+          <div className="p-8 max-w-5xl mx-auto animate-in slide-in-from-bottom-4 duration-500">
+            <div className="flex justify-between items-center mb-8">
+              <div>
+                <h3 className="text-2xl font-black dark:text-white">Notification Center</h3>
+                <p className="text-text-secondary-light font-bold">Stay updated with system alerts and network activity.</p>
+              </div>
+              <button className="text-sm font-bold text-primary-light hover:underline">Mark all as read</button>
+            </div>
+
+            <div className="space-y-4">
+              {[
+                { title: 'New Commission Earned', desc: 'You received ₹2,450 from Metro Supermarket sales.', time: '2 hours ago', type: 'success', icon: <Wallet size={20}/> },
+                { title: 'Shop Approval Update', desc: 'Fresh Mart Grocery has been approved by the Admin.', time: '5 hours ago', type: 'info', icon: <CheckCircle size={20}/> },
+                { title: 'Security Alert', desc: 'New login detected from a Chrome browser on Windows.', time: '1 day ago', type: 'warning', icon: <ShieldCheck size={20}/> },
+                { title: 'System Maintenance', desc: 'AgentHub will be down for scheduled maintenance on Sunday.', time: '2 days ago', type: 'error', icon: <AlertCircle size={20}/> },
+                { title: 'Incentive Program', desc: 'Complete 10 shop tie-ups this month to earn a bonus.', time: '3 days ago', type: 'success', icon: <Award size={20}/> }
+              ].map((notif, i) => (
+                <div key={i} className="card-premium flex gap-6 items-start hover:scale-[1.01] transition-transform cursor-pointer">
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
+                    notif.type === 'success' ? 'bg-emerald-500/10 text-emerald-500' :
+                    notif.type === 'warning' ? 'bg-orange-500/10 text-orange-500' :
+                    notif.type === 'error' ? 'bg-red-500/10 text-red-500' : 'bg-blue-500/10 text-blue-500'
+                  }`}>
+                    {notif.icon}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <h4 className="font-bold dark:text-white">{notif.title}</h4>
+                      <span className="text-[10px] font-black text-text-secondary-light uppercase">{notif.time}</span>
+                    </div>
+                    <p className="text-sm text-text-secondary-light mt-1">{notif.desc}</p>
+                  </div>
+                  <button className="p-2 hover:bg-gray-100 dark:hover:bg-secondary-dark rounded-xl transition-all"><MoreVertical size={18} className="text-text-secondary-light"/></button>
+                </div>
+              ))}
             </div>
           </div>
         );
 
       case 'Support / Tickets':
         return (
-          <div className="p-8 space-y-8 animate-in slide-in-from-bottom-4 duration-500">
-            <div className="flex justify-between items-center">
+          <div className="p-8 max-w-6xl mx-auto animate-in slide-in-from-bottom-4 duration-500 space-y-8">
+            <div className="flex justify-between items-end">
               <div>
-                <h3 className="text-2xl font-bold dark:text-white">Support Center</h3>
-                <p className="text-sm text-text-secondary-light">We are here to help you grow your business.</p>
+                <h3 className="text-2xl font-black dark:text-white">Support Center</h3>
+                <p className="text-text-secondary-light font-bold">Need help? Raise a ticket or browse our FAQ.</p>
               </div>
-              <button className="btn-primary px-6 py-2 text-sm flex items-center gap-2"><LifeBuoy size={18} /> Raise New Ticket</button>
+              <button className="btn-primary px-6 py-3 rounded-2xl flex items-center gap-2 shadow-xl shadow-primary-light/20">
+                <PlusSquare size={20}/> New Support Ticket
+              </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-6">
-                <div className="card-premium space-y-6">
-                  <h4 className="font-bold dark:text-white">Your Support Tickets</h4>
-                  <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { label: 'Active Tickets', value: '2', color: 'text-primary-light', bg: 'bg-primary-light/10' },
+                { label: 'Resolved', value: '14', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+                { label: 'Avg Response Time', value: '4h 20m', color: 'text-blue-500', bg: 'bg-blue-500/10' }
+              ].map((stat, i) => (
+                <div key={i} className="card-premium p-8 text-center space-y-2">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light">{stat.label}</p>
+                  <p className={`text-3xl font-black ${stat.color}`}>{stat.value}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="card-premium overflow-hidden border-none shadow-2xl">
+              <div className="p-6 border-b dark:border-border-dark flex justify-between items-center bg-gray-50/50 dark:bg-secondary-dark/30">
+                <h4 className="font-black dark:text-white uppercase tracking-tighter">Recent Tickets</h4>
+                <div className="flex gap-2">
+                  <button className="p-2 hover:bg-white dark:hover:bg-secondary-dark rounded-xl transition-all border border-transparent hover:border-border-light shadow-sm"><Search size={18}/></button>
+                  <button className="p-2 hover:bg-white dark:hover:bg-secondary-dark rounded-xl transition-all border border-transparent hover:border-border-light shadow-sm"><Filter size={18}/></button>
+                </div>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-gray-50 dark:bg-secondary-dark/50 text-left">
+                      <th className="px-6 py-4 text-[10px] font-black text-text-secondary-light uppercase">Ticket ID</th>
+                      <th className="px-6 py-4 text-[10px] font-black text-text-secondary-light uppercase">Subject</th>
+                      <th className="px-6 py-4 text-[10px] font-black text-text-secondary-light uppercase">Status</th>
+                      <th className="px-6 py-4 text-[10px] font-black text-text-secondary-light uppercase">Priority</th>
+                      <th className="px-6 py-4 text-[10px] font-black text-text-secondary-light uppercase">Last Activity</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y dark:divide-border-dark">
                     {[
-                      { id: '#T-8821', subject: 'Payout Delayed for West Zone', status: 'Open', date: 'May 01, 2026' },
-                      { id: '#T-8740', subject: 'Shop Onboarding Document Error', status: 'Resolved', date: 'Apr 25, 2026' },
-                      { id: '#T-8692', subject: 'Membership Commission Discrepancy', status: 'Resolved', date: 'Apr 12, 2026' },
+                      { id: '#TK-9921', sub: 'Commission payout delay for April', status: 'In Progress', priority: 'High', activity: '1 hour ago' },
+                      { id: '#TK-9845', sub: 'Technical issue with shop upload', status: 'Pending', priority: 'Medium', activity: '5 hours ago' },
+                      { id: '#TK-9721', sub: 'How to update KYC documents?', status: 'Resolved', priority: 'Low', activity: '2 days ago' }
                     ].map((ticket, i) => (
-                      <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-secondary-dark rounded-xl border border-border-light dark:border-border-dark group cursor-pointer hover:border-primary-light transition-all">
-                        <div className="flex items-center gap-4">
-                          <div className={`w-2 h-2 rounded-full ${ticket.status === 'Open' ? 'bg-primary-light animate-pulse' : 'bg-success'}`}></div>
-                          <div>
-                            <p className="text-sm font-bold dark:text-white group-hover:text-primary-light transition-colors">{ticket.subject}</p>
-                            <p className="text-[10px] text-text-secondary-light">{ticket.id} • Last updated on {ticket.date}</p>
-                          </div>
-                        </div>
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          ticket.status === 'Open' ? 'bg-primary-light/10 text-primary-light' : 'bg-success/10 text-success'
-                        }`}>{ticket.status}</span>
-                      </div>
+                      <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/30 transition-colors cursor-pointer group">
+                        <td className="px-6 py-4 text-sm font-black dark:text-white">{ticket.id}</td>
+                        <td className="px-6 py-4 text-sm font-bold dark:text-white group-hover:text-primary-light transition-colors">{ticket.sub}</td>
+                        <td className="px-6 py-4">
+                          <span className={`px-3 py-1 rounded-full text-[10px] font-black ${
+                            ticket.status === 'Resolved' ? 'bg-emerald-500/10 text-emerald-500' :
+                            ticket.status === 'In Progress' ? 'bg-blue-500/10 text-blue-500' : 'bg-orange-500/10 text-orange-500'
+                          }`}>{ticket.status}</span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`text-[10px] font-black ${
+                            ticket.priority === 'High' ? 'text-red-500' :
+                            ticket.priority === 'Medium' ? 'text-orange-500' : 'text-emerald-500'
+                          }`}>{ticket.priority}</span>
+                        </td>
+                        <td className="px-6 py-4 text-xs text-text-secondary-light font-bold">{ticket.activity}</td>
+                      </tr>
                     ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <div className="card-premium space-y-4">
-                  <h4 className="font-bold dark:text-white">Quick Help</h4>
-                  <div className="space-y-3">
-                    {[
-                      'How to withdraw earnings?',
-                      'Onboarding shop guidelines',
-                      'Territory rights policy',
-                      'Commission rate slabs'
-                    ].map((faq, i) => (
-                      <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-secondary-dark rounded-xl cursor-pointer hover:bg-primary-light/5 transition-all group">
-                        <span className="text-xs dark:text-white font-medium group-hover:text-primary-light transition-colors">{faq}</span>
-                        <ChevronRight size={14} className="text-text-secondary-light group-hover:translate-x-1 transition-transform" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="card-premium bg-emerald-500 text-white border-none text-center space-y-4">
-                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto">
-                    <MessageSquare size={24} />
-                  </div>
-                  <h4 className="font-bold">Live Chat</h4>
-                  <p className="text-xs opacity-90">Instant support available 9 AM - 6 PM.</p>
-                  <button className="w-full bg-white text-emerald-500 font-bold py-2 rounded-xl text-sm">Start Chat</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-
-      case 'Admin Messages':
-        return (
-          <div className="p-8 max-w-4xl animate-in slide-in-from-bottom-4 duration-500">
-            <div className="card-premium space-y-8">
-              <div className="border-b dark:border-border-dark pb-6">
-                <h3 className="text-2xl font-bold dark:text-white">Admin Messages</h3>
-                <p className="text-sm text-text-secondary-light">Direct communications from the corporate hub.</p>
-              </div>
-
-              <div className="space-y-6">
-                {[
-                  { sender: 'Corporate Admin', title: 'New Sales Policy Q2 2026', body: 'Please review the updated commission structure for grocery partners effective from June 1st.', date: 'May 02, 2026', unread: true },
-                  { sender: 'District Manager', title: 'Weekend Workshop Invitation', body: 'You are invited to our monthly agent performance workshop at the Central Hub this Sunday.', date: 'May 01, 2026', unread: false },
-                  { sender: 'Security Team', title: 'Account Security Review', body: 'We have noticed a new login to your dashboard from a different location. Please verify if it was you.', date: 'Apr 28, 2026', unread: false },
-                ].map((msg, i) => (
-                  <div key={i} className={`p-5 rounded-2xl border transition-all cursor-pointer ${
-                    msg.unread ? 'bg-primary-light/5 border-primary-light/20 shadow-sm' : 'bg-gray-50 dark:bg-secondary-dark/50 border-border-light dark:border-border-dark'
-                  }`}>
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-primary-light text-white rounded-lg flex items-center justify-center text-xs font-bold">{msg.sender[0]}</div>
-                        <div>
-                          <p className="text-[10px] font-bold text-primary-light uppercase tracking-widest">{msg.sender}</p>
-                          <h4 className="text-sm font-bold dark:text-white">{msg.title}</h4>
-                        </div>
-                      </div>
-                      <p className="text-[10px] text-text-secondary-light font-bold">{msg.date}</p>
-                    </div>
-                    <p className="text-xs text-text-secondary-light leading-relaxed">{msg.body}</p>
-                    <div className="mt-4 flex gap-3">
-                      <button className="text-xs font-bold text-primary-light hover:underline">Reply</button>
-                      <button className="text-xs font-bold text-text-secondary-light hover:underline">Archive</button>
-                    </div>
-                  </div>
-                ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -1631,255 +1842,87 @@ const AgentDashboard = () => {
 
       case 'Settings':
         return (
-          <div className="p-8 max-w-4xl animate-in slide-in-from-bottom-4 duration-500">
-            <div className="card-premium space-y-8">
-              <div className="border-b dark:border-border-dark pb-6">
-                <h3 className="text-2xl font-bold dark:text-white">Settings</h3>
-                <p className="text-sm text-text-secondary-light">Configure your account and notification preferences.</p>
-              </div>
-
-              <div className="space-y-8">
-                <div className="space-y-4">
-                  <h4 className="font-bold dark:text-white text-sm flex items-center gap-2"><User size={18} /> Profile Settings</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-xl flex items-center justify-between">
-                      <span className="text-sm dark:text-white">Edit Personal Info</span>
-                      <ChevronRight size={16} className="text-text-secondary-light" />
-                    </div>
-                    <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-xl flex items-center justify-between">
-                      <span className="text-sm dark:text-white">Language: English</span>
-                      <ChevronRight size={16} className="text-text-secondary-light" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h4 className="font-bold dark:text-white text-sm flex items-center gap-2"><Lock size={18} /> Security</h4>
-                  <div className="space-y-3">
-                    <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-xl flex items-center justify-between">
-                      <div className="flex flex-col">
-                        <span className="text-sm dark:text-white">Change Password</span>
-                        <span className="text-[10px] text-text-secondary-light">Last changed 3 months ago</span>
-                      </div>
-                      <button className="btn-outline px-3 py-1 text-xs">Update</button>
-                    </div>
-                    <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-xl flex items-center justify-between">
-                      <div className="flex flex-col">
-                        <span className="text-sm dark:text-white">Two-Factor Authentication</span>
-                        <span className="text-[10px] text-text-secondary-light">Secured via email and phone</span>
-                      </div>
-                      <div className="w-10 h-5 bg-success rounded-full relative p-1 cursor-pointer">
-                        <div className="absolute right-1 w-3 h-3 bg-white rounded-full"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h4 className="font-bold dark:text-white text-sm flex items-center gap-2"><Bell size={18} /> Notifications</h4>
-                  <div className="space-y-3">
-                    {['Email Alerts', 'SMS Notifications', 'Browser Pushes', 'Commission Alerts'].map((item, i) => (
-                      <div key={i} className="flex items-center justify-between p-2">
-                        <span className="text-sm dark:text-white">{item}</span>
-                        <div className="w-10 h-5 bg-primary-light rounded-full relative p-1 cursor-pointer">
-                          <div className="absolute right-1 w-3 h-3 bg-white rounded-full"></div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-6 border-t dark:border-border-dark flex justify-end gap-4">
-                <button className="btn-outline px-6 py-2 text-sm font-bold">Discard Changes</button>
-                <button className="btn-primary px-8 py-2 text-sm font-bold">Save All Settings</button>
+          <div className="p-8 max-w-4xl mx-auto animate-in slide-in-from-bottom-4 duration-500 space-y-8">
+            <div className="flex items-center gap-4 mb-8">
+              <div className="p-3 bg-primary-light/10 text-primary-light rounded-2xl"><Settings size={32}/></div>
+              <div>
+                <h3 className="text-2xl font-black dark:text-white">Dashboard Settings</h3>
+                <p className="text-text-secondary-light font-bold">Customize your experience and manage security.</p>
               </div>
             </div>
-          </div>
-        );
-      case 'Agent Application':
-        return (
-          <div className="p-8 max-w-4xl animate-in slide-in-from-bottom-4 duration-500 mx-auto">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-black dark:text-white">Agent Application</h2>
-              <p className="text-text-secondary-light mt-2">Complete the steps below to fully register as an AgenticStore Agent.</p>
-            </div>
 
-            {/* Stepper */}
-            <div className="flex items-center justify-center mb-12 max-w-3xl mx-auto relative">
-              {[
-                { step: 1, label: 'APPLICATION' },
-                { step: 2, label: 'PAYMENT' },
-                { step: 3, label: 'KYC UPLOAD' },
-                { step: 4, label: 'SUBMITTED' }
-              ].map((s, i) => (
-                <React.Fragment key={s.step}>
-                  <div className="flex flex-col items-center relative z-10">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg transition-all duration-500 shadow-lg
-                      ${applicationStep >= s.step 
-                        ? 'bg-primary-light text-white ring-4 ring-primary-light/20 scale-110' 
-                        : 'bg-gray-100 dark:bg-secondary-dark text-text-secondary-light dark:text-text-secondary-dark'}`}
-                    >
-                      {applicationStep > s.step ? <CheckCircle size={24} /> : s.step}
-                    </div>
-                    <span className={`absolute -bottom-6 text-[10px] font-black uppercase tracking-widest whitespace-nowrap
-                      ${applicationStep >= s.step ? 'text-primary-light' : 'text-text-secondary-light dark:text-text-secondary-dark'}`}
-                    >
-                      {s.label}
-                    </span>
-                  </div>
-                  {i < 3 && (
-                    <div className="flex-1 h-1 mx-4 rounded-full relative overflow-hidden bg-gray-100 dark:bg-secondary-dark">
-                      <div className="absolute inset-y-0 left-0 bg-primary-light transition-all duration-500" 
-                           style={{ width: applicationStep > s.step ? '100%' : '0%' }}></div>
-                    </div>
-                  )}
-                </React.Fragment>
-              ))}
-            </div>
-
-            {/* Step 1: Form */}
-            {applicationStep === 1 && (
-              <div className="card-premium space-y-8">
+            <div className="grid grid-cols-1 gap-6">
+              {/* Notification Preferences */}
+              <div className="card-premium space-y-6">
                 <div className="flex items-center gap-3 border-b dark:border-border-dark pb-4">
-                  <div className="p-2 bg-primary-light/10 text-primary-light rounded-lg"><User size={20} /></div>
-                  <h3 className="text-xl font-bold dark:text-white">Personal Information</h3>
+                  <Bell className="text-primary-light" size={20}/>
+                  <h4 className="font-black dark:text-white uppercase tracking-tighter">Notification Preferences</h4>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-text-secondary-light uppercase">Full Name</label>
-                    <input type="text" className="w-full px-4 py-3 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl outline-none" defaultValue={user?.name || ''} />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-text-secondary-light uppercase">Phone Number</label>
-                    <input type="text" className="w-full px-4 py-3 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl outline-none" defaultValue={user?.phone || ''} readOnly />
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 border-b dark:border-border-dark pb-4 pt-4">
-                  <div className="p-2 bg-orange-500/10 text-orange-500 rounded-lg"><Map size={20} /></div>
-                  <h3 className="text-xl font-bold dark:text-white">Territory Details</h3>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-text-secondary-light uppercase">Agent Role</label>
-                    <select className="w-full px-4 py-3 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl outline-none dark:text-white">
-                      <option>Pincode Agent</option>
-                      <option>Division/Taluk Agent</option>
-                      <option>District Agent</option>
-                      <option>State Agent</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-text-secondary-light uppercase">State</label>
-                    <select className="w-full px-4 py-3 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl outline-none dark:text-white">
-                      <option>Maharashtra</option>
-                      <option>Karnataka</option>
-                      <option>Delhi</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-text-secondary-light uppercase">Pincode</label>
-                    <input type="text" className="w-full px-4 py-3 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl outline-none" placeholder="e.g. 400001" />
-                  </div>
-                </div>
-
-                <div className="pt-6 border-t dark:border-border-dark flex justify-end">
-                  <button onClick={() => setApplicationStep(2)} className="btn-primary px-10 py-4 rounded-xl text-lg w-full md:w-auto">Proceed to Payment</button>
-                </div>
-              </div>
-            )}
-
-            {/* Step 2: Payment */}
-            {applicationStep === 2 && (
-              <div className="card-premium space-y-8">
-                <div className="text-center">
-                  <h3 className="text-2xl font-bold dark:text-white">Security Deposit</h3>
-                  <p className="text-text-secondary-light mt-1">A refundable deposit is required to activate your agent account.</p>
-                </div>
-
-                <div className="max-w-md mx-auto p-8 bg-gradient-to-br from-primary-light/10 to-transparent rounded-2xl border-2 border-primary-light/20 relative overflow-hidden text-center">
-                  <div className="relative z-10">
-                    <span className="text-xs font-bold text-primary-light uppercase tracking-widest">Amount to Pay</span>
-                    <h2 className="text-5xl font-black dark:text-white mt-2 mb-6">₹1,00,000</h2>
-                    <ul className="text-sm text-left space-y-3 mb-8 text-text-secondary-light">
-                      <li className="flex gap-2"><CheckCircle size={16} className="text-success" /> Fully refundable after 1 year</li>
-                      <li className="flex gap-2"><CheckCircle size={16} className="text-success" /> Secures your exclusive territory rights</li>
-                      <li className="flex gap-2"><CheckCircle size={16} className="text-success" /> Unlocks immediate dashboard access</li>
-                    </ul>
-                    <button 
-                      onClick={() => {
-                        setIsProcessing(true);
-                        setTimeout(() => { setIsProcessing(false); setApplicationStep(3); }, 2000);
-                      }}
-                      disabled={isProcessing}
-                      className="w-full btn-primary py-4 rounded-xl text-lg flex items-center justify-center gap-2"
-                    >
-                      {isProcessing ? 'Processing...' : 'Pay Securely'}
-                    </button>
-                  </div>
-                  <Lock size={120} className="absolute -right-10 -bottom-10 text-primary-light/5 rotate-12" />
-                </div>
-                
-                <div className="text-center">
-                  <button onClick={() => setApplicationStep(1)} className="text-sm font-bold text-text-secondary-light hover:text-primary-light">← Back to Form</button>
-                </div>
-              </div>
-            )}
-
-            {/* Step 3: KYC */}
-            {applicationStep === 3 && (
-              <div className="card-premium space-y-8">
-                <div className="flex items-center justify-between border-b dark:border-border-dark pb-4">
-                  <h3 className="text-xl font-bold dark:text-white flex items-center gap-2"><ShieldCheck className="text-primary-light" /> KYC Verification</h3>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {['Aadhar Card', 'PAN Card', 'Passport Photo'].map((doc) => (
-                    <div key={doc} className="p-6 border-2 border-dashed border-border-light dark:border-border-dark rounded-2xl flex flex-col items-center justify-center gap-3 hover:border-primary-light transition-colors group cursor-pointer bg-gray-50 dark:bg-secondary-dark">
-                      <div className="p-3 bg-white dark:bg-surface-dark rounded-xl shadow-sm group-hover:scale-110 transition-transform">
-                        <PlusSquare className="text-text-secondary-light group-hover:text-primary-light" size={24} />
+                <div className="space-y-4">
+                  {[
+                    { label: 'Email Payout Alerts', desc: 'Receive an email when commissions are credited.' },
+                    { label: 'Shop Status Updates', desc: 'Instant notification when a shop is approved or rejected.' },
+                    { label: 'Network Activity', desc: 'Monthly report of your team performance.' }
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-transparent hover:border-border-light dark:hover:border-border-dark transition-all">
+                      <div>
+                        <p className="text-sm font-bold dark:text-white">{item.label}</p>
+                        <p className="text-[10px] text-text-secondary-light font-bold">{item.desc}</p>
                       </div>
-                      <span className="text-sm font-bold dark:text-white text-center">Upload {doc}</span>
-                      <span className="text-[10px] text-text-secondary-light">Max 5MB (JPG/PNG/PDF)</span>
+                      <div className="w-12 h-6 bg-primary-light rounded-full relative cursor-pointer shadow-inner shadow-black/10">
+                        <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-md"></div>
+                      </div>
                     </div>
                   ))}
                 </div>
-
-                <div className="pt-6 border-t dark:border-border-dark flex justify-between items-center">
-                  <button onClick={() => setApplicationStep(2)} className="text-sm font-bold text-text-secondary-light hover:text-primary-light">← Back</button>
-                  <button onClick={() => setApplicationStep(4)} className="btn-primary px-10 py-4 rounded-xl text-lg">Submit Application</button>
-                </div>
               </div>
-            )}
 
-            {/* Step 4: Success */}
-            {applicationStep === 4 && (
-              <div className="card-premium text-center py-16 space-y-6">
-                <div className="w-24 h-24 bg-success/10 text-success rounded-full flex items-center justify-center mx-auto mb-6 relative">
-                  <div className="absolute inset-0 bg-success/20 rounded-full animate-ping"></div>
-                  <CheckCircle size={48} />
+              {/* Security Settings */}
+              <div className="card-premium space-y-6">
+                <div className="flex items-center gap-3 border-b dark:border-border-dark pb-4">
+                  <ShieldCheck className="text-orange-500" size={20}/>
+                  <h4 className="font-black dark:text-white uppercase tracking-tighter">Security & Privacy</h4>
                 </div>
-                <h2 className="text-3xl font-black dark:text-white">Application Submitted!</h2>
-                <p className="text-text-secondary-light max-w-md mx-auto">
-                  Your application and payment of ₹1,00,000 has been received. Our compliance team will review your KYC documents within 24-48 hours.
-                </p>
-                <div className="inline-block p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark my-8">
-                  <p className="text-xs text-text-secondary-light uppercase font-bold tracking-widest">Application Reference</p>
-                  <p className="text-xl font-mono font-bold dark:text-white mt-1">AGT-APP-9982X</p>
-                </div>
-                <div>
-                  <button onClick={() => setActiveTab('Dashboard')} className="btn-primary px-10 py-4 rounded-xl text-lg">
-                    Go to Dashboard
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <button className="p-6 bg-gray-50 dark:bg-secondary-dark rounded-[32px] border-2 border-transparent hover:border-primary-light transition-all text-left space-y-2 group">
+                    <div className="w-10 h-10 bg-white dark:bg-surface-dark rounded-xl flex items-center justify-center text-text-secondary-light group-hover:text-primary-light shadow-sm transition-colors"><Lock size={20}/></div>
+                    <p className="text-sm font-black dark:text-white">Change Password</p>
+                    <p className="text-[10px] text-text-secondary-light font-bold">Update your login credentials.</p>
+                  </button>
+                  <button className="p-6 bg-gray-50 dark:bg-secondary-dark rounded-[32px] border-2 border-transparent hover:border-primary-light transition-all text-left space-y-2 group">
+                    <div className="w-10 h-10 bg-white dark:bg-surface-dark rounded-xl flex items-center justify-center text-text-secondary-light group-hover:text-primary-light shadow-sm transition-colors"><ShieldCheck size={20}/></div>
+                    <p className="text-sm font-black dark:text-white">Two-Factor Auth</p>
+                    <p className="text-[10px] text-text-secondary-light font-bold">Add an extra layer of security.</p>
                   </button>
                 </div>
               </div>
-            )}
+
+              {/* Data & Account */}
+              <div className="card-premium space-y-6">
+                <div className="flex items-center gap-3 border-b dark:border-border-dark pb-4">
+                  <History className="text-blue-500" size={20}/>
+                  <h4 className="font-black dark:text-white uppercase tracking-tighter">Data Management</h4>
+                </div>
+                <div className="flex items-center justify-between p-6 bg-blue-500/5 rounded-[32px] border-2 border-dashed border-blue-500/20">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 bg-white dark:bg-surface-dark rounded-2xl flex items-center justify-center text-blue-500 shadow-xl shadow-blue-500/5"><Download size={24}/></div>
+                    <div>
+                      <p className="text-sm font-black dark:text-white">Export My Data</p>
+                      <p className="text-[10px] text-text-secondary-light font-bold">Download your shop tie-ups and commission history in CSV.</p>
+                    </div>
+                  </div>
+                  <button className="btn-secondary px-6 py-3 rounded-2xl bg-blue-500 text-white shadow-xl shadow-blue-500/20">Download</button>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-center pt-8">
+              <button className="flex items-center gap-2 text-red-500 font-black uppercase text-[10px] tracking-widest hover:bg-red-500/5 px-6 py-3 rounded-full transition-all">
+                <LogOut size={16}/> Deactivate Account
+              </button>
+            </div>
           </div>
         );
-
 
       default:
         return (
@@ -1923,7 +1966,6 @@ const AgentDashboard = () => {
           </SidebarSection>
 
           <SidebarSection title="PROFILE">
-            <SidebarLink icon={<FileText size={18} />} label="Agent Application" active={activeTab === 'Agent Application'} onClick={() => setActiveTab('Agent Application')} />
             <SidebarLink icon={<User size={18} />} label="My Profile" active={activeTab === 'My Profile'} onClick={() => setActiveTab('My Profile')} />
             <SidebarLink icon={<ShieldCheck size={18} />} label="KYC Status" active={activeTab === 'KYC Status'} onClick={() => setActiveTab('KYC Status')} />
             <SidebarLink icon={<Lock size={18} />} label="Security Deposit" active={activeTab === 'Security Deposit'} onClick={() => setActiveTab('Security Deposit')} />
@@ -1931,39 +1973,32 @@ const AgentDashboard = () => {
 
           <SidebarSection title="NETWORK">
             <SidebarLink icon={<Users size={18} />} label="My Members" active={activeTab === 'My Members'} onClick={() => setActiveTab('My Members')} badge="156" />
-            <SidebarLink icon={<GitBranch size={18} />} label="Downline Tree" active={activeTab === 'Downline Tree'} onClick={() => setActiveTab('Downline Tree')} />
             <SidebarLink icon={<LinkIcon size={18} />} label="Referral Links" active={activeTab === 'Referral Links'} onClick={() => setActiveTab('Referral Links')} />
           </SidebarSection>
 
           <SidebarSection title="OPERATIONS">
             <SidebarLink icon={<Map size={18} />} label="Territory Management" active={activeTab === 'Territory Management'} onClick={() => setActiveTab('Territory Management')} />
-            <SidebarLink icon={<PlusSquare size={18} />} label="Shop Tie-Up" active={activeTab === 'Shop Tie-Up'} onClick={() => setActiveTab('Shop Tie-Up')} />
-            <SidebarLink icon={<Store size={18} />} label="Shop List" active={activeTab === 'Shop List'} onClick={() => setActiveTab('Shop List')} badge="12" />
+            <SidebarLink icon={<PlusSquare size={18} />} label="Shop Tie-Up" active={activeTab === 'Shop Tie-Up' || activeTab === 'Add New Shop'} onClick={() => setActiveTab('Shop Tie-Up')} />
             <SidebarLink icon={<CheckSquare size={18} />} label="Daily Tasks" active={activeTab === 'Daily Tasks'} onClick={() => setActiveTab('Daily Tasks')} />
           </SidebarSection>
 
           <SidebarSection title="BUSINESS">
             <SidebarLink icon={<Target size={18} />} label="Sales Targets" active={activeTab === 'Sales Targets'} onClick={() => setActiveTab('Sales Targets')} />
             <SidebarLink icon={<ShoppingBag size={18} />} label="Leads / Orders" active={activeTab === 'Leads / Orders'} onClick={() => setActiveTab('Leads / Orders')} />
-            <SidebarLink icon={<CreditCard size={18} />} label="Membership Sales" active={activeTab === 'Membership Sales'} onClick={() => setActiveTab('Membership Sales')} />
           </SidebarSection>
 
           <SidebarSection title="EARNINGS">
             <SidebarLink icon={<Wallet size={18} />} label="Wallet / Earnings" active={activeTab === 'Wallet / Earnings'} onClick={() => setActiveTab('Wallet / Earnings')} />
             <SidebarLink icon={<History size={18} />} label="Commission History" active={activeTab === 'Commission History'} onClick={() => setActiveTab('Commission History')} />
-            <SidebarLink icon={<Award size={18} />} label="Incentives & Rewards" active={activeTab === 'Incentives & Rewards'} onClick={() => setActiveTab('Incentives & Rewards')} />
-            <SidebarLink icon={<ArrowUpRight size={18} />} label="Payout Requests" active={activeTab === 'Payout Requests'} onClick={() => setActiveTab('Payout Requests')} />
           </SidebarSection>
 
           <SidebarSection title="PERFORMANCE">
             <SidebarLink icon={<TrendingUp size={18} />} label="Analytics" active={activeTab === 'Analytics'} onClick={() => setActiveTab('Analytics')} />
-            <SidebarLink icon={<BarChart2 size={18} />} label="Reports" active={activeTab === 'Reports'} onClick={() => setActiveTab('Reports')} />
           </SidebarSection>
 
           <SidebarSection title="COMMUNICATION">
             <SidebarLink icon={<Bell size={18} />} label="Notifications" active={activeTab === 'Notifications'} onClick={() => setActiveTab('Notifications')} />
             <SidebarLink icon={<LifeBuoy size={18} />} label="Support / Tickets" active={activeTab === 'Support / Tickets'} onClick={() => setActiveTab('Support / Tickets')} />
-            <SidebarLink icon={<MessageSquare size={18} />} label="Admin Messages" active={activeTab === 'Admin Messages'} onClick={() => setActiveTab('Admin Messages')} />
           </SidebarSection>
 
           <SidebarSection title="SYSTEM">
@@ -2004,7 +2039,10 @@ const AgentDashboard = () => {
               {isDarkMode ? <Sun size={20} className="text-yellow-500" /> : <Moon size={20} className="text-blue-600" />}
             </button>
 
-            <button className="p-2.5 text-text-secondary-light dark:text-text-secondary-dark relative hover:bg-gray-100 dark:hover:bg-secondary-dark rounded-xl transition-all hover:scale-110">
+            <button 
+              onClick={() => setActiveTab('Notifications')}
+              className="p-2.5 text-text-secondary-light dark:text-text-secondary-dark relative hover:bg-gray-100 dark:hover:bg-secondary-dark rounded-xl transition-all hover:scale-110"
+            >
               <Bell size={20} />
               <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full ring-2 ring-surface-light dark:ring-surface-dark"></span>
             </button>
@@ -2024,6 +2062,373 @@ const AgentDashboard = () => {
           {renderContent()}
         </div>
       </main>
+      {/* Edit Profile Modal */}
+      {showEditProfile && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setShowEditProfile(false)}></div>
+          <div className="relative w-full max-w-lg bg-surface-light dark:bg-surface-dark rounded-[32px] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="p-8 border-b dark:border-border-dark flex justify-between items-center bg-primary-light text-white">
+              <h3 className="text-xl font-black">Edit Personal Info</h3>
+              <button onClick={() => setShowEditProfile(false)} className="p-2 hover:bg-white/10 rounded-xl transition-all"><X size={24}/></button>
+            </div>
+            <div className="p-8 space-y-4">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-text-secondary-light">Full Name</label>
+                <input type="text" defaultValue="Demo Agent" className="w-full p-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-text-secondary-light">Phone Number</label>
+                <input type="text" defaultValue="+91 98765 43210" className="w-full p-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-text-secondary-light">Email Address</label>
+                <input type="email" defaultValue="demo@agenticstore.com" className="w-full p-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
+              </div>
+              <button 
+                onClick={() => {
+                  setShowEditProfile(false);
+                  addNotification({ title: 'Profile Updated', message: 'Your personal information has been saved.', type: 'success' });
+                }}
+                className="w-full btn-primary py-4 rounded-2xl mt-4 font-black"
+              >
+                Save Profile Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Language Modal */}
+      {showLanguageModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setShowLanguageModal(false)}></div>
+          <div className="relative w-full max-w-xs bg-surface-light dark:bg-surface-dark rounded-[32px] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="p-6 border-b dark:border-border-dark text-center">
+              <h3 className="text-lg font-black dark:text-white">Select Language</h3>
+            </div>
+            <div className="p-4 space-y-2">
+              {['English', 'Hindi', 'Marathi', 'Gujarati', 'Tamil'].map((lang) => (
+                <div 
+                  key={lang}
+                  onClick={() => {
+                    setSettings({...settings, language: lang});
+                    setShowLanguageModal(false);
+                    addNotification({ title: 'Language Changed', message: `Interface language set to ${lang}.`, type: 'success' });
+                  }}
+                  className={`p-4 rounded-xl cursor-pointer flex items-center justify-between transition-all ${
+                    settings.language === lang ? 'bg-primary-light/10 text-primary-light font-bold' : 'hover:bg-gray-50 dark:hover:bg-secondary-dark dark:text-white'
+                  }`}
+                >
+                  <span>{lang}</span>
+                  {settings.language === lang && <CheckCircle size={16} />}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Role Upgrade Modal */}
+      {showUpgradeModal && (
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setShowUpgradeModal(false)}></div>
+          <div className="relative w-full max-w-lg bg-surface-light dark:bg-surface-dark rounded-[32px] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="p-8 border-b dark:border-border-dark flex justify-between items-center bg-error/10 text-error">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-error/20 rounded-2xl flex items-center justify-center"><TrendingUp size={24}/></div>
+                <div>
+                  <h3 className="text-xl font-black">Request Role Upgrade</h3>
+                  <p className="text-xs text-error/80 font-bold">Apply for a higher tier with better commissions.</p>
+                </div>
+              </div>
+              <button onClick={() => setShowUpgradeModal(false)} className="p-3 hover:bg-error/5 rounded-2xl transition-all text-error"><X size={24}/></button>
+            </div>
+            
+            <div className="p-8 space-y-6">
+              <div className="space-y-4">
+                <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark">
+                  <p className="text-[10px] text-text-secondary-light font-black uppercase mb-1">Current Role</p>
+                  <p className="text-sm font-bold dark:text-white">Pincode Agent</p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Target Role</label>
+                  <select className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold appearance-none">
+                    <option>District Agent (+5% Commission)</option>
+                    <option>State Agent (+10% Commission)</option>
+                    <option>Premium Corporate Partner</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Justification / Experience</label>
+                  <textarea 
+                    placeholder="Briefly describe your performance or reasons for upgrade..." 
+                    className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold h-32 resize-none"
+                  ></textarea>
+                </div>
+              </div>
+
+              <div className="flex gap-4 pt-4">
+                <button 
+                  onClick={() => setShowUpgradeModal(false)}
+                  className="flex-1 py-4 border-2 border-border-light dark:border-border-dark rounded-2xl font-black text-sm dark:text-white hover:bg-gray-50 transition-all"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={() => {
+                    setShowUpgradeModal(false);
+                    addNotification({ title: 'Application Submitted', message: 'Your upgrade request is under review by the corporate team.', type: 'success' });
+                  }}
+                  className="flex-1 py-4 bg-error text-white rounded-2xl font-black text-sm shadow-xl shadow-error/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                >
+                  Submit Request
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add New Shop Modal */}
+      {showShopModal && (
+        <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setShowShopModal(false)}></div>
+          <div className="relative w-full max-w-2xl bg-surface-light dark:bg-surface-dark rounded-[40px] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
+            <div className="p-8 border-b dark:border-border-dark flex justify-between items-center bg-emerald-500 text-white shrink-0">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm"><PlusSquare size={24}/></div>
+                <div>
+                  <h3 className="text-2xl font-black">Add New Shop</h3>
+                  <p className="text-xs opacity-80 font-bold uppercase tracking-wider">Retail Partner Onboarding</p>
+                </div>
+              </div>
+              <button onClick={() => setShowShopModal(false)} className="p-3 hover:bg-white/10 rounded-2xl transition-all"><X size={24}/></button>
+            </div>
+            
+            <div className="p-8 overflow-y-auto custom-scrollbar space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Shop Name</label>
+                  <div className="relative">
+                    <Store className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary-light" size={18} />
+                    <input 
+                      type="text" 
+                      placeholder="e.g. Metro Supermarket" 
+                      className="w-full pl-12 pr-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-emerald-500 outline-none dark:text-white font-bold transition-all"
+                      value={shopForm.name}
+                      onChange={(e) => setShopForm({...shopForm, name: e.target.value})}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Business Category</label>
+                  <select 
+                    className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-emerald-500 outline-none dark:text-white font-bold appearance-none cursor-pointer"
+                    value={shopForm.category}
+                    onChange={(e) => setShopForm({...shopForm, category: e.target.value})}
+                  >
+                    <option>Grocery</option>
+                    <option>Electronics</option>
+                    <option>Fashion & Apparel</option>
+                    <option>Restaurant / Cafe</option>
+                    <option>Pharmacy</option>
+                    <option>Hardware / Paints</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Owner Name</label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary-light" size={18} />
+                    <input 
+                      type="text" 
+                      placeholder="Full legal name" 
+                      className="w-full pl-12 pr-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-emerald-500 outline-none dark:text-white font-bold transition-all"
+                      value={shopForm.owner}
+                      onChange={(e) => setShopForm({...shopForm, owner: e.target.value})}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Contact Number</label>
+                  <div className="relative">
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary-light" size={18} />
+                    <input 
+                      type="text" 
+                      placeholder="+91 XXXXX XXXXX" 
+                      className="w-full pl-12 pr-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-emerald-500 outline-none dark:text-white font-bold transition-all"
+                      value={shopForm.contact}
+                      onChange={(e) => setShopForm({...shopForm, contact: e.target.value})}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Shop Location / Address</label>
+                <div className="relative">
+                  <Map className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary-light" size={18} />
+                  <input 
+                    type="text" 
+                    placeholder="Enter full business address" 
+                    className="w-full pl-12 pr-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-emerald-500 outline-none dark:text-white font-bold transition-all"
+                    value={shopForm.location}
+                    onChange={(e) => setShopForm({...shopForm, location: e.target.value})}
+                  />
+                </div>
+              </div>
+
+              <div className="p-6 bg-emerald-500/5 border-2 border-dashed border-emerald-500/20 rounded-[32px] space-y-4">
+                <p className="text-[10px] text-text-secondary-light font-black mb-2 uppercase tracking-widest">Required Documents</p>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <button className="flex-1 py-4 bg-white dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-2xl text-sm font-bold dark:text-white hover:border-emerald-500 hover:shadow-lg transition-all flex items-center justify-center gap-3">
+                    <FileText size={20} className="text-emerald-500" /> Shop License
+                  </button>
+                  <button className="flex-1 py-4 bg-white dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-2xl text-sm font-bold dark:text-white hover:border-emerald-500 hover:shadow-lg transition-all flex items-center justify-center gap-3">
+                    <FileText size={20} className="text-emerald-500" /> GST / PAN
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-8 border-t dark:border-border-dark flex gap-4 shrink-0 bg-gray-50 dark:bg-secondary-dark/30">
+              <button 
+                onClick={() => setShowShopModal(false)}
+                className="flex-1 py-4 border-2 border-border-light dark:border-border-dark rounded-2xl font-black text-sm dark:text-white hover:bg-white dark:hover:bg-secondary-dark transition-all"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => {
+                  const newId = shops.length + 1;
+                  setShops([...shops, { id: newId, name: shopForm.name, category: shopForm.category, owner: shopForm.owner, sales: '₹0', status: 'Pending', rating: 'N/A' }]);
+                  setShowShopModal(false);
+                  addNotification({ title: 'Shop Added', message: `${shopForm.name} registration is pending approval.`, type: 'success' });
+                }}
+                className="flex-1 py-4 bg-emerald-500 text-white rounded-2xl font-black text-sm shadow-xl shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+              >
+                Submit Registration
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Commission Plan Modal */}
+      <CommissionPlanModal isOpen={showCommissionModal} onClose={() => setShowCommissionModal(false)} />
+    </div>
+  );
+};
+
+const CommissionPlanModal = ({ isOpen, onClose }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-background-dark/90 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
+      <div className="relative w-full max-w-2xl bg-white dark:bg-surface-dark rounded-[40px] shadow-2xl border border-white/10 overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="p-8 border-b dark:border-border-dark flex justify-between items-center bg-gradient-to-r from-primary-light to-primary-dark text-white">
+          <div className="flex items-center gap-3">
+            <Award size={28} />
+            <div>
+              <h3 className="text-2xl font-black">Compensation Plan</h3>
+              <p className="text-xs opacity-80 font-bold uppercase tracking-widest">Effective May 2026</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-3 hover:bg-white/20 rounded-2xl transition-all"><X size={24}/></button>
+        </div>
+        
+        <div className="p-8 space-y-8 max-h-[70vh] overflow-y-auto custom-scrollbar">
+          {/* Section 1: Direct Commission */}
+          <div className="space-y-4">
+            <h4 className="font-black dark:text-white uppercase tracking-widest text-sm flex items-center gap-2">
+              <TrendingUp size={18} className="text-emerald-500" />
+              Direct Referral Commission
+            </h4>
+            <div className="overflow-hidden border border-border-light dark:border-border-dark rounded-2xl">
+              <table className="w-full text-left">
+                <thead className="bg-gray-50 dark:bg-secondary-dark/50">
+                  <tr>
+                    <th className="p-4 text-[10px] font-black uppercase text-text-secondary-light tracking-widest">Customer Type</th>
+                    <th className="p-4 text-[10px] font-black uppercase text-text-secondary-light tracking-widest">Commission Rate</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border-light dark:divide-border-dark">
+                  <tr>
+                    <td className="p-4 text-sm font-bold dark:text-white">New User (First Purchase)</td>
+                    <td className="p-4 text-sm font-black text-emerald-500">10%</td>
+                  </tr>
+                  <tr>
+                    <td className="p-4 text-sm font-bold dark:text-white">Returning Customer</td>
+                    <td className="p-4 text-sm font-black text-emerald-500">5%</td>
+                  </tr>
+                  <tr>
+                    <td className="p-4 text-sm font-bold dark:text-white">Subscription Services</td>
+                    <td className="p-4 text-sm font-black text-emerald-500">₹200 Monthly</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Section 2: Onboarding Rewards */}
+          <div className="space-y-4">
+            <h4 className="font-black dark:text-white uppercase tracking-widest text-sm flex items-center gap-2">
+              <PlusSquare size={18} className="text-blue-500" />
+              Onboarding & Network Bonuses
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-5 bg-blue-500/5 rounded-2xl border border-blue-500/10 space-y-2">
+                <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Shop Onboarding</p>
+                <p className="text-xl font-black dark:text-white">₹500.00</p>
+                <p className="text-[10px] text-text-secondary-light font-medium leading-relaxed">Paid once the shop completes KYC and lists at least 10 products/services.</p>
+              </div>
+              <div className="p-5 bg-purple-500/5 rounded-2xl border border-purple-500/10 space-y-2">
+                <p className="text-[10px] font-black text-purple-500 uppercase tracking-widest">Agent Recruitment</p>
+                <p className="text-xl font-black dark:text-white">₹200.00</p>
+                <p className="text-[10px] text-text-secondary-light font-medium leading-relaxed">Paid after the referred agent successfully completes their first 5 shop tie-ups.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 3: Performance Tiers */}
+          <div className="space-y-4">
+            <h4 className="font-black dark:text-white uppercase tracking-widest text-sm flex items-center gap-2">
+              <Target size={18} className="text-orange-500" />
+              Performance Tiers
+            </h4>
+            <div className="space-y-3">
+              {[
+                { tier: 'Standard', requirement: '0-50 Referrals', bonus: 'Base Rate', active: true },
+                { tier: 'Silver', requirement: '51-150 Referrals', bonus: '+2% Extra Commission', active: false },
+                { tier: 'Gold', requirement: '151-500 Referrals', bonus: '+5% Extra Commission', active: false },
+                { tier: 'Platinum', requirement: '500+ Referrals', bonus: '+10% Extra Commission', active: false },
+              ].map((tier, i) => (
+                <div key={i} className={`p-4 rounded-2xl border flex items-center justify-between ${tier.active ? 'bg-primary-light/5 border-primary-light' : 'bg-gray-50 dark:bg-secondary-dark border-transparent'}`}>
+                  <div>
+                    <p className={`text-sm font-black ${tier.active ? 'text-primary-light' : 'dark:text-white'}`}>{tier.tier} Tier</p>
+                    <p className="text-[10px] text-text-secondary-light font-bold">{tier.requirement}</p>
+                  </div>
+                  <span className={`text-xs font-black ${tier.active ? 'text-primary-light' : 'text-text-secondary-light'}`}>{tier.bonus}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="p-6 bg-gray-100 dark:bg-secondary-dark/50 rounded-[28px] border border-dashed border-border-light dark:border-border-dark text-center">
+            <p className="text-xs text-text-secondary-light font-bold">Commissions are calculated on the net order value after taxes. Payouts are processed every 1st and 15th of the month.</p>
+          </div>
+        </div>
+        
+        <div className="p-8 bg-gray-50 dark:bg-secondary-dark/30 border-t dark:border-border-dark flex gap-4">
+          <button onClick={onClose} className="flex-1 py-4 bg-white dark:bg-surface-dark border-2 border-border-light dark:border-border-dark rounded-2xl font-black text-sm dark:text-white hover:bg-gray-100 transition-all">Close</button>
+          <button className="flex-1 py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 flex items-center justify-center gap-2">
+            <Download size={18} /> Download PDF
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

@@ -28,10 +28,7 @@ const Hero = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-              <a href="#plans" className="btn-primary px-10 py-4 text-lg w-full sm:w-auto">
-                Buy Membership
-              </a>
-              <Link to="/register" className="btn-outline px-10 py-4 text-lg w-full sm:w-auto">
+              <Link to="/register" className="btn-primary px-12 py-4 text-lg w-full sm:w-auto">
                 Join as Agent
               </Link>
             </div>

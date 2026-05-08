@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Globe, Share2, MessageSquare, Link2, Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, Phone, MapPin } from 'lucide-react';
+import { FacebookIcon, InstagramIcon, TwitterIcon, LinkedinIcon } from './SocialIcons';
 
 const Footer = () => {
   return (
@@ -21,10 +22,10 @@ const Footer = () => {
               Premium membership platform connecting local businesses, professional agents, and discerning customers across every district.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="p-2 bg-surface-dark hover:bg-primary-dark transition-colors rounded-lg"><Globe size={20} /></a>
-              <a href="#" className="p-2 bg-surface-dark hover:bg-primary-dark transition-colors rounded-lg"><Share2 size={20} /></a>
-              <a href="#" className="p-2 bg-surface-dark hover:bg-primary-dark transition-colors rounded-lg"><MessageSquare size={20} /></a>
-              <a href="#" className="p-2 bg-surface-dark hover:bg-primary-dark transition-colors rounded-lg"><Link2 size={20} /></a>
+              <a href="#" className="p-2 bg-surface-dark hover:bg-blue-600 transition-all rounded-lg"><FacebookIcon size={20} /></a>
+              <a href="#" className="p-2 bg-surface-dark hover:bg-pink-600 transition-all rounded-lg"><InstagramIcon size={20} /></a>
+              <a href="#" className="p-2 bg-surface-dark hover:bg-sky-500 transition-all rounded-lg"><TwitterIcon size={20} /></a>
+              <a href="#" className="p-2 bg-surface-dark hover:bg-blue-700 transition-all rounded-lg"><LinkedinIcon size={20} /></a>
             </div>
           </div>
 
@@ -32,6 +33,7 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-bold mb-6 text-accent-dark">Quick Links</h4>
             <ul className="space-y-4">
+              <li><Link to="/about" className="text-text-secondary-dark hover:text-white transition-colors">About Us</Link></li>
               <li><Link to="/plans" className="text-text-secondary-dark hover:text-white transition-colors">Membership Plans</Link></li>
               <li><Link to="/services" className="text-text-secondary-dark hover:text-white transition-colors">Local Services</Link></li>
               <li><Link to="/shops" className="text-text-secondary-dark hover:text-white transition-colors">Partner Shops</Link></li>

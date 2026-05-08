@@ -15,7 +15,6 @@ const LandingPage = () => {
         <Hero />
         <HowItWorks />
         <ServicesProducts />
-        <ShopPartner />
         
         {/* Additional Sections can be added here */}
         <section className="py-24 bg-primary-light dark:bg-primary-dark text-white">

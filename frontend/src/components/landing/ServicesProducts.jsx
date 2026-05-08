@@ -1,21 +1,22 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Hotel, ShoppingBasket, Stethoscope, Utensils, Scissors, Plane, Sofa, Laptop, Home, Package, ShieldCheck, TrendingUp, UserCheck } from 'lucide-react';
 
 const ServicesProducts = () => {
   const services = [
-    { name: 'Hotels', icon: <Hotel />, desc: 'Premium stays at local rates' },
-    { name: 'Hospitals', icon: <Stethoscope />, desc: 'Priority healthcare access' },
-    { name: 'Grocery', icon: <ShoppingBasket />, desc: 'Daily essentials delivered' },
-    { name: 'Restaurants', icon: <Utensils />, desc: 'Fine dining & local eats' },
-    { name: 'Salons', icon: <Scissors />, desc: 'Beauty & wellness services' },
-    { name: 'Travel', icon: <Plane />, desc: 'Hassle-free local travel' }
+    { name: 'Hotels', icon: <Hotel />, desc: 'Premium stays at local rates', type: 'service' },
+    { name: 'Hospitals', icon: <Stethoscope />, desc: 'Priority healthcare access', type: 'service' },
+    { name: 'Grocery', icon: <ShoppingBasket />, desc: 'Daily essentials delivered', type: 'service' },
+    { name: 'Restaurants', icon: <Utensils />, desc: 'Fine dining & local eats', type: 'service' },
+    { name: 'Salons', icon: <Scissors />, desc: 'Beauty & wellness services', type: 'service' },
+    { name: 'Travel', icon: <Plane />, desc: 'Hassle-free local travel', type: 'service' }
   ];
 
   const products = [
-    { name: 'Furniture', icon: <Sofa />, desc: 'Custom local craftsmanship' },
-    { name: 'Electronics', icon: <Laptop />, desc: 'Latest gadgets with warranty' },
-    { name: 'Appliances', icon: <Home />, desc: 'Smart home solutions' },
-    { name: 'Local Items', icon: <Package />, desc: 'Unique district specialties' }
+    { name: 'Furniture', icon: <Sofa />, desc: 'Custom local craftsmanship', type: 'product' },
+    { name: 'Electronics', icon: <Laptop />, desc: 'Latest gadgets with warranty', type: 'product' },
+    { name: 'Appliances', icon: <Home />, desc: 'Smart home solutions', type: 'product' },
+    { name: 'Local Items', icon: <Package />, desc: 'Unique district specialties', type: 'product' }
   ];
 
   return (
@@ -37,13 +38,17 @@ const ServicesProducts = () => {
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
               {services.map((item) => (
-                <div key={item.name} className="card-premium group hover:-translate-y-2 text-center flex flex-col items-center">
+                <Link 
+                  key={item.name} 
+                  to={`/explore/${item.type}/${item.name}`}
+                  className="card-premium group hover:-translate-y-2 text-center flex flex-col items-center cursor-pointer transition-all border-2 border-transparent hover:border-primary-light/30"
+                >
                   <div className="w-16 h-16 bg-primary-light/10 dark:bg-primary-dark/10 rounded-2xl flex items-center justify-center text-primary-light dark:text-primary-dark mb-4 transition-transform group-hover:scale-110">
                     {React.cloneElement(item.icon, { size: 32 })}
                   </div>
                   <h4 className="font-bold dark:text-white mb-1">{item.name}</h4>
                   <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark">{item.desc}</p>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
@@ -56,13 +61,17 @@ const ServicesProducts = () => {
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {products.map((item) => (
-                <div key={item.name} className="card-premium group hover:-translate-y-2 text-center flex flex-col items-center">
+                <Link 
+                  key={item.name} 
+                  to={`/explore/${item.type}/${item.name}`}
+                  className="card-premium group hover:-translate-y-2 text-center flex flex-col items-center cursor-pointer transition-all border-2 border-transparent hover:border-accent-light/30"
+                >
                   <div className="w-16 h-16 bg-accent-light/10 dark:bg-accent-dark/10 rounded-2xl flex items-center justify-center text-accent-light dark:text-accent-dark mb-4 transition-transform group-hover:scale-110">
                     {React.cloneElement(item.icon, { size: 32 })}
                   </div>
                   <h4 className="font-bold dark:text-white mb-1">{item.name}</h4>
                   <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark">{item.desc}</p>
-                </div>
+                </Link>
               ))}
             </div>
           </div>

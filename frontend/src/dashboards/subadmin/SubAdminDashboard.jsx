@@ -3,13 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { 
-  Users, Store, ShoppingCart, TrendingUp, 
+  Users, Store, TrendingUp, 
   ShieldCheck, AlertCircle, DollarSign, Target,
   LayoutDashboard, Map, Settings, Bell,
   CheckSquare, CheckCircle, FileText, BarChart2,
   Clock, LogOut, Briefcase, LifeBuoy, Sun, Moon, User,
   Lock, BellRing, Palette, ChevronRight,
-  Key, History, X, Edit, Eye, XCircle
+  Key, History, X, Edit, Eye, XCircle, Phone, Mail, MapPin, Plus, Send
 } from 'lucide-react';
 
 import { useNotifications } from '../../context/NotificationContext';
@@ -21,6 +21,13 @@ const SubAdminDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [selectedShop, setSelectedShop] = useState(null);
+  const [showCommissionModal, setShowCommissionModal] = useState(false);
+  
+  const [kycRequests, setKycRequests] = useState([
+    { id: 1, name: 'Rahul Dev', role: 'Agent', docs: 'Aadhar, PAN', status: 'Pending Review', location: 'Delhi', date: '2h ago' },
+    { id: 2, name: 'Fresh Mart', role: 'Shop', docs: 'GST, Trade License', status: 'Action Required', location: 'Mumbai', date: '5h ago' },
+    { id: 3, name: 'Sneha Patel', role: 'Agent', docs: 'Aadhar', status: 'Incomplete', location: 'Pune', date: '1d ago' },
+  ]);
 
   const [systemUsers, setSystemUsers] = useState([
     { id: 1, name: 'Amit Kumar', role: 'Sub Admin', phone: '+91 98765 43210', email: 'amit@adminhub.com', location: 'Delhi', status: 'Active', lastLogin: '2026-05-04 10:30', riskLevel: 'Low' },
@@ -38,6 +45,11 @@ const SubAdminDashboard = () => {
   const [showEscalateModal, setShowEscalateModal] = useState(false);
   const [escalateReason, setEscalateReason] = useState('Suspicious Activity');
   const [escalateNotes, setEscalateNotes] = useState('');
+  const [showAddAgentModal, setShowAddAgentModal] = useState(false);
+  const [showAddZoneModal, setShowAddZoneModal] = useState(false);
+  const [showShopDetailModal, setShowShopDetailModal] = useState(false);
+  const [selectedShopDetail, setSelectedShopDetail] = useState(null);
+  const [reportSubmitted, setReportSubmitted] = useState(false);
 
   const [verifyShops, setVerifyShops] = useState([
     { id: 1, name: 'Fresh Mart', cat: 'Grocery', loc: 'Pune Central', status: 'Pending', agent: 'Rajesh Kumar', docs: ['GST', 'License'] },
@@ -52,6 +64,36 @@ const SubAdminDashboard = () => {
       title: 'Shop Verified',
       message: `Shop "${shop.name}" has been verified and sent to Admin for final approval.`,
       type: 'success'
+    });
+  };
+
+  const handleApproveKYC = (id) => {
+    const kyc = kycRequests.find(k => k.id === id);
+    setKycRequests(kycRequests.map(k => k.id === id ? { ...k, status: 'Approved' } : k));
+    addNotification({
+      title: 'KYC Approved',
+      message: `KYC for ${kyc.name} has been approved successfully.`,
+      type: 'success'
+    });
+  };
+
+  const handleRejectKYC = (id) => {
+    const kyc = kycRequests.find(k => k.id === id);
+    setKycRequests(kycRequests.map(k => k.id === id ? { ...k, status: 'Rejected' } : k));
+    addNotification({
+      title: 'KYC Rejected',
+      message: `KYC for ${kyc.name} has been rejected.`,
+      type: 'error'
+    });
+  };
+
+  const handleReject = (id) => {
+    const shop = verifyShops.find(s => s.id === id);
+    setVerifyShops(verifyShops.map(s => s.id === id ? { ...s, status: 'Rejected' } : s));
+    addNotification({
+      title: 'Shop Rejected',
+      message: `Shop "${shop.name}" has been rejected. The agent will be notified.`,
+      type: 'error'
     });
   };
 
@@ -150,7 +192,7 @@ const SubAdminDashboard = () => {
           <div className="p-8 space-y-8 animate-in fade-in duration-500">
             <div className="flex justify-between items-center">
               <h3 className="text-2xl font-bold dark:text-white">Assigned Agents</h3>
-              <button className="btn-primary px-4 py-2 text-sm">Add Agent</button>
+              <button onClick={() => setShowAddAgentModal(true)} className="btn-primary px-4 py-2 text-sm flex items-center gap-2"><Plus size={16}/> Add Agent</button>
             </div>
             <div className="card-premium">
               <table className="w-full text-left">
@@ -226,14 +268,47 @@ const SubAdminDashboard = () => {
                       </td>
                       <td className="p-4 text-right">
                         {s.status === 'Pending' ? (
-                          <button 
-                            onClick={() => handleVerify(s.id)}
-                            className="px-4 py-2 bg-primary-light text-white text-xs font-bold rounded-xl shadow-lg shadow-primary-light/20 hover:scale-105 transition-transform"
-                          >
-                            Verify Shop
-                          </button>
+                          <div className="flex justify-end gap-2">
+                            <button 
+                              onClick={() => {
+                                setSelectedShopDetail(s);
+                                setShowShopDetailModal(true);
+                              }}
+                              className="p-2 bg-gray-100 dark:bg-secondary-dark rounded-xl hover:bg-primary-light hover:text-white transition-all"
+                              title="View Details"
+                            >
+                              <Eye size={16} />
+                            </button>
+                            <button 
+                              onClick={() => handleVerify(s.id)}
+                              className="p-2 bg-success/10 text-success rounded-xl hover:bg-success hover:text-white transition-all"
+                              title="Verify"
+                            >
+                              <CheckCircle size={16} />
+                            </button>
+                            <button 
+                              onClick={() => handleReject(s.id)}
+                              className="p-2 bg-error/10 text-error rounded-xl hover:bg-error hover:text-white transition-all"
+                              title="Reject"
+                            >
+                              <XCircle size={16} />
+                            </button>
+                          </div>
                         ) : (
-                          <span className="text-xs font-bold text-text-secondary-light italic">Waiting for Admin</span>
+                          <div className="flex justify-end gap-2">
+                             <button 
+                              onClick={() => {
+                                setSelectedShopDetail(s);
+                                setShowShopDetailModal(true);
+                              }}
+                              className="p-2 bg-gray-100 dark:bg-secondary-dark rounded-xl hover:bg-primary-light hover:text-white transition-all"
+                            >
+                              <Eye size={16} />
+                            </button>
+                            <span className="text-xs font-bold text-text-secondary-light italic bg-gray-50 dark:bg-secondary-dark/50 px-3 py-2 rounded-xl flex items-center">
+                              {s.status === 'Verified' ? 'Waiting for Admin' : 'Action Taken'}
+                            </span>
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -247,80 +322,179 @@ const SubAdminDashboard = () => {
       case 'KYC Review':
         return (
           <div className="p-8 space-y-8 animate-in fade-in duration-500">
-            <h3 className="text-2xl font-bold dark:text-white">KYC Review Queue</h3>
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-2xl font-black dark:text-white tracking-tight uppercase">KYC Review Queue</h3>
+                <p className="text-sm text-text-secondary-light">Manage and verify onboarding documents for agents and shops.</p>
+              </div>
+              <div className="flex gap-2">
+                <span className="px-4 py-2 bg-primary-light/10 text-primary-light rounded-xl font-black text-xs">
+                  {kycRequests.filter(k => k.status === 'Pending Review').length} Pending
+                </span>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[
-                { name: 'Rahul Dev', role: 'Agent', docs: 'Aadhar, PAN', status: 'Pending Review' },
-                { name: 'Fresh Mart', role: 'Shop', docs: 'GST, Trade License', status: 'Action Required' },
-                { name: 'Sneha Patel', role: 'Agent', docs: 'Aadhar', status: 'Incomplete' },
-              ].map((k, i) => (
-                <div key={i} className="p-6 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl shadow-sm">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex gap-3 items-center">
-                      <div className="w-10 h-10 bg-gray-100 dark:bg-secondary-dark rounded-xl flex items-center justify-center text-lg">{k.name[0]}</div>
+              {kycRequests.map((k) => (
+                <div key={k.id} className="card-premium group hover:border-primary-light/50 transition-all">
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="flex gap-4 items-center">
+                      <div className="w-12 h-12 bg-primary-light text-white rounded-2xl flex items-center justify-center text-xl font-black shadow-lg shadow-primary-light/20">
+                        {k.name[0]}
+                      </div>
                       <div>
-                        <h4 className="font-bold dark:text-white text-lg">{k.name}</h4>
-                        <p className="text-xs text-text-secondary-light">{k.role}</p>
+                        <h4 className="font-black dark:text-white text-lg tracking-tight">{k.name}</h4>
+                        <p className="text-xs font-bold text-text-secondary-light uppercase tracking-widest">{k.role} · {k.location}</p>
                       </div>
                     </div>
-                    <span className="px-3 py-1 bg-warning/10 text-warning text-[10px] font-bold rounded-lg uppercase">{k.status}</span>
+                    <div className="flex flex-col items-end gap-2">
+                      <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
+                        k.status === 'Approved' ? 'bg-success/10 text-success' : 
+                        k.status === 'Rejected' ? 'bg-error/10 text-error' : 
+                        'bg-warning/10 text-warning animate-pulse'
+                      }`}>
+                        {k.status}
+                      </span>
+                      <span className="text-[10px] font-bold text-text-secondary-light flex items-center gap-1"><Clock size={10}/> {k.date}</span>
+                    </div>
                   </div>
-                  <p className="text-sm dark:text-white mb-4">Uploaded Docs: <span className="text-text-secondary-light font-bold">{k.docs}</span></p>
-                  <div className="flex gap-2">
-                    <button className="flex-1 py-2 bg-success text-white font-bold text-sm rounded-xl hover:opacity-90">Approve</button>
-                    <button className="flex-1 py-2 bg-error/10 text-error font-bold text-sm rounded-xl hover:bg-error/20">Reject</button>
+
+                  <div className="space-y-4 mb-6 bg-gray-50 dark:bg-secondary-dark/30 p-4 rounded-2xl border border-border-light dark:border-border-dark">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light mb-2">Submitted Documents</p>
+                    <div className="flex flex-wrap gap-2">
+                      {k.docs.split(', ').map(doc => (
+                        <span key={doc} className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl text-[10px] font-bold dark:text-white">
+                          <FileText size={12} className="text-primary-light" /> {doc}
+                        </span>
+                      ))}
+                    </div>
                   </div>
+
+                  {k.status !== 'Approved' && k.status !== 'Rejected' ? (
+                    <div className="flex gap-3 mt-auto">
+                      <button 
+                        onClick={() => handleApproveKYC(k.id)} 
+                        className="flex-1 py-3 bg-success text-white font-black text-sm rounded-2xl shadow-lg shadow-success/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                      >
+                        Approve
+                      </button>
+                      <button 
+                        onClick={() => handleRejectKYC(k.id)} 
+                        className="flex-1 py-3 bg-white dark:bg-surface-dark border-2 border-error/20 text-error font-black text-sm rounded-2xl hover:bg-error/5 transition-all"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex justify-center p-3 bg-gray-100 dark:bg-secondary-dark/50 rounded-2xl">
+                      <span className="text-xs font-black text-text-secondary-light uppercase tracking-widest italic">Verification Finalized</span>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
           </div>
         );
 
-      case 'Leads / Orders':
       case 'Commission View':
       case 'Incentive Tracking':
         return (
-          <div className="p-8 space-y-8 animate-in fade-in duration-500">
-            <h3 className="text-2xl font-bold dark:text-white">{activeTab}</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="card-premium">
-                <p className="text-sm text-text-secondary-light">Total Volume</p>
-                <h3 className="text-3xl font-bold dark:text-white mt-2">₹12.5L</h3>
+          <div className="p-8 space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-2xl font-black dark:text-white tracking-tight uppercase">Earnings & Incentives</h3>
+                <p className="text-sm text-text-secondary-light">Detailed breakdown of commissions and performance rewards.</p>
               </div>
-              <div className="card-premium">
-                <p className="text-sm text-text-secondary-light">This Month</p>
-                <h3 className="text-3xl font-bold text-emerald-500 mt-2">+15%</h3>
-              </div>
-              <div className="card-premium">
-                <p className="text-sm text-text-secondary-light">Pending Settlement</p>
-                <h3 className="text-3xl font-bold text-orange-500 mt-2">₹45K</h3>
-              </div>
+              <button 
+                onClick={() => setShowCommissionModal(true)}
+                className="btn-primary px-6 py-3 rounded-2xl text-sm font-black flex items-center gap-2 shadow-xl shadow-primary-light/20"
+              >
+                <Trophy size={18} /> View Commission Plan
+              </button>
             </div>
-            <div className="card-premium">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="border-b border-border-light dark:border-border-dark text-text-secondary-light">
-                    <th className="pb-4 font-bold">ID / Ref</th>
-                    <th className="pb-4 font-bold">Date</th>
-                    <th className="pb-4 font-bold">Amount</th>
-                    <th className="pb-4 font-bold">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border-light dark:divide-border-dark">
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { label: 'Total Volume', value: '₹12.5L', color: 'bg-primary-light', icon: <Briefcase /> },
+                { label: 'This Month', value: '₹2.4L', color: 'bg-emerald-500', icon: <TrendingUp /> },
+                { label: 'Pending Settlement', value: '₹45K', color: 'bg-orange-500', icon: <Clock /> },
+              ].map((stat, i) => (
+                <div key={i} className="card-premium flex items-center gap-4">
+                  <div className={`p-4 ${stat.color} text-white rounded-2xl shadow-lg`}>
+                    {React.cloneElement(stat.icon, { size: 24 })}
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black text-text-secondary-light uppercase tracking-widest">{stat.label}</p>
+                    <h3 className="text-2xl font-black dark:text-white">{stat.value}</h3>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+              <div className="xl:col-span-2 card-premium">
+                <h4 className="text-lg font-black dark:text-white mb-6 flex items-center gap-2">
+                  <History size={20} className="text-primary-light" /> Recent Settlements
+                </h4>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="border-b border-border-light dark:border-border-dark text-text-secondary-light">
+                        <th className="pb-4 font-black text-[10px] uppercase tracking-widest">ID / Ref</th>
+                        <th className="pb-4 font-black text-[10px] uppercase tracking-widest">Date</th>
+                        <th className="pb-4 font-black text-[10px] uppercase tracking-widest">Type</th>
+                        <th className="pb-4 font-black text-[10px] uppercase tracking-widest text-right">Amount</th>
+                        <th className="pb-4 font-black text-[10px] uppercase tracking-widest text-right">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border-light dark:divide-border-dark">
+                      {[
+                        { id: 'TXN-00192', date: 'Today, 10:30 AM', type: 'Shop Onboarding', amount: '₹1,200', status: 'Completed' },
+                        { id: 'TXN-00191', date: 'Yesterday', type: 'Sales Commission', amount: '₹4,500', status: 'Pending' },
+                        { id: 'TXN-00189', date: 'Oct 24', type: 'Performance Bonus', amount: '₹12,400', status: 'Completed' },
+                      ].map((t, i) => (
+                        <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50 group transition-colors">
+                          <td className="py-4 font-bold dark:text-white text-sm">{t.id}</td>
+                          <td className="py-4 text-[11px] font-bold text-text-secondary-light">{t.date}</td>
+                          <td className="py-4 text-xs font-medium dark:text-white">{t.type}</td>
+                          <td className="py-4 font-black text-primary-light text-right">{t.amount}</td>
+                          <td className="py-4 text-right">
+                            <span className={`px-3 py-1 text-[10px] rounded-lg font-black uppercase tracking-tighter ${
+                              t.status === 'Completed' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'
+                            }`}>
+                              {t.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="card-premium space-y-6">
+                <h4 className="text-lg font-black dark:text-white flex items-center gap-2">
+                  <Gift size={20} className="text-accent-light" /> Related Content
+                </h4>
+                <div className="space-y-4">
                   {[
-                    { id: 'TXN-00192', date: 'Today, 10:30 AM', amount: '₹1,200', status: 'Completed' },
-                    { id: 'TXN-00191', date: 'Yesterday', amount: '₹4,500', status: 'Pending' },
-                    { id: 'TXN-00189', date: 'Oct 24', amount: '₹12,400', status: 'Completed' },
-                  ].map((t, i) => (
-                    <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50">
-                      <td className="py-4 font-bold dark:text-white">{t.id}</td>
-                      <td className="py-4 text-sm text-text-secondary-light">{t.date}</td>
-                      <td className="py-4 font-bold text-primary-light">{t.amount}</td>
-                      <td className="py-4"><span className={`px-2 py-1 text-[10px] rounded-lg font-bold uppercase ${t.status === 'Completed' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}`}>{t.status}</span></td>
-                    </tr>
+                    { title: 'Commission Policy 2024', size: '1.2 MB', icon: <FileText className="text-blue-500" /> },
+                    { title: 'Reward Milestone Guide', size: '2.5 MB', icon: <Trophy className="text-yellow-500" /> },
+                    { title: 'Payout Cycle Schedule', size: '0.8 MB', icon: <Clock className="text-emerald-500" /> },
+                  ].map((item, i) => (
+                    <div key={i} className="p-4 bg-gray-50 dark:bg-secondary-dark/30 rounded-2xl border border-border-light dark:border-border-dark flex items-center gap-4 group cursor-pointer hover:border-primary-light/50 transition-all">
+                      <div className="w-10 h-10 bg-white dark:bg-surface-dark rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                        {item.icon}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs font-black dark:text-white">{item.title}</p>
+                        <p className="text-[10px] font-bold text-text-secondary-light uppercase mt-0.5">{item.size} · PDF</p>
+                      </div>
+                      <Download size={14} className="text-text-secondary-light group-hover:text-primary-light" />
+                    </div>
                   ))}
-                </tbody>
-              </table>
+                </div>
+              </div>
             </div>
           </div>
         );
@@ -518,10 +692,339 @@ const SubAdminDashboard = () => {
         );
 
       case 'Area Management':
-      case 'Target Tracking':
+        return (
+          <div className="p-8 space-y-8 animate-in fade-in duration-500">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-2xl font-bold dark:text-white">Area Management</h3>
+                <p className="text-sm text-text-secondary-light mt-1">Monitor and manage your assigned territories, zones and pincode coverage.</p>
+              </div>
+              <button onClick={() => setShowAddZoneModal(true)} className="btn-primary px-4 py-2 text-sm flex items-center gap-2">
+                <Map size={16} /> Add New Zone
+              </button>
+            </div>
+
+            {/* Area Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {[
+                { label: 'Total Zones', value: '8', color: 'bg-blue-500', icon: <Map size={20} /> },
+                { label: 'Active Pincodes', value: '124', color: 'bg-emerald-500', icon: <ShieldCheck size={20} /> },
+                { label: 'Agents Deployed', value: '42', color: 'bg-primary-light', icon: <Users size={20} /> },
+                { label: 'Uncovered Areas', value: '3', color: 'bg-orange-500', icon: <AlertCircle size={20} /> },
+              ].map((stat) => (
+                <div key={stat.label} className="card-premium flex items-center gap-4">
+                  <div className={`p-3 ${stat.color} text-white rounded-2xl shadow-lg`}>{stat.icon}</div>
+                  <div>
+                    <p className="text-xs text-text-secondary-light">{stat.label}</p>
+                    <h3 className="text-2xl font-bold dark:text-white">{stat.value}</h3>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Zone Table */}
+            <div className="card-premium p-0 overflow-hidden">
+              <div className="p-5 border-b dark:border-border-dark flex justify-between items-center">
+                <h4 className="font-bold dark:text-white">Territory Zone Overview</h4>
+                <span className="text-[10px] font-black text-text-secondary-light uppercase tracking-widest">8 Zones Active</span>
+              </div>
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="bg-gray-50 dark:bg-secondary-dark/30">
+                    <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest">Zone / Area</th>
+                    <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest">Pincodes</th>
+                    <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest">Agents</th>
+                    <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest">Shops</th>
+                    <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest">Coverage</th>
+                    <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest text-right">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border-light dark:divide-border-dark">
+                  {[
+                    { zone: 'Pune Central', pincodes: '411001, 411002', agents: 8, shops: 34, coverage: 92, status: 'Active' },
+                    { zone: 'Mumbai South', pincodes: '400001, 400002', agents: 12, shops: 56, coverage: 87, status: 'Active' },
+                    { zone: 'Delhi NCR Zone A', pincodes: '110001-110010', agents: 10, shops: 41, coverage: 78, status: 'Active' },
+                    { zone: 'Nashik District', pincodes: '422001, 422002', agents: 5, shops: 18, coverage: 55, status: 'Partial' },
+                    { zone: 'Nagpur East', pincodes: '440001', agents: 3, shops: 9, coverage: 40, status: 'Low Coverage' },
+                  ].map((zone, i) => (
+                    <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50 transition-colors">
+                      <td className="p-4">
+                        <p className="font-bold dark:text-white text-sm">{zone.zone}</p>
+                        <p className="text-[10px] text-text-secondary-light font-bold mt-0.5">{zone.pincodes}</p>
+                      </td>
+                      <td className="p-4 text-sm font-bold dark:text-white">{zone.pincodes.split(',').length}</td>
+                      <td className="p-4 text-sm font-bold dark:text-white">{zone.agents}</td>
+                      <td className="p-4 text-sm font-bold dark:text-white">{zone.shops}</td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-2 bg-gray-100 dark:bg-background-dark rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full ${zone.coverage >= 80 ? 'bg-success' : zone.coverage >= 50 ? 'bg-warning' : 'bg-error'}`}
+                              style={{ width: `${zone.coverage}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-[10px] font-black dark:text-white w-8">{zone.coverage}%</span>
+                        </div>
+                      </td>
+                      <td className="p-4 text-right">
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                          zone.status === 'Active' ? 'bg-success/10 text-success' :
+                          zone.status === 'Partial' ? 'bg-warning/10 text-warning' : 'bg-error/10 text-error'
+                        }`}>{zone.status}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+
       case 'Daily Work Updates':
+        return (
+          <div className="p-8 space-y-8 animate-in fade-in duration-500">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-2xl font-bold dark:text-white">Daily Work Updates</h3>
+                <p className="text-sm text-text-secondary-light mt-1">Submit your daily field report and monitor team activity logs.</p>
+              </div>
+              <button 
+                onClick={() => {
+                  setReportSubmitted(true);
+                  addNotification({ title: 'Report Submitted', message: 'Your daily field report has been sent successfully.', type: 'success' });
+                  setTimeout(() => setReportSubmitted(false), 3000);
+                }}
+                disabled={reportSubmitted}
+                className={`btn-primary px-4 py-2 text-sm flex items-center gap-2 transition-all ${reportSubmitted ? 'bg-success border-success' : ''}`}
+              >
+                {reportSubmitted ? <CheckCircle size={16} /> : <Briefcase size={16} />}
+                {reportSubmitted ? 'Report Submitted' : "Submit Today's Report"}
+              </button>
+            </div>
+
+            {/* Today's Summary Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[
+                { label: "Agents Reported Today", value: '36 / 42', sub: '6 pending', color: 'text-primary-light bg-primary-light/10' },
+                { label: "Shops Visited", value: '87', sub: 'Out of 128 assigned', color: 'text-emerald-500 bg-emerald-500/10' },
+                { label: "Issues Flagged", value: '4', sub: 'Requires follow-up', color: 'text-error bg-error/10' },
+              ].map((s) => (
+                <div key={s.label} className="card-premium flex items-center gap-4">
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl ${s.color}`}>{s.value}</div>
+                  <div>
+                    <p className="text-xs text-text-secondary-light">{s.label}</p>
+                    <p className="text-sm font-bold dark:text-white">{s.sub}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Quick Submit Form */}
+            <div className="card-premium space-y-5">
+              <h4 className="font-bold dark:text-white text-lg border-b border-border-light dark:border-border-dark pb-3">📝 Today's Field Update</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Zone / Area Covered</label>
+                  <select className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold appearance-none">
+                    <option>Pune Central</option>
+                    <option>Mumbai South</option>
+                    <option>Delhi NCR Zone A</option>
+                    <option>Nashik District</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Agents Visited</label>
+                  <input type="number" defaultValue="8" className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Daily Summary / Observations</label>
+                <textarea rows="3" placeholder="Briefly describe today's field activity, issues, and highlights..." className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold resize-none leading-relaxed"></textarea>
+              </div>
+              <button 
+                onClick={() => {
+                  setReportSubmitted(true);
+                  addNotification({ title: 'Report Submitted', message: 'Your daily field report has been sent successfully.', type: 'success' });
+                  setTimeout(() => setReportSubmitted(false), 3000);
+                }}
+                disabled={reportSubmitted}
+                className={`w-full py-3 text-white rounded-2xl font-black text-sm shadow-xl transition-all ${reportSubmitted ? 'bg-success shadow-success/20 scale-[0.98]' : 'bg-primary-light shadow-primary-light/20 hover:scale-[1.01] active:scale-[0.99]'}`}
+              >
+                {reportSubmitted ? '✓ Report Submitted' : 'Submit Field Report'}
+              </button>
+            </div>
+
+            {/* Recent Team Updates */}
+            <div className="card-premium space-y-4">
+              <h4 className="font-bold dark:text-white text-lg border-b border-border-light dark:border-border-dark pb-3">🕐 Recent Team Updates</h4>
+              {[
+                { name: 'Amit Singh', zone: 'Pune South', time: '10:30 AM', note: 'Visited 6 shops, 1 new KYC submitted.', status: 'Submitted' },
+                { name: 'Priya Verma', zone: 'Pincode 411001', time: '11:15 AM', note: 'Agent follow-up done, updates collected.', status: 'Submitted' },
+                { name: 'Rahul Dev', zone: 'Mumbai South', time: '—', note: 'No update yet for today.', status: 'Pending' },
+                { name: 'Sneha Patel', zone: 'Delhi NCR A', time: '09:00 AM', note: 'Morning route complete, 4 shops verified.', status: 'Submitted' },
+              ].map((update, i) => (
+                <div key={i} className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark">
+                  <div className="w-10 h-10 bg-primary-light/10 text-primary-light rounded-xl flex items-center justify-center font-bold text-sm shrink-0">{update.name[0]}</div>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-bold dark:text-white text-sm">{update.name}</p>
+                        <p className="text-[10px] text-text-secondary-light font-bold">{update.zone} · {update.time}</p>
+                      </div>
+                      <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
+                        update.status === 'Submitted' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'
+                      }`}>{update.status}</span>
+                    </div>
+                    <p className="text-xs text-text-secondary-light mt-2">{update.note}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
       case 'Support / Tickets':
-      case 'Escalations':
+        return (
+          <div className="p-8 space-y-8 animate-in fade-in duration-500">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-2xl font-bold dark:text-white">Support / Tickets</h3>
+                <p className="text-sm text-text-secondary-light mt-1">Manage, escalate and track all support requests from your territory.</p>
+              </div>
+              <button className="btn-primary px-4 py-2 text-sm flex items-center gap-2">
+                <LifeBuoy size={16} /> Raise New Ticket
+              </button>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {[
+                { label: 'Open Tickets', value: '8', color: 'bg-error', icon: <AlertCircle size={20} /> },
+                { label: 'In Progress', value: '5', color: 'bg-warning', icon: <Clock size={20} /> },
+                { label: 'Resolved Today', value: '12', color: 'bg-success', icon: <CheckCircle size={20} /> },
+                { label: 'Avg. Resolution Time', value: '3.2h', color: 'bg-blue-500', icon: <TrendingUp size={20} /> },
+              ].map((stat) => (
+                <div key={stat.label} className="card-premium flex items-center gap-4">
+                  <div className={`p-3 ${stat.color} text-white rounded-2xl shadow-lg shrink-0`}>{stat.icon}</div>
+                  <div>
+                    <p className="text-xs text-text-secondary-light">{stat.label}</p>
+                    <h3 className="text-2xl font-bold dark:text-white">{stat.value}</h3>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Tickets Table */}
+            <div className="card-premium p-0 overflow-hidden">
+              <div className="p-5 border-b dark:border-border-dark flex justify-between items-center">
+                <h4 className="font-bold dark:text-white">Active Tickets</h4>
+                <div className="flex gap-2">
+                  {['All', 'Open', 'In Progress', 'Resolved'].map((f) => (
+                    <button key={f} className="px-3 py-1 rounded-full text-[10px] font-black bg-gray-100 dark:bg-secondary-dark text-text-secondary-light hover:text-primary-light hover:bg-primary-light/10 transition-colors uppercase tracking-widest">{f}</button>
+                  ))}
+                </div>
+              </div>
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="bg-gray-50 dark:bg-secondary-dark/30">
+                    <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest">Ticket ID</th>
+                    <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest">Subject</th>
+                    <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest">Raised By</th>
+                    <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest">Priority</th>
+                    <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest">Status</th>
+                    <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest">Created</th>
+                    <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border-light dark:divide-border-dark">
+                  {[
+                    { id: 'TKT-4821', subject: 'Agent unable to login', by: 'Amit Singh', priority: 'High', status: 'Open', time: '10 min ago' },
+                    { id: 'TKT-4820', subject: 'Shop KYC document rejected incorrectly', by: 'Fresh Mart', priority: 'High', status: 'In Progress', time: '1h ago' },
+                    { id: 'TKT-4818', subject: 'Commission not credited for May', by: 'Priya Verma', priority: 'Medium', status: 'Open', time: '3h ago' },
+                    { id: 'TKT-4815', subject: 'App crash on data submission', by: 'Rahul Dev', priority: 'Low', status: 'In Progress', time: 'Yesterday' },
+                    { id: 'TKT-4810', subject: 'Wrong area assigned to agent', by: 'Sneha Patel', priority: 'Medium', status: 'Resolved', time: '2 days ago' },
+                    { id: 'TKT-4805', subject: 'Referral bonus not reflecting', by: 'Vikram Kumar', priority: 'Low', status: 'Resolved', time: '3 days ago' },
+                  ].map((ticket, i) => (
+                    <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50 transition-colors group">
+                      <td className="p-4">
+                        <span className="text-[11px] font-black text-primary-light bg-primary-light/10 px-2 py-1 rounded-lg">{ticket.id}</span>
+                      </td>
+                      <td className="p-4">
+                        <p className="font-bold dark:text-white text-sm">{ticket.subject}</p>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 bg-gray-100 dark:bg-secondary-dark rounded-full flex items-center justify-center text-xs font-bold dark:text-white">{ticket.by[0]}</div>
+                          <span className="text-sm text-text-secondary-light font-medium">{ticket.by}</span>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
+                          ticket.priority === 'High' ? 'bg-error/10 text-error' :
+                          ticket.priority === 'Medium' ? 'bg-warning/10 text-warning' :
+                          'bg-gray-100 dark:bg-secondary-dark text-text-secondary-light'
+                        }`}>{ticket.priority}</span>
+                      </td>
+                      <td className="p-4">
+                        <span className={`px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                          ticket.status === 'Open' ? 'bg-error/10 text-error' :
+                          ticket.status === 'In Progress' ? 'bg-warning/10 text-warning' :
+                          'bg-success/10 text-success'
+                        }`}>{ticket.status}</span>
+                      </td>
+                      <td className="p-4 text-xs text-text-secondary-light font-medium">{ticket.time}</td>
+                      <td className="p-4 text-right">
+                        <button className="text-[10px] font-black text-primary-light px-3 py-1.5 bg-primary-light/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary-light hover:text-white">
+                          View →
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Raise New Ticket Form */}
+            <div className="card-premium space-y-5">
+              <h4 className="font-bold dark:text-white text-lg border-b border-border-light dark:border-border-dark pb-3">🎫 Raise a New Ticket</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Issue Category</label>
+                  <select className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold appearance-none">
+                    <option>Agent Issue</option>
+                    <option>Shop / KYC Problem</option>
+                    <option>Commission / Finance</option>
+                    <option>App / Technical Bug</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Priority Level</label>
+                  <select className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold appearance-none">
+                    <option>High</option>
+                    <option>Medium</option>
+                    <option>Low</option>
+                  </select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Subject</label>
+                <input type="text" placeholder="Brief title of the issue..." className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Description</label>
+                <textarea rows="3" placeholder="Describe the issue in detail including agent/shop ID if applicable..." className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold resize-none leading-relaxed"></textarea>
+              </div>
+              <button 
+                onClick={() => addNotification({ title: 'Ticket Submitted', message: 'Your support ticket has been raised. A technician will contact you soon.', type: 'info' })}
+                className="w-full py-3 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.01] active:scale-[0.99] transition-all"
+              >
+                Submit Support Ticket
+              </button>
+            </div>
+          </div>
+        );
+
       case 'Agent Reports':
       case 'Shop Reports':
       case 'Target Reports':
@@ -537,7 +1040,6 @@ const SubAdminDashboard = () => {
                 Export Data
               </button>
             </div>
-            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3, 4, 5, 6].map((item) => (
                 <div key={item} className="card-premium flex flex-col justify-between hover:-translate-y-1 transition-transform border border-transparent hover:border-primary-light/30">
@@ -546,7 +1048,7 @@ const SubAdminDashboard = () => {
                       <FileText size={20} />
                     </div>
                     <h4 className="font-bold dark:text-white text-lg mb-2">{activeTab} Record #{item}</h4>
-                    <p className="text-sm text-text-secondary-light mb-4">Detailed metric or record log regarding this operational category. Showing aggregated data for your assigned territory.</p>
+                    <p className="text-sm text-text-secondary-light mb-4">Detailed metric or record log regarding this operational category.</p>
                   </div>
                   <div className="flex justify-between items-center pt-4 border-t border-border-light dark:border-border-dark">
                     <span className="text-xs font-bold text-text-secondary-light">Updated 2h ago</span>
@@ -557,7 +1059,56 @@ const SubAdminDashboard = () => {
             </div>
           </div>
         );
-      
+
+
+      case 'Reports':
+        return (
+          <div className="p-8 space-y-8 animate-in fade-in duration-500">
+            <div>
+              <h3 className="text-2xl font-bold dark:text-white">Reports Overview</h3>
+              <p className="text-sm text-text-secondary-light mt-1">Consolidated performance reports for your assigned territory.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { title: 'Agent Performance', value: '42 Active', sub: '+3 this week', color: 'bg-blue-500', icon: <Users size={22} /> },
+                { title: 'Shop Activity', value: '128 Shops', sub: '12 pending review', color: 'bg-emerald-500', icon: <Store size={22} /> },
+                { title: 'Commission Earned', value: '₹2.4L', sub: '+8% vs last month', color: 'bg-primary-light', icon: <DollarSign size={22} /> },
+              ].map((stat) => (
+                <div key={stat.title} className="card-premium flex items-center gap-4">
+                  <div className={`p-4 ${stat.color} text-white rounded-2xl shadow-lg shrink-0`}>{stat.icon}</div>
+                  <div>
+                    <p className="text-sm text-text-secondary-light">{stat.title}</p>
+                    <h3 className="text-2xl font-bold dark:text-white">{stat.value}</h3>
+                    <p className="text-xs text-text-secondary-light mt-0.5">{stat.sub}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[
+                { title: 'Agent Reports', items: ['Weekly Agent Activity', 'Agent KYC Completion Rate', 'New Registrations This Month'] },
+                { title: 'Shop Reports', items: ['Shop Onboarding Rate', 'Verification Backlog', 'Category-wise Distribution'] },
+                { title: 'Finance Summary', items: ['Commission Ledger (MTD)', 'Payout Status Overview', 'Pending Settlements'] },
+                { title: 'Operations Log', items: ['Daily Work Submission Rate', 'Area Coverage Progress', 'Outstanding Follow-ups'] },
+              ].map((section) => (
+                <div key={section.title} className="card-premium space-y-4">
+                  <h4 className="font-bold dark:text-white text-lg border-b border-border-light dark:border-border-dark pb-3">{section.title}</h4>
+                  <div className="space-y-2">
+                    {section.items.map((item) => (
+                      <div key={item} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-secondary-dark rounded-xl group hover:bg-primary-light/5 cursor-pointer transition-all">
+                        <span className="text-sm font-medium dark:text-white">{item}</span>
+                        <button className="text-[10px] font-black text-primary-light px-3 py-1 bg-primary-light/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">View →</button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
       default:
         return (
           <div className="p-20 text-center animate-in zoom-in duration-500">
@@ -598,47 +1149,33 @@ const SubAdminDashboard = () => {
         <div className="flex-1 overflow-y-auto py-4 px-4 custom-scrollbar">
           <SidebarSection title="MAIN">
             <SidebarLink icon={<LayoutDashboard size={18} />} label="Dashboard" active={activeTab === 'Dashboard'} onClick={() => setActiveTab('Dashboard')} />
-            <SidebarLink icon={<CheckSquare size={18} />} label="Today Tasks" active={activeTab === 'Today Tasks'} onClick={() => setActiveTab('Today Tasks')} />
             <SidebarLink icon={<Bell size={18} />} label="Notifications" active={activeTab === 'Notifications'} onClick={() => setActiveTab('Notifications')} />
           </SidebarSection>
 
           <SidebarSection title="MANAGEMENT">
             <SidebarLink icon={<Users size={18} />} label="Assigned Agents" active={activeTab === 'Assigned Agents'} onClick={() => setActiveTab('Assigned Agents')} />
             <SidebarLink icon={<Store size={18} />} label="Shop Management" active={activeTab === 'Shop Management'} onClick={() => setActiveTab('Shop Management')} />
-            <SidebarLink icon={<ShoppingCart size={18} />} label="Leads / Orders" active={activeTab === 'Leads / Orders'} onClick={() => setActiveTab('Leads / Orders')} />
           </SidebarSection>
 
           <SidebarSection title="VERIFICATION">
             <SidebarLink icon={<ShieldCheck size={18} />} label="KYC Review" active={activeTab === 'KYC Review'} onClick={() => setActiveTab('KYC Review')} />
-            <SidebarLink icon={<CheckCircle size={18} />} label="Shop Verification" active={activeTab === 'Shop Verification'} onClick={() => setActiveTab('Shop Verification')} />
           </SidebarSection>
 
           <SidebarSection title="OPERATIONS">
             <SidebarLink icon={<Map size={18} />} label="Area Management" active={activeTab === 'Area Management'} onClick={() => setActiveTab('Area Management')} />
-            <SidebarLink icon={<Target size={18} />} label="Target Tracking" active={activeTab === 'Target Tracking'} onClick={() => setActiveTab('Target Tracking')} />
             <SidebarLink icon={<Briefcase size={18} />} label="Daily Work Updates" active={activeTab === 'Daily Work Updates'} onClick={() => setActiveTab('Daily Work Updates')} />
           </SidebarSection>
 
-          <SidebarSection title="FINANCE (VIEW ONLY)">
+          <SidebarSection title="FINANCE">
             <SidebarLink icon={<DollarSign size={18} />} label="Commission View" active={activeTab === 'Commission View'} onClick={() => setActiveTab('Commission View')} />
-            <SidebarLink icon={<TrendingUp size={18} />} label="Incentive Tracking" active={activeTab === 'Incentive Tracking'} onClick={() => setActiveTab('Incentive Tracking')} />
           </SidebarSection>
 
           <SidebarSection title="SUPPORT">
             <SidebarLink icon={<LifeBuoy size={18} />} label="Support / Tickets" active={activeTab === 'Support / Tickets'} onClick={() => setActiveTab('Support / Tickets')} />
-            <SidebarLink icon={<AlertCircle size={18} />} label="Escalations" active={activeTab === 'Escalations'} onClick={() => setActiveTab('Escalations')} />
           </SidebarSection>
 
           <SidebarSection title="REPORTS">
-            <SidebarLink icon={<FileText size={18} />} label="Agent Reports" active={activeTab === 'Agent Reports'} onClick={() => setActiveTab('Agent Reports')} />
-            <SidebarLink icon={<BarChart2 size={18} />} label="Shop Reports" active={activeTab === 'Shop Reports'} onClick={() => setActiveTab('Shop Reports')} />
-            <SidebarLink icon={<Target size={18} />} label="Target Reports" active={activeTab === 'Target Reports'} onClick={() => setActiveTab('Target Reports')} />
-            <SidebarLink icon={<Clock size={18} />} label="Daily Work Report" active={activeTab === 'Daily Work Report'} onClick={() => setActiveTab('Daily Work Report')} />
-          </SidebarSection>
-
-          <SidebarSection title="SYSTEM">
-            <SidebarLink icon={<Key size={18} />} label="Role & Permissions" active={activeTab === 'Role & Permissions'} onClick={() => setActiveTab('Role & Permissions')} />
-            <SidebarLink icon={<History size={18} />} label="Activity Log" active={activeTab === 'Activity Log'} onClick={() => setActiveTab('Activity Log')} />
+            <SidebarLink icon={<BarChart2 size={18} />} label="Reports" active={activeTab === 'Reports'} onClick={() => setActiveTab('Reports')} />
           </SidebarSection>
 
           <SidebarSection title="ACCOUNT">
@@ -694,6 +1231,7 @@ const SubAdminDashboard = () => {
         <div className="animate-in fade-in slide-in-from-top-2 duration-700">
           {renderContent()}
         </div>
+        
         <EscalateUserModal 
           isOpen={showEscalateModal}
           onClose={() => setShowEscalateModal(false)}
@@ -719,10 +1257,320 @@ const SubAdminDashboard = () => {
             setShowEscalateModal(false);
           }}
         />
+
+        <AddAgentModal 
+          isOpen={showAddAgentModal} 
+          onClose={() => setShowAddAgentModal(false)} 
+          onAdd={(agent) => {
+            addNotification({ title: 'Agent Added', message: `${agent.name} has been successfully registered.`, type: 'success' });
+            setShowAddAgentModal(false);
+          }}
+        />
+
+        <AddZoneModal 
+          isOpen={showAddZoneModal} 
+          onClose={() => setShowAddZoneModal(false)} 
+          onAdd={(zone) => {
+            addNotification({ title: 'Zone Created', message: `New territory "${zone.name}" is now active.`, type: 'success' });
+            setShowAddZoneModal(false);
+          }}
+        />
+
+        <ShopDetailModal 
+          isOpen={showShopDetailModal} 
+          onClose={() => setShowShopDetailModal(false)} 
+          shop={selectedShopDetail} 
+        />
+
+        <CommissionPlanModal 
+          isOpen={showCommissionModal}
+          onClose={() => setShowCommissionModal(false)}
+        />
       </main>
     </div>
   );
 };
+
+const CommissionPlanModal = ({ isOpen, onClose }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
+      <div className="relative w-full max-w-2xl bg-white dark:bg-surface-dark rounded-[40px] shadow-2xl border border-white/10 overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
+        <div className="p-8 border-b dark:border-border-dark flex justify-between items-center bg-gradient-to-r from-primary-light to-primary-dark text-white">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center shadow-inner">
+              <Trophy size={28} />
+            </div>
+            <div>
+              <h3 className="text-2xl font-black tracking-tight">Standard Commission Plan</h3>
+              <p className="text-xs font-bold uppercase tracking-widest opacity-80">FY 2024-25 Reward Structure</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-3 hover:bg-white/10 rounded-2xl transition-all">
+            <X size={24} />
+          </button>
+        </div>
+
+        <div className="p-8 overflow-y-auto custom-scrollbar space-y-8">
+          <div className="space-y-4">
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-primary-light border-b-2 border-primary-light/10 pb-2">Onboarding Rewards</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark">
+                <p className="text-xs font-bold text-text-secondary-light uppercase">New Shop Tie-up</p>
+                <p className="text-2xl font-black dark:text-white mt-1">₹500 <span className="text-xs font-medium text-text-secondary-light">per shop</span></p>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark">
+                <p className="text-xs font-bold text-text-secondary-light uppercase">Agent Referral</p>
+                <p className="text-2xl font-black dark:text-white mt-1">₹1,000 <span className="text-xs font-medium text-text-secondary-light">per agent</span></p>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-emerald-500 border-b-2 border-emerald-500/10 pb-2">Sales Commission</h4>
+            <div className="card-premium p-0 overflow-hidden border-emerald-500/20">
+              <table className="w-full text-left">
+                <thead className="bg-emerald-500/5">
+                  <tr>
+                    <th className="p-4 text-[10px] font-black uppercase text-text-secondary-light">Monthly Sales Volume</th>
+                    <th className="p-4 text-[10px] font-black uppercase text-text-secondary-light text-right">Commission Rate</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border-light dark:divide-border-dark">
+                  <tr>
+                    <td className="p-4 text-sm font-bold dark:text-white">Up to ₹5 Lakhs</td>
+                    <td className="p-4 text-sm font-black text-emerald-500 text-right">3%</td>
+                  </tr>
+                  <tr>
+                    <td className="p-4 text-sm font-bold dark:text-white">₹5 Lakhs - ₹15 Lakhs</td>
+                    <td className="p-4 text-sm font-black text-emerald-500 text-right">5%</td>
+                  </tr>
+                  <tr>
+                    <td className="p-4 text-sm font-bold dark:text-white">Above ₹15 Lakhs</td>
+                    <td className="p-4 text-sm font-black text-emerald-500 text-right">8%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="p-6 bg-primary-light/5 rounded-3xl border border-primary-light/10">
+            <h4 className="font-bold dark:text-white flex items-center gap-2 mb-2">
+              <Zap size={18} className="text-primary-light" /> Performance Multiplier
+            </h4>
+            <p className="text-sm text-text-secondary-light leading-relaxed">
+              Maintain a shop retention rate above <span className="font-bold text-primary-light">95%</span> to qualify for an additional <span className="font-bold text-primary-light">2% bonus</span> on total monthly earnings.
+            </p>
+          </div>
+        </div>
+
+        <div className="p-8 border-t dark:border-border-dark bg-gray-50/50 dark:bg-secondary-dark/30">
+          <button onClick={onClose} className="w-full py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] transition-all">Got it, Thanks!</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const AddAgentModal = ({ isOpen, onClose, onAdd }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
+      <div className="relative w-full max-w-2xl bg-surface-light dark:bg-surface-dark rounded-[32px] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
+        <div className="p-8 border-b dark:border-border-dark flex justify-between items-center bg-primary-light text-white">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center"><Users size={24}/></div>
+            <div>
+              <h3 className="text-xl font-black">Register New Agent</h3>
+              <p className="text-xs font-bold uppercase opacity-80">Agent Onboarding Form</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-3 hover:bg-white/10 rounded-2xl transition-all"><X size={24}/></button>
+        </div>
+        <div className="p-8 overflow-y-auto custom-scrollbar space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase text-text-secondary-light">Full Name</label>
+              <input type="text" placeholder="John Doe" className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase text-text-secondary-light">Phone Number</label>
+              <input type="tel" placeholder="+91 00000 00000" className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-text-secondary-light">Email Address</label>
+            <input type="email" placeholder="agent@example.com" className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase text-text-secondary-light">Assigned Role</label>
+              <select className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold appearance-none">
+                <option>District Agent</option>
+                <option>Pincode Agent</option>
+                <option>Divisional Agent</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase text-text-secondary-light">Territory / Zone</label>
+              <select className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold appearance-none">
+                <option>Pune Central</option>
+                <option>Mumbai South</option>
+                <option>Delhi NCR Zone A</option>
+              </select>
+            </div>
+          </div>
+          <div className="space-y-4 pt-4">
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light">Document Verification</h4>
+            <div className="grid grid-cols-2 gap-3">
+              {['Aadhar Card', 'PAN Card', 'Address Proof', 'Profile Photo'].map(doc => (
+                <div key={doc} className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border-2 border-dashed border-border-light dark:border-border-dark flex flex-col items-center gap-2 cursor-pointer hover:border-primary-light transition-all">
+                  <div className="p-2 bg-primary-light/10 text-primary-light rounded-xl"><Plus size={20}/></div>
+                  <span className="text-[10px] font-black dark:text-white">{doc}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="p-8 border-t dark:border-border-dark bg-gray-50/50 dark:bg-secondary-dark/30 flex gap-4">
+          <button onClick={onClose} className="flex-1 py-4 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl font-black text-sm dark:text-white hover:bg-gray-100 transition-all">Cancel</button>
+          <button onClick={() => onAdd({ name: 'New Agent' })} className="flex-[2] py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] transition-all">Complete Registration</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const AddZoneModal = ({ isOpen, onClose, onAdd }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
+      <div className="relative w-full max-w-lg bg-surface-light dark:bg-surface-dark rounded-[32px] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="p-8 border-b dark:border-border-dark flex justify-between items-center bg-emerald-500 text-white">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center"><Map size={24}/></div>
+            <h3 className="text-xl font-black">Add Territory Zone</h3>
+          </div>
+          <button onClick={onClose} className="p-3 hover:bg-white/10 rounded-2xl transition-all"><X size={24}/></button>
+        </div>
+        <div className="p-8 space-y-6">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-text-secondary-light">Zone Name</label>
+            <input type="text" placeholder="e.g., Bangalore East" className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-text-secondary-light">Pincodes (Comma separated)</label>
+            <textarea rows="2" placeholder="560001, 560002..." className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold resize-none"></textarea>
+          </div>
+          <button onClick={() => onAdd({ name: 'Bangalore East' })} className="w-full py-4 bg-emerald-500 text-white rounded-2xl font-black text-sm shadow-xl shadow-emerald-500/20 hover:scale-[1.02] transition-all">Create Territory Zone</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ShopDetailModal = ({ isOpen, onClose, shop }) => {
+  if (!isOpen || !shop) return null;
+  return (
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
+      <div className="relative w-full max-w-2xl bg-surface-light dark:bg-surface-dark rounded-[32px] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
+        <div className="p-8 border-b dark:border-border-dark flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-primary-light rounded-2xl flex items-center justify-center text-white text-xl font-black">{shop.name[0]}</div>
+            <div>
+              <h3 className="text-xl font-black dark:text-white">{shop.name}</h3>
+              <p className="text-xs font-bold text-text-secondary-light uppercase tracking-widest">{shop.cat} · {shop.loc}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-3 hover:bg-gray-100 dark:hover:bg-secondary-dark rounded-2xl transition-all"><X size={24} className="dark:text-white"/></button>
+        </div>
+        <div className="p-8 overflow-y-auto custom-scrollbar space-y-8">
+          <div className="grid grid-cols-2 gap-8">
+            <div className="space-y-4">
+              <h4 className="text-[10px] font-black uppercase text-text-secondary-light border-b-2 border-primary-light/10 pb-2">Business Details</h4>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 text-sm font-bold dark:text-white"><Phone size={16} className="text-primary-light"/> +91 99999 88888</div>
+                <div className="flex items-center gap-3 text-sm font-bold dark:text-white"><Mail size={16} className="text-primary-light"/> shop@example.com</div>
+                <div className="flex items-center gap-3 text-sm font-bold dark:text-white"><MapPin size={16} className="text-primary-light"/> {shop.loc}, Maharashtra</div>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <h4 className="text-[10px] font-black uppercase text-text-secondary-light border-b-2 border-primary-light/10 pb-2">Agent Assignment</h4>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gray-100 dark:bg-secondary-dark rounded-xl flex items-center justify-center font-bold dark:text-white text-xs">{shop.agent[0]}</div>
+                <div>
+                  <p className="text-sm font-black dark:text-white">{shop.agent}</p>
+                  <p className="text-[10px] font-bold text-text-secondary-light uppercase">Verified by this Agent</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <h4 className="text-[10px] font-black uppercase text-text-secondary-light border-b-2 border-primary-light/10 pb-2">Submitted Documents</h4>
+            <div className="grid grid-cols-3 gap-3">
+              {['Trade_License.pdf', 'GST_Certificate.png', 'Shop_Front.jpg'].map(doc => (
+                <div key={doc} className="p-3 bg-gray-50 dark:bg-secondary-dark rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between group cursor-pointer hover:border-primary-light">
+                  <span className="text-[10px] font-bold dark:text-white truncate">{doc}</span>
+                  <Eye size={14} className="text-text-secondary-light group-hover:text-primary-light shrink-0"/>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        {shop.status === 'Pending' && (
+          <div className="p-8 border-t dark:border-border-dark bg-gray-50/50 dark:bg-secondary-dark/30 flex gap-4">
+            <button onClick={onClose} className="flex-1 py-4 bg-error text-white rounded-2xl font-black text-sm shadow-xl shadow-error/20 hover:scale-[1.02] transition-all">Reject Shop</button>
+            <button onClick={onClose} className="flex-[2] py-4 bg-success text-white rounded-2xl font-black text-sm shadow-xl shadow-success/20 hover:scale-[1.02] transition-all">Approve & Live</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const EscalateUserModal = ({ isOpen, onClose, user, reason, setReason, notes, setNotes, onConfirm }) => {
+  if (!isOpen || !user) return null;
+  return (
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
+      <div className="relative w-full max-w-lg bg-surface-light dark:bg-surface-dark rounded-[32px] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="p-8 border-b dark:border-border-dark flex justify-between items-center bg-error text-white">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center"><AlertCircle size={24}/></div>
+            <h3 className="text-xl font-black">Escalate Security Risk</h3>
+          </div>
+          <button onClick={onClose} className="p-3 hover:bg-white/10 rounded-2xl transition-all"><X size={24}/></button>
+        </div>
+        <div className="p-8 space-y-6">
+          <div className="p-4 bg-error/5 border border-error/10 rounded-2xl">
+            <p className="text-sm font-bold dark:text-white">Reporting User: <span className="text-error">{user.name}</span></p>
+            <p className="text-xs text-text-secondary-light font-bold mt-1">Level: {user.riskLevel} Risk</p>
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-text-secondary-light">Reason for Escalation</label>
+            <select value={reason} onChange={(e) => setReason(e.target.value)} className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-error outline-none dark:text-white font-bold appearance-none">
+              <option>Suspicious Activity</option>
+              <option>KYC Fraud Detected</option>
+              <option>Financial Discrepancy</option>
+              <option>Multiple Failed Logins</option>
+              <option>Policy Violation</option>
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-text-secondary-light">Evidence / Details</label>
+            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows="3" placeholder="Provide details to help Admin investigate..." className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-error outline-none dark:text-white font-bold resize-none"></textarea>
+          </div>
+          <button onClick={onConfirm} className="w-full py-4 bg-error text-white rounded-2xl font-black text-sm shadow-xl shadow-error/20 hover:scale-[1.02] active:scale-[0.98] transition-all">Submit Security Report</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 const SidebarSection = ({ title, children }) => (
   <div className="mb-6 last:mb-0">
@@ -762,59 +1610,5 @@ const SidebarLink = ({ icon, label, active, onClick, badge }) => (
   </div>
 );
 
-const EscalateUserModal = ({ isOpen, onClose, user, reason, setReason, notes, setNotes, onConfirm }) => {
-  if (!isOpen || !user) return null;
-
-  const reasons = ['Suspicious Activity', 'KYC Mismatch Reported', 'Payment Anomaly', 'Repeated Complaints', 'Others'];
-
-  return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
-      <div className="relative w-full max-w-lg bg-surface-light dark:bg-surface-dark rounded-3xl shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300">
-        <div className="p-6 border-b border-border-light dark:border-border-dark flex justify-between items-center bg-warning/5">
-          <div className="flex items-center gap-3 text-warning">
-            <AlertCircle size={24} />
-            <h3 className="text-lg font-black tracking-tight">Escalate to Admin</h3>
-          </div>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-secondary-dark rounded-xl transition-all"><X size={20} className="dark:text-white" /></button>
-        </div>
-
-        <div className="p-8 space-y-6">
-          <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-dashed border-border-light dark:border-border-dark">
-            <p className="text-sm dark:text-white font-medium text-center">Reporting <span className="font-bold text-warning">{user.name}</span> for Admin review.</p>
-          </div>
-
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Reporting Reason</label>
-              <select 
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-warning outline-none dark:text-white font-medium appearance-none"
-              >
-                {reasons.map(r => <option key={r} value={r}>{r}</option>)}
-              </select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Evidence / Notes</label>
-              <textarea 
-                placeholder="Describe the suspicious behavior..."
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-warning outline-none dark:text-white font-medium h-24 resize-none"
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-4">
-            <button onClick={onClose} className="flex-1 py-4 rounded-2xl font-black text-sm border-2 border-border-light dark:border-border-dark dark:text-white hover:bg-gray-50 transition-all">Cancel</button>
-            <button onClick={onConfirm} className="flex-1 py-4 rounded-2xl bg-warning text-background-dark font-black text-sm shadow-xl shadow-warning/20 hover:scale-[1.02] active:scale-[0.98] transition-all">Submit Escalation</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export default SubAdminDashboard;

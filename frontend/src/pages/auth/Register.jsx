@@ -17,6 +17,8 @@ const Register = () => {
     password: '',
     role: 'Agent',
     agentType: 'Pincode Agent',
+    businessCategory: 'Service-Based',
+    businessType: 'Hospital',
     territory: {
       state: '',
       district: '',
@@ -41,6 +43,7 @@ const Register = () => {
       upiId: ''
     },
     paymentDetails: {
+      amount: '100000',
       transactionId: '',
       paymentProof: null
     }
@@ -50,6 +53,15 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  
+  // OTP Flow States
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpError, setOtpError] = useState('');
+  const [isManualAmount, setIsManualAmount] = useState(false);
+
   const { register } = useAuth();
   const { addNotification } = useNotifications();
   const navigate = useNavigate();
@@ -97,6 +109,50 @@ const Register = () => {
 
   const nextStep = () => setStep(prev => prev + 1);
   const prevStep = () => setStep(prev => prev - 1);
+
+  // OTP Simulation Logic
+  const handleSendOtp = () => {
+    if (!formData.phone) {
+      setOtpError('Please enter a phone number first');
+      return;
+    }
+    setOtpLoading(true);
+    setOtpError('');
+    // Simulate API call
+    setTimeout(() => {
+      setOtpSent(true);
+      setOtpLoading(false);
+      addNotification({
+        title: 'OTP Sent',
+        message: 'A verification code has been sent to your phone.',
+        type: 'success'
+      });
+    }, 1500);
+  };
+
+  const handleVerifyOtp = () => {
+    if (otp.length !== 6) {
+      setOtpError('Please enter a valid 6-digit OTP');
+      return;
+    }
+    setOtpLoading(true);
+    setOtpError('');
+    // Simulate verification
+    setTimeout(() => {
+      if (otp === '123456') { // Mock OTP
+        setOtpVerified(true);
+        setOtpLoading(false);
+        addNotification({
+          title: 'Verified Success',
+          message: 'Your phone number has been verified.',
+          type: 'success'
+        });
+      } else {
+        setOtpError('Invalid OTP. Use 123456 for demo.');
+        setOtpLoading(false);
+      }
+    }, 1500);
+  };
 
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
@@ -234,9 +290,35 @@ const Register = () => {
                     <label className="text-xs font-black uppercase tracking-widest text-text-secondary-light">Email Address</label>
                     <input type="email" name="email" value={formData.email} onChange={handleInputChange} className="input-field" placeholder="john@example.com" required />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 relative">
                     <label className="text-xs font-black uppercase tracking-widest text-text-secondary-light">Phone Number</label>
-                    <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} className="input-field" placeholder="+91 98765 43210" required />
+                    <div className="relative">
+                      <input 
+                        type="tel" 
+                        name="phone" 
+                        value={formData.phone} 
+                        onChange={handleInputChange} 
+                        className={`input-field pr-32 ${otpVerified ? 'border-success bg-success/5' : ''}`} 
+                        placeholder="+91 98765 43210" 
+                        disabled={otpVerified}
+                        required 
+                      />
+                      {!otpVerified && (
+                        <button 
+                          type="button"
+                          onClick={handleSendOtp}
+                          disabled={otpLoading || !formData.phone}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 bg-primary-light text-white rounded-lg text-[10px] font-black uppercase tracking-widest disabled:opacity-50 transition-all"
+                        >
+                          {otpLoading && !otpSent ? 'Sending...' : otpSent ? 'Resend OTP' : 'Send OTP'}
+                        </button>
+                      )}
+                      {otpVerified && (
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-success flex items-center gap-1 font-black text-[10px] uppercase tracking-widest">
+                          <CheckCircle size={14} /> Verified
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-black uppercase tracking-widest text-text-secondary-light">Password</label>
@@ -244,11 +326,43 @@ const Register = () => {
                   </div>
                 </div>
 
+                {otpSent && !otpVerified && (
+                  <div className="p-6 bg-primary-light/5 border border-primary-light/20 rounded-2xl space-y-4 animate-in fade-in slide-in-from-top-4">
+                    <div className="flex justify-between items-center">
+                      <label className="text-xs font-black uppercase tracking-widest text-primary-light">Enter 6-Digit OTP</label>
+                      <span className="text-[10px] font-bold text-text-secondary-light">OTP is 123456</span>
+                    </div>
+                    <div className="flex gap-4">
+                      <input 
+                        type="text" 
+                        maxLength={6}
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                        className="input-field text-center text-2xl tracking-[1rem] font-black" 
+                        placeholder="000000"
+                      />
+                      <button 
+                        type="button"
+                        onClick={handleVerifyOtp}
+                        disabled={otpLoading || otp.length !== 6}
+                        className="btn-primary px-8 rounded-xl shrink-0"
+                      >
+                        {otpLoading ? <Loader2 className="animate-spin" /> : 'Verify OTP'}
+                      </button>
+                    </div>
+                    {otpError && <p className="text-xs text-error font-bold flex items-center gap-1"><AlertCircle size={14} /> {otpError}</p>}
+                  </div>
+                )}
+
                 <div className="pt-6 flex justify-between items-center">
                   <Link to="/" className="text-sm font-bold text-text-secondary-light hover:text-error flex items-center gap-2 transition-colors">
                     <X size={16} /> Exit Registration
                   </Link>
-                  <button onClick={nextStep} className="btn-primary px-10 py-4 rounded-xl flex items-center gap-2">
+                  <button 
+                    onClick={nextStep} 
+                    disabled={!otpVerified}
+                    className={`btn-primary px-10 py-4 rounded-xl flex items-center gap-2 ${!otpVerified ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
+                  >
                     Next Step <ChevronRight size={20} />
                   </button>
                 </div>
@@ -275,6 +389,59 @@ const Register = () => {
                       <option>Divisional Agent</option>
                       <option>Pincode Agent</option>
                     </select>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-xs font-black uppercase tracking-widest text-text-secondary-light">Business Focus</label>
+                      <select name="businessCategory" value={formData.businessCategory} onChange={handleInputChange} className="input-field">
+                        <option>Service-Based</option>
+                        <option>Product-Based</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-xs font-black uppercase tracking-widest text-text-secondary-light">Business Type</label>
+                      <select name="businessType" value={formData.businessType} onChange={handleInputChange} className="input-field">
+                        <optgroup label="Healthcare">
+                          <option value="Hospital">🏥 Hospital</option>
+                          <option value="Clinic">🩺 Clinic</option>
+                          <option value="Pharmacy">💊 Pharmacy</option>
+                          <option value="Diagnostic Lab">🔬 Diagnostic Lab</option>
+                        </optgroup>
+                        <optgroup label="Hospitality">
+                          <option value="Hotel">🏨 Hotel</option>
+                          <option value="Restaurant">🍽️ Restaurant</option>
+                          <option value="Café">☕ Café</option>
+                          <option value="Resort">🌴 Resort</option>
+                          <option value="Guest House">🏠 Guest House</option>
+                        </optgroup>
+                        <optgroup label="Retail & Commerce">
+                          <option value="Supermarket">🛒 Supermarket</option>
+                          <option value="Grocery Store">🥦 Grocery Store</option>
+                          <option value="Electronics Shop">📱 Electronics Shop</option>
+                          <option value="Clothing Store">👗 Clothing Store</option>
+                          <option value="Jewellery Shop">💎 Jewellery Shop</option>
+                        </optgroup>
+                        <optgroup label="Education">
+                          <option value="School">🏫 School</option>
+                          <option value="College">🎓 College</option>
+                          <option value="Coaching Center">📚 Coaching Center</option>
+                        </optgroup>
+                        <optgroup label="Finance & Services">
+                          <option value="Bank">🏦 Bank</option>
+                          <option value="Insurance Agency">🛡️ Insurance Agency</option>
+                          <option value="Travel Agency">✈️ Travel Agency</option>
+                          <option value="Real Estate">🏗️ Real Estate</option>
+                        </optgroup>
+                        <optgroup label="Others">
+                          <option value="Salon & Spa">💇 Salon & Spa</option>
+                          <option value="Gym & Fitness">🏋️ Gym & Fitness</option>
+                          <option value="Transport">🚛 Transport & Logistics</option>
+                          <option value="Other">🔧 Other</option>
+                        </optgroup>
+                      </select>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -426,11 +593,42 @@ const Register = () => {
 
                   <div className="space-y-6">
                     <h4 className="font-bold dark:text-white border-b dark:border-border-dark pb-2">Security Deposit</h4>
-                    <div className="p-4 bg-primary-light/5 rounded-xl border border-primary-light/20 space-y-2">
-                      <p className="text-xs text-text-secondary-light font-bold">Transfer ₹1,00,000 to:</p>
-                      <p className="text-sm font-black dark:text-white">AgenticStore Platforms Ltd.</p>
-                      <p className="text-sm font-mono dark:text-white">A/C: 998877665544</p>
-                      <p className="text-sm font-mono dark:text-white">IFSC: AGNT0001234</p>
+                    <div className="p-4 bg-primary-light/5 rounded-xl border border-primary-light/20 space-y-3">
+                      <div className="flex justify-between items-center">
+                        <p className="text-xs text-text-secondary-light font-bold">
+                          {isManualAmount ? 'Enter Amount to Transfer:' : 'Transfer Amount:'}
+                        </p>
+                        <button 
+                          type="button"
+                          onClick={() => setIsManualAmount(!isManualAmount)}
+                          className="text-[10px] font-black uppercase tracking-widest text-primary-light hover:underline"
+                        >
+                          {isManualAmount ? 'Fixed Amount' : 'Manual Entry'}
+                        </button>
+                      </div>
+                      
+                      {isManualAmount ? (
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-text-secondary-light">₹</span>
+                          <input 
+                            type="number" 
+                            name="paymentDetails.amount" 
+                            value={formData.paymentDetails.amount} 
+                            onChange={handleInputChange}
+                            className="w-full pl-8 pr-4 py-2 bg-white dark:bg-surface-dark border border-primary-light/30 rounded-lg font-black dark:text-white focus:border-primary-light outline-none"
+                            placeholder="0.00"
+                          />
+                        </div>
+                      ) : (
+                        <p className="text-xl font-black dark:text-white">₹{Number(formData.paymentDetails.amount).toLocaleString('en-IN')}</p>
+                      )}
+
+                      <div className="pt-2 border-t border-primary-light/10 space-y-1">
+                        <p className="text-xs text-text-secondary-light font-bold">Transfer to:</p>
+                        <p className="text-sm font-black dark:text-white">AgenticStore Platforms Ltd.</p>
+                        <p className="text-sm font-mono dark:text-white">A/C: 998877665544</p>
+                        <p className="text-sm font-mono dark:text-white">IFSC: AGNT0001234</p>
+                      </div>
                     </div>
                     <div className="space-y-4">
                       <div className="space-y-2">
@@ -488,6 +686,8 @@ const Register = () => {
                       <h4 className="font-bold dark:text-white text-sm uppercase tracking-widest pt-4">Territory</h4>
                       <div className="space-y-1">
                         <p className="text-xs text-text-secondary-light">Type: <span className="font-bold dark:text-white">{formData.agentType}</span></p>
+                        <p className="text-xs text-text-secondary-light">Focus: <span className="font-bold dark:text-white">{formData.businessCategory}</span></p>
+                        <p className="text-xs text-text-secondary-light">Business Type: <span className="font-bold dark:text-white">{formData.businessType}</span></p>
                         <p className="text-xs text-text-secondary-light">Area: <span className="font-bold dark:text-white">{formData.territory.district}, {formData.territory.state}</span></p>
                       </div>
                       {formData.bankDetails.upiId && (
@@ -499,6 +699,11 @@ const Register = () => {
                           </div>
                         </>
                       )}
+                      <h4 className="font-bold dark:text-white text-sm uppercase tracking-widest pt-4">Payment</h4>
+                      <div className="space-y-1">
+                        <p className="text-xs text-text-secondary-light">Amount: <span className="font-bold dark:text-white">₹{Number(formData.paymentDetails.amount).toLocaleString('en-IN')}</span></p>
+                        <p className="text-xs text-text-secondary-light">Txn ID: <span className="font-bold dark:text-white">{formData.paymentDetails.transactionId}</span></p>
+                      </div>
                     </div>
                   </div>
 
