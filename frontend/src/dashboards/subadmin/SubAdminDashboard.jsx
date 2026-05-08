@@ -363,9 +363,14 @@ const SubAdminDashboard = () => {
                     <p className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light mb-2">Submitted Documents</p>
                     <div className="flex flex-wrap gap-2">
                       {k.docs.split(', ').map(doc => (
-                        <span key={doc} className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl text-[10px] font-bold dark:text-white">
+                        <div 
+                          key={doc} 
+                          onClick={() => addNotification({ title: 'Viewing Document', message: `Opening ${doc} for verification...`, type: 'info' })}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl text-[10px] font-bold dark:text-white cursor-pointer hover:border-primary-light transition-all active:scale-95 group"
+                        >
                           <FileText size={12} className="text-primary-light" /> {doc}
-                        </span>
+                          <Download size={10} className="text-text-secondary-light group-hover:text-primary-light ml-1" />
+                        </div>
                       ))}
                     </div>
                   </div>
@@ -1513,7 +1518,11 @@ const ShopDetailModal = ({ isOpen, onClose, shop }) => {
             <h4 className="text-[10px] font-black uppercase text-text-secondary-light border-b-2 border-primary-light/10 pb-2">Submitted Documents</h4>
             <div className="grid grid-cols-3 gap-3">
               {['Trade_License.pdf', 'GST_Certificate.png', 'Shop_Front.jpg'].map(doc => (
-                <div key={doc} className="p-3 bg-gray-50 dark:bg-secondary-dark rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between group cursor-pointer hover:border-primary-light">
+                <div 
+                  key={doc} 
+                  onClick={() => addNotification({ title: 'Downloading Document', message: `Securing and downloading ${doc}...`, type: 'info' })}
+                  className="p-3 bg-gray-50 dark:bg-secondary-dark rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between group cursor-pointer hover:border-primary-light active:scale-95 transition-all"
+                >
                   <span className="text-[10px] font-bold dark:text-white truncate">{doc}</span>
                   <Eye size={14} className="text-text-secondary-light group-hover:text-primary-light shrink-0"/>
                 </div>
