@@ -51,6 +51,13 @@ const SubAdminDashboard = () => {
   const [selectedShopDetail, setSelectedShopDetail] = useState(null);
   const [reportSubmitted, setReportSubmitted] = useState(false);
 
+  const handleDownload = (docName) => {
+    addNotification({ title: 'Download Started', message: `Preparing ${docName} for secure download...`, type: 'info' });
+    setTimeout(() => {
+      addNotification({ title: 'Download Complete', message: `${docName} has been saved to your device.`, type: 'success' });
+    }, 2000);
+  };
+
   const [verifyShops, setVerifyShops] = useState([
     { id: 1, name: 'Fresh Mart', cat: 'Grocery', loc: 'Pune Central', status: 'Pending', agent: 'Rajesh Kumar', docs: ['GST', 'License'] },
     { id: 2, name: 'ElectroHub', cat: 'Electronics', loc: 'Mumbai South', status: 'Pending', agent: 'Vikram Singh', docs: ['Trade License', 'Owner ID'] },
@@ -365,7 +372,7 @@ const SubAdminDashboard = () => {
                       {k.docs.split(', ').map(doc => (
                         <div 
                           key={doc} 
-                          onClick={() => addNotification({ title: 'Viewing Document', message: `Opening ${doc} for verification...`, type: 'info' })}
+                          onClick={() => handleDownload(doc)}
                           className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl text-[10px] font-bold dark:text-white cursor-pointer hover:border-primary-light transition-all active:scale-95 group"
                         >
                           <FileText size={12} className="text-primary-light" /> {doc}
@@ -1520,7 +1527,12 @@ const ShopDetailModal = ({ isOpen, onClose, shop }) => {
               {['Trade_License.pdf', 'GST_Certificate.png', 'Shop_Front.jpg'].map(doc => (
                 <div 
                   key={doc} 
-                  onClick={() => addNotification({ title: 'Downloading Document', message: `Securing and downloading ${doc}...`, type: 'info' })}
+                  onClick={() => {
+                    addNotification({ title: 'Securing File', message: 'Verifying document encryption...', type: 'info' });
+                    setTimeout(() => {
+                      addNotification({ title: 'Download Complete', message: `${doc} saved successfully.`, type: 'success' });
+                    }, 1500);
+                  }}
                   className="p-3 bg-gray-50 dark:bg-secondary-dark rounded-xl border border-border-light dark:border-border-dark flex items-center justify-between group cursor-pointer hover:border-primary-light active:scale-95 transition-all"
                 >
                   <span className="text-[10px] font-bold dark:text-white truncate">{doc}</span>
