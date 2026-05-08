@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Map, Settings, Bell,
   CheckSquare, CheckCircle, FileText, BarChart2,
   Clock, LogOut, Briefcase, LifeBuoy, Sun, Moon, User,
-  Lock, BellRing, Palette, ChevronRight, Download,
+  Lock, BellRing, Palette, ChevronRight, Download, Trophy,
   Key, History, X, Edit, Eye, XCircle, Phone, Mail, MapPin, Plus, Send
 } from 'lucide-react';
 
