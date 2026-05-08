@@ -57,6 +57,9 @@ const SubAdminDashboard = () => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [show2FAModal, setShow2FAModal] = useState(false);
   const [showSessionsModal, setShowSessionsModal] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [showNotificationSettingsModal, setShowNotificationSettingsModal] = useState(false);
+  const [showAppearanceSettingsModal, setShowAppearanceSettingsModal] = useState(false);
 
   const handleDownload = (docName) => {
     addNotification({ title: 'Download Started', message: `Preparing ${docName} for secure download...`, type: 'info' });
@@ -548,7 +551,17 @@ const SubAdminDashboard = () => {
                               if (item === 'Change Password') setShowPasswordModal(true);
                               if (item === 'Two-Factor Authentication') setShow2FAModal(true);
                               if (item === 'Active Sessions') setShowSessionsModal(true);
+                              
+                              if (['Task Reminders', 'Agent Alerts', 'Weekly Digest'].includes(item)) {
+                                setShowNotificationSettingsModal(true);
+                              }
+                              
+                              if (['Primary Brand Color'].includes(item)) {
+                                setShowAppearanceSettingsModal(true);
+                              }
+
                               if (item === 'Dark Mode Toggle') toggleTheme();
+                              if (item === 'Compact Sidebar') setIsSidebarCollapsed(!isSidebarCollapsed);
                             }}
                             className="flex items-center justify-between p-3 bg-gray-50 dark:bg-secondary-dark/50 rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-secondary-dark transition-all group"
                           >
@@ -1183,64 +1196,65 @@ const SubAdminDashboard = () => {
   return (
     <div className="flex h-screen bg-background-light dark:bg-background-dark overflow-hidden">
       {/* Sidebar */}
-      <aside className="w-72 bg-surface-light dark:bg-surface-dark border-r border-border-light dark:border-border-dark hidden lg:flex flex-col shadow-2xl z-20">
-        <div className="p-6 border-b dark:border-border-dark">
+      <aside className={`${isSidebarCollapsed ? 'w-24' : 'w-72'} bg-surface-light dark:bg-surface-dark border-r border-border-light dark:border-border-dark hidden lg:flex flex-col shadow-2xl z-20 transition-all duration-500`}>
+        <div className={`p-6 border-b dark:border-border-dark ${isSidebarCollapsed ? 'flex justify-center' : ''}`}>
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-primary-light dark:bg-primary-dark rounded-xl flex items-center justify-center shadow-lg shadow-primary-light/20 transition-transform">
               <span className="text-white font-black text-xl">S</span>
             </div>
-            <div>
-              <span className="font-black text-xl dark:text-white block leading-tight tracking-tight">Agent<span className="text-primary-light">Hub</span></span>
-              <span className="text-[10px] font-black text-primary-light uppercase tracking-widest">Sub-Admin</span>
-            </div>
+            {!isSidebarCollapsed && (
+              <div>
+                <span className="font-black text-xl dark:text-white block leading-tight tracking-tight">Agent<span className="text-primary-light">Hub</span></span>
+                <span className="text-[10px] font-black text-primary-light uppercase tracking-widest">Sub-Admin</span>
+              </div>
+            )}
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto py-4 px-4 custom-scrollbar">
-          <SidebarSection title="MAIN">
-            <SidebarLink icon={<LayoutDashboard size={18} />} label="Dashboard" active={activeTab === 'Dashboard'} onClick={() => setActiveTab('Dashboard')} />
-            <SidebarLink icon={<Bell size={18} />} label="Notifications" active={activeTab === 'Notifications'} onClick={() => setActiveTab('Notifications')} />
+          <SidebarSection title={isSidebarCollapsed ? "" : "MAIN"} collapsed={isSidebarCollapsed}>
+            <SidebarLink icon={<LayoutDashboard size={18} />} label="Dashboard" active={activeTab === 'Dashboard'} onClick={() => setActiveTab('Dashboard')} collapsed={isSidebarCollapsed} />
+            <SidebarLink icon={<Bell size={18} />} label="Notifications" active={activeTab === 'Notifications'} onClick={() => setActiveTab('Notifications')} collapsed={isSidebarCollapsed} />
           </SidebarSection>
 
-          <SidebarSection title="MANAGEMENT">
-            <SidebarLink icon={<Users size={18} />} label="Assigned Agents" active={activeTab === 'Assigned Agents'} onClick={() => setActiveTab('Assigned Agents')} />
-            <SidebarLink icon={<Store size={18} />} label="Shop Management" active={activeTab === 'Shop Management'} onClick={() => setActiveTab('Shop Management')} />
+          <SidebarSection title={isSidebarCollapsed ? "" : "MANAGEMENT"} collapsed={isSidebarCollapsed}>
+            <SidebarLink icon={<Users size={18} />} label="Assigned Agents" active={activeTab === 'Assigned Agents'} onClick={() => setActiveTab('Assigned Agents')} collapsed={isSidebarCollapsed} />
+            <SidebarLink icon={<Store size={18} />} label="Shop Management" active={activeTab === 'Shop Management'} onClick={() => setActiveTab('Shop Management')} collapsed={isSidebarCollapsed} />
           </SidebarSection>
 
-          <SidebarSection title="VERIFICATION">
-            <SidebarLink icon={<ShieldCheck size={18} />} label="KYC Review" active={activeTab === 'KYC Review'} onClick={() => setActiveTab('KYC Review')} />
+          <SidebarSection title={isSidebarCollapsed ? "" : "VERIFICATION"} collapsed={isSidebarCollapsed}>
+            <SidebarLink icon={<ShieldCheck size={18} />} label="KYC Review" active={activeTab === 'KYC Review'} onClick={() => setActiveTab('KYC Review')} collapsed={isSidebarCollapsed} />
           </SidebarSection>
 
-          <SidebarSection title="OPERATIONS">
-            <SidebarLink icon={<Map size={18} />} label="Area Management" active={activeTab === 'Area Management'} onClick={() => setActiveTab('Area Management')} />
-            <SidebarLink icon={<Briefcase size={18} />} label="Daily Work Updates" active={activeTab === 'Daily Work Updates'} onClick={() => setActiveTab('Daily Work Updates')} />
+          <SidebarSection title={isSidebarCollapsed ? "" : "OPERATIONS"} collapsed={isSidebarCollapsed}>
+            <SidebarLink icon={<Map size={18} />} label="Area Management" active={activeTab === 'Area Management'} onClick={() => setActiveTab('Area Management')} collapsed={isSidebarCollapsed} />
+            <SidebarLink icon={<Briefcase size={18} />} label="Daily Work Updates" active={activeTab === 'Daily Work Updates'} onClick={() => setActiveTab('Daily Work Updates')} collapsed={isSidebarCollapsed} />
           </SidebarSection>
 
-          <SidebarSection title="FINANCE">
-            <SidebarLink icon={<DollarSign size={18} />} label="Commission View" active={activeTab === 'Commission View'} onClick={() => setActiveTab('Commission View')} />
+          <SidebarSection title={isSidebarCollapsed ? "" : "FINANCE"} collapsed={isSidebarCollapsed}>
+            <SidebarLink icon={<DollarSign size={18} />} label="Commission View" active={activeTab === 'Commission View'} onClick={() => setActiveTab('Commission View')} collapsed={isSidebarCollapsed} />
           </SidebarSection>
 
-          <SidebarSection title="SUPPORT">
-            <SidebarLink icon={<LifeBuoy size={18} />} label="Support / Tickets" active={activeTab === 'Support / Tickets'} onClick={() => setActiveTab('Support / Tickets')} />
+          <SidebarSection title={isSidebarCollapsed ? "" : "SUPPORT"} collapsed={isSidebarCollapsed}>
+            <SidebarLink icon={<LifeBuoy size={18} />} label="Support / Tickets" active={activeTab === 'Support / Tickets'} onClick={() => setActiveTab('Support / Tickets')} collapsed={isSidebarCollapsed} />
           </SidebarSection>
 
-          <SidebarSection title="REPORTS">
-            <SidebarLink icon={<BarChart2 size={18} />} label="Reports" active={activeTab === 'Reports'} onClick={() => setActiveTab('Reports')} />
+          <SidebarSection title={isSidebarCollapsed ? "" : "REPORTS"} collapsed={isSidebarCollapsed}>
+            <SidebarLink icon={<BarChart2 size={18} />} label="Reports" active={activeTab === 'Reports'} onClick={() => setActiveTab('Reports')} collapsed={isSidebarCollapsed} />
           </SidebarSection>
 
-          <SidebarSection title="ACCOUNT">
-            <SidebarLink icon={<User size={18} />} label="My Profile" active={activeTab === 'My Profile'} onClick={() => setActiveTab('My Profile')} />
-            <SidebarLink icon={<Settings size={18} />} label="Settings" active={activeTab === 'Settings'} onClick={() => setActiveTab('Settings')} />
+          <SidebarSection title={isSidebarCollapsed ? "" : "ACCOUNT"} collapsed={isSidebarCollapsed}>
+            <SidebarLink icon={<User size={18} />} label="My Profile" active={activeTab === 'My Profile'} onClick={() => setActiveTab('My Profile')} collapsed={isSidebarCollapsed} />
+            <SidebarLink icon={<Settings size={18} />} label="Settings" active={activeTab === 'Settings'} onClick={() => setActiveTab('Settings')} collapsed={isSidebarCollapsed} />
             <div 
               onClick={handleLogout} 
-              className="flex items-center justify-center p-4 rounded-2xl cursor-pointer bg-error/5 hover:bg-error/10 border border-error/10 transition-all duration-500 group overflow-hidden relative shadow-sm mt-2"
+              className={`flex items-center ${isSidebarCollapsed ? 'justify-center w-12 mx-auto' : 'p-4'} rounded-2xl cursor-pointer bg-error/5 hover:bg-error/10 border border-error/10 transition-all duration-500 group overflow-hidden relative shadow-sm mt-2`}
             >
               <div className="relative z-10">
-                <span className="font-black text-sm text-error/80 group-hover:text-error transition-colors tracking-widest uppercase flex items-center gap-2">
-                  <LogOut size={16} /> Logout
+                <span className={`font-black text-sm text-error/80 group-hover:text-error transition-colors tracking-widest uppercase flex items-center gap-2 ${isSidebarCollapsed ? 'justify-center' : ''}`}>
+                  <LogOut size={16} /> {!isSidebarCollapsed && "Logout"}
                 </span>
               </div>
-              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-1000 ease-in-out"></div>
             </div>
           </SidebarSection>
         </div>
@@ -1373,6 +1387,24 @@ const SubAdminDashboard = () => {
         <SessionsModal 
           isOpen={showSessionsModal}
           onClose={() => setShowSessionsModal(false)}
+        />
+
+        <NotificationSettingsModal 
+          isOpen={showNotificationSettingsModal}
+          onClose={() => setShowNotificationSettingsModal(false)}
+          onSave={() => {
+            addNotification({ title: 'Alerts Updated', message: 'Your notification preferences have been synced.', type: 'success' });
+            setShowNotificationSettingsModal(false);
+          }}
+        />
+
+        <AppearanceSettingsModal 
+          isOpen={showAppearanceSettingsModal}
+          onClose={() => setShowAppearanceSettingsModal(false)}
+          onSave={() => {
+            addNotification({ title: 'Appearance Saved', message: 'System theme and colors have been updated.', type: 'info' });
+            setShowAppearanceSettingsModal(false);
+          }}
         />
       </main>
     </div>
@@ -1669,36 +1701,37 @@ const EscalateUserModal = ({ isOpen, onClose, user, reason, setReason, notes, se
 };
 
 
-const SidebarSection = ({ title, children }) => (
-  <div className="mb-6 last:mb-0">
-    <p className="text-[10px] font-black text-text-secondary-light dark:text-text-secondary-dark/40 tracking-[0.2em] px-3 mb-2 uppercase">
-      {title}
-    </p>
+const SidebarSection = ({ title, children, collapsed }) => (
+  <div className="mb-6">
+    {title && <h5 className={`text-[10px] font-black text-text-secondary-light dark:text-text-secondary-dark mb-3 uppercase tracking-[0.2em] ml-2 ${collapsed ? 'text-center ml-0' : ''}`}>{title}</h5>}
     <div className="space-y-1">
       {children}
     </div>
   </div>
 );
 
-const SidebarLink = ({ icon, label, active, onClick, badge }) => (
+const SidebarLink = ({ icon, label, active, onClick, collapsed }) => (
   <div 
     onClick={onClick}
-    className={`flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all duration-300 group ${
-      active 
-        ? 'bg-primary-light/10 text-primary-light border border-primary-light/20 shadow-sm' 
-        : 'text-text-secondary-light dark:text-text-secondary-dark hover:bg-gray-100 dark:hover:bg-secondary-dark hover:translate-x-1'
-    }`}
+    className={`
+      flex items-center gap-3 px-4 py-3.5 rounded-2xl cursor-pointer transition-all duration-300 group relative
+      ${active 
+        ? 'bg-primary-light text-white shadow-lg shadow-primary-light/20 scale-[1.02]' 
+        : 'text-text-secondary-light hover:bg-gray-100 dark:hover:bg-secondary-dark hover:text-primary-light dark:hover:text-primary-light'
+      }
+      ${collapsed ? 'justify-center px-0 w-12 mx-auto' : ''}
+    `}
   >
-    <div className="flex items-center gap-3">
-      <div className={`transition-transform duration-300 ${active ? 'scale-110' : 'group-hover:scale-110'}`}>
-        {icon}
-      </div>
-      <span className={`text-sm font-bold tracking-tight ${active ? 'opacity-100' : 'opacity-80 group-hover:opacity-100'}`}>
-        {label}
-      </span>
+    <div className={`transition-transform duration-300 ${active ? 'scale-110' : 'group-hover:scale-110'}`}>
+      {icon}
     </div>
-    {badge && (
-      <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-black ${
+    {!collapsed && <span className="text-sm font-bold tracking-tight">{label}</span>}
+    {active && !collapsed && (
+      <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-white animate-pulse"></div>
+    )}
+    {collapsed && (
+      <div className="absolute left-full ml-4 px-2 py-1 bg-gray-900 text-white text-[10px] font-black rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
+        {label}
         active ? 'bg-primary-light text-white' : 'bg-gray-100 dark:bg-secondary-dark text-text-secondary-light'
       }`}>
         {badge}
@@ -1932,6 +1965,82 @@ const SessionsModal = ({ isOpen, onClose }) => {
             </div>
           ))}
           <button className="w-full py-4 mt-4 bg-error/10 text-error rounded-2xl font-black text-sm hover:bg-error hover:text-white transition-all">Sign out from all other devices</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+const NotificationSettingsModal = ({ isOpen, onClose, onSave }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
+      <div className="relative w-full max-w-md bg-surface-light dark:bg-surface-dark rounded-[32px] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="p-8 border-b dark:border-border-dark flex justify-between items-center bg-blue-500 text-white">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center"><BellRing size={24}/></div>
+            <h3 className="text-xl font-black">Notification Alerts</h3>
+          </div>
+          <button onClick={onClose} className="p-3 hover:bg-white/10 rounded-2xl transition-all"><X size={24}/></button>
+        </div>
+        <div className="p-8 space-y-6">
+          {['Task Reminders', 'Agent Activity Alerts', 'Weekly Territory Digest', 'System Updates'].map(label => (
+            <div key={label} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl">
+              <span className="text-sm font-bold dark:text-white">{label}</span>
+              <div className="w-12 h-6 bg-blue-500 rounded-full relative cursor-pointer">
+                <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+              </div>
+            </div>
+          ))}
+          <button onClick={onSave} className="w-full py-4 bg-blue-500 text-white rounded-2xl font-black text-sm shadow-xl shadow-blue-500/20 hover:scale-[1.02] transition-all">Save Preferences</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const AppearanceSettingsModal = ({ isOpen, onClose, onSave }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
+      <div className="relative w-full max-w-md bg-surface-light dark:bg-surface-dark rounded-[32px] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="p-8 border-b dark:border-border-dark flex justify-between items-center bg-primary-light text-white">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center"><Palette size={24}/></div>
+            <h3 className="text-xl font-black">System Appearance</h3>
+          </div>
+          <button onClick={onClose} className="p-3 hover:bg-white/10 rounded-2xl transition-all"><X size={24}/></button>
+        </div>
+        <div className="p-8 space-y-6">
+          <div className="space-y-4">
+            <label className="text-[10px] font-black uppercase text-text-secondary-light tracking-widest">Primary Brand Color</label>
+            <div className="grid grid-cols-4 gap-3">
+              {['bg-emerald-500', 'bg-blue-500', 'bg-primary-light', 'bg-purple-500'].map(c => (
+                <div key={c} className={`h-12 rounded-2xl ${c} cursor-pointer hover:scale-110 transition-transform border-4 border-transparent hover:border-white/20`}></div>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-4">
+            <label className="text-[10px] font-black uppercase text-text-secondary-light tracking-widest">Sidebar Style</label>
+            <div className="grid grid-cols-2 gap-3">
+              <div 
+                onClick={() => setIsSidebarCollapsed(false)}
+                className={`p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border-2 transition-all cursor-pointer ${!isSidebarCollapsed ? 'border-primary-light shadow-lg' : 'border-transparent'}`}
+              >
+                <span className="text-xs font-black dark:text-white">Full Navigation</span>
+              </div>
+              <div 
+                onClick={() => setIsSidebarCollapsed(true)}
+                className={`p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border-2 transition-all cursor-pointer ${isSidebarCollapsed ? 'border-primary-light shadow-lg' : 'border-transparent'}`}
+              >
+                <span className="text-xs font-black dark:text-white">Compact View</span>
+              </div>
+            </div>
+          </div>
+          <button onClick={onSave} className="w-full py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] transition-all">Apply Aesthetics</button>
         </div>
       </div>
     </div>
