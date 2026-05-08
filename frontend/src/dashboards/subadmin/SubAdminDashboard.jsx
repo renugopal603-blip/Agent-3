@@ -55,6 +55,26 @@ const SubAdminDashboard = () => {
   const [selectedReport, setSelectedReport] = useState(null);
   const [savingProfile, setSavingProfile] = useState(false);
 
+  const handleSettingAction = (item) => {
+    switch(item) {
+      case 'Change Password':
+        addNotification({ title: 'Security Protocol', message: 'A password reset link has been sent to your registered email.', type: 'info' });
+        break;
+      case 'Two-Factor Authentication':
+        addNotification({ title: '2FA Enabled', message: 'Two-factor authentication has been successfully configured.', type: 'success' });
+        break;
+      case 'Active Sessions':
+        addNotification({ title: 'Sessions Reviewed', message: 'Current sessions are secure across 3 devices.', type: 'info' });
+        break;
+      case 'Dark Mode Toggle':
+        toggleTheme();
+        addNotification({ title: 'Theme Updated', message: `Switched to ${isDarkMode ? 'Light' : 'Dark'} mode.`, type: 'info' });
+        break;
+      default:
+        addNotification({ title: 'Setting Updated', message: `${item} preference has been saved.`, type: 'success' });
+    }
+  };
+
   const handleDownload = (docName) => {
     addNotification({ title: 'Download Started', message: `Preparing ${docName} for secure download...`, type: 'info' });
     setTimeout(() => {
@@ -539,7 +559,11 @@ const SubAdminDashboard = () => {
                       <p className="text-xs text-text-secondary-light mt-0.5">{group.desc}</p>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
                         {group.items.map(item => (
-                          <div key={item} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-secondary-dark/50 rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-secondary-dark transition-all group">
+                          <div 
+                            key={item} 
+                            onClick={() => handleSettingAction(item)}
+                            className="flex items-center justify-between p-3 bg-gray-50 dark:bg-secondary-dark/50 rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-secondary-dark transition-all group active:scale-[0.98]"
+                          >
                             <span className="text-sm dark:text-white font-medium">{item}</span>
                             <ChevronRight size={14} className="text-text-secondary-light group-hover:translate-x-1 transition-transform" />
                           </div>
