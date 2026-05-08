@@ -8,8 +8,8 @@ import {
   LayoutDashboard, Map, Settings, Bell,
   CheckSquare, CheckCircle, FileText, BarChart2,
   Clock, LogOut, Briefcase, LifeBuoy, Sun, Moon, User,
-  Lock, BellRing, Palette, ChevronRight, Download, Gift, Trophy, Zap, Filter, Trash2,
-  Key, History, X, Edit, Eye, XCircle, Phone, Mail, MapPin, Plus, Send
+  Lock, BellRing, Palette, ChevronRight, Download, Gift, Trophy, Zap, Filter,
+  Key, History, X, Edit, Eye, XCircle, Phone, Mail, MapPin, Plus, Send, Trash2
 } from 'lucide-react';
 
 import { useNotifications } from '../../context/NotificationContext';
@@ -60,6 +60,14 @@ const SubAdminDashboard = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showNotificationSettingsModal, setShowNotificationSettingsModal] = useState(false);
   const [showAppearanceSettingsModal, setShowAppearanceSettingsModal] = useState(false);
+  const [supportTickets, setSupportTickets] = useState([
+    { id: 'TKT-4821', subject: 'Agent unable to login', by: 'Amit Singh', priority: 'High', status: 'Open', time: '10 min ago' },
+    { id: 'TKT-4820', subject: 'Shop KYC document rejected incorrectly', by: 'Fresh Mart', priority: 'High', status: 'In Progress', time: '1h ago' },
+    { id: 'TKT-4818', subject: 'Commission not credited for May', by: 'Priya Verma', priority: 'Medium', status: 'Open', time: '3h ago' },
+    { id: 'TKT-4815', subject: 'App crash on data submission', by: 'Rahul Dev', priority: 'Low', status: 'In Progress', time: 'Yesterday' },
+    { id: 'TKT-4810', subject: 'Wrong area assigned to agent', by: 'Sneha Patel', priority: 'Medium', status: 'Resolved', time: '2 days ago' },
+    { id: 'TKT-4805', subject: 'Referral bonus not reflecting', by: 'Vikram Kumar', priority: 'Low', status: 'Resolved', time: '3 days ago' },
+  ]);
 
   const handleDownload = (docName) => {
     addNotification({ title: 'Download Started', message: `Preparing ${docName} for secure download...`, type: 'info' });
@@ -236,42 +244,29 @@ const SubAdminDashboard = () => {
                     <th className="pb-4 font-bold">Role</th>
                     <th className="pb-4 font-bold">Territory</th>
                     <th className="pb-4 font-bold">Status</th>
-                    <th className="pb-4 font-bold text-right">Actions</th>
+                    <th className="pb-4 font-bold text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border-light dark:divide-border-dark">
-                  {[
-                    { name: 'Amit Singh', role: 'District Agent', territory: 'Pune South', status: 'Active' },
-                    { name: 'Priya Verma', role: 'Pincode Agent', territory: '411001', status: 'Active' },
-                    { name: 'Rahul Dev', role: 'Divisional Agent', territory: 'Mumbai', status: 'Inactive' },
-                  ].map((a, i) => (
+                  {systemUsers.filter(u => u.role === 'Agent').map((a, i) => (
                     <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50">
                       <td className="py-4 font-bold dark:text-white flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-primary-light/20 flex items-center justify-center text-primary-light text-xs">{a.name[0]}</div>
                         {a.name}
                       </td>
                       <td className="py-4 text-sm text-text-secondary-light">{a.role}</td>
-                      <td className="py-4 text-sm text-text-secondary-light">{a.territory}</td>
+                      <td className="py-4 text-sm text-text-secondary-light">{a.territory || a.location}</td>
                       <td className="py-4"><span className={`px-2 py-1 text-[10px] rounded-lg font-bold uppercase ${a.status === 'Active' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}`}>{a.status}</span></td>
                       <td className="py-4 text-right">
-                        <div className="flex justify-end gap-2">
-                          <button 
-                            onClick={() => addNotification({ title: 'Edit Agent', message: `Opening profile for ${a.name}...`, type: 'info' })}
-                            className="p-2 bg-gray-50 dark:bg-secondary-dark rounded-xl hover:bg-primary-light hover:text-white transition-all shadow-sm"
-                          >
-                            <Edit size={14} />
-                          </button>
-                          <button 
-                            onClick={() => {
-                              if(window.confirm(`Are you sure you want to remove ${a.name} from your territory?`)) {
-                                addNotification({ title: 'Agent Removed', message: `${a.name} has been detached from your management.`, type: 'success' });
-                              }
-                            }}
-                            className="p-2 bg-error/5 text-error rounded-xl hover:bg-error hover:text-white transition-all shadow-sm"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
+                        <button 
+                          onClick={() => {
+                            setSystemUsers(systemUsers.filter(u => u.id !== a.id));
+                            addNotification({ title: 'Agent Removed', message: `${a.name} has been removed from your territory.`, type: 'error' });
+                          }}
+                          className="p-2 text-text-secondary-light hover:text-error transition-colors"
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -376,6 +371,15 @@ const SubAdminDashboard = () => {
                               className="p-2 bg-gray-100 dark:bg-secondary-dark rounded-xl hover:bg-primary-light hover:text-white transition-all"
                             >
                               <Eye size={16} />
+                            </button>
+                            <button 
+                              onClick={() => {
+                                setVerifyShops(verifyShops.filter(item => item.id !== s.id));
+                                addNotification({ title: 'Record Deleted', message: `Shop request for ${s.name} has been removed.`, type: 'error' });
+                              }}
+                              className="p-2 bg-error/5 text-error/60 rounded-xl hover:bg-error hover:text-white transition-all"
+                            >
+                              <Trash2 size={16} />
                             </button>
                             <span className="text-xs font-bold text-text-secondary-light italic bg-gray-50 dark:bg-secondary-dark/50 px-3 py-2 rounded-xl flex items-center">
                               {s.status === 'Verified' ? 'Waiting for Admin' : 'Action Taken'}
@@ -1100,9 +1104,20 @@ const SubAdminDashboard = () => {
                       </td>
                       <td className="p-4 text-xs text-text-secondary-light font-medium">{ticket.time}</td>
                       <td className="p-4 text-right">
-                        <button className="text-[10px] font-black text-primary-light px-3 py-1.5 bg-primary-light/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary-light hover:text-white">
-                          View →
-                        </button>
+                        <div className="flex justify-end gap-2">
+                          <button className="p-2 bg-gray-100 dark:bg-secondary-dark rounded-xl hover:bg-primary-light hover:text-white transition-all">
+                            <Eye size={14} />
+                          </button>
+                          <button 
+                            onClick={() => {
+                              setSupportTickets(supportTickets.filter(t => t.id !== ticket.id));
+                              addNotification({ title: 'Ticket Deleted', message: `Support ticket ${ticket.id} has been removed.`, type: 'error' });
+                            }}
+                            className="p-2 bg-error/5 text-error/60 rounded-xl hover:bg-error hover:text-white transition-all"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
