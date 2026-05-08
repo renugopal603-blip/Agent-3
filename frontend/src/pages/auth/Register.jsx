@@ -16,9 +16,9 @@ const Register = () => {
     phone: '',
     password: '',
     role: 'Agent',
-    agentType: 'Pincode Agent',
-    businessCategory: 'Service-Based',
-    businessType: 'Hospital',
+    agentType: '',
+    businessCategory: '',
+    businessType: '',
     territory: {
       state: '',
       district: '',
@@ -26,7 +26,7 @@ const Register = () => {
       pincode: ''
     },
     kycDocuments: {
-      identityProofType: 'Aadhaar Card',
+      identityProofType: '',
       aadharFront: null,
       panCard: null,
       photo: null,
@@ -39,7 +39,7 @@ const Register = () => {
       accountNumber: '',
       bankName: '',
       ifscCode: '',
-      upiApp: 'Google Pay',
+      upiApp: '',
       upiId: ''
     },
     paymentDetails: {
@@ -396,7 +396,8 @@ const Register = () => {
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <label className="text-xs font-black uppercase tracking-widest text-text-secondary-light">Agent Type</label>
-                    <select name="agentType" value={formData.agentType} onChange={handleInputChange} className="input-field">
+                    <select name="agentType" value={formData.agentType} onChange={handleInputChange} className="input-field" required>
+                      <option value="" disabled>Select Agent Type</option>
                       <option>State Agent</option>
                       <option>District Agent</option>
                       <option>Divisional Agent</option>
@@ -407,7 +408,8 @@ const Register = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label className="text-xs font-black uppercase tracking-widest text-text-secondary-light">Business Focus</label>
-                      <select name="businessCategory" value={formData.businessCategory} onChange={handleInputChange} className="input-field">
+                      <select name="businessCategory" value={formData.businessCategory} onChange={handleInputChange} className="input-field" required>
+                        <option value="" disabled>Select Focus</option>
                         <option>Service-Based</option>
                         <option>Product-Based</option>
                       </select>
@@ -415,7 +417,8 @@ const Register = () => {
 
                     <div className="space-y-2">
                       <label className="text-xs font-black uppercase tracking-widest text-text-secondary-light">Business Type</label>
-                      <select name="businessType" value={formData.businessType} onChange={handleInputChange} className="input-field">
+                      <select name="businessType" value={formData.businessType} onChange={handleInputChange} className="input-field" required>
+                        <option value="" disabled>Select Type</option>
                         <optgroup label="Healthcare">
                           <option value="Hospital">🏥 Hospital</option>
                           <option value="Clinic">🩺 Clinic</option>
@@ -507,7 +510,8 @@ const Register = () => {
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <label className="text-xs font-black uppercase tracking-widest text-text-secondary-light">Identity Proof Type</label>
-                    <select name="kycDocuments.identityProofType" value={formData.kycDocuments.identityProofType} onChange={handleInputChange} className="input-field">
+                    <select name="kycDocuments.identityProofType" value={formData.kycDocuments.identityProofType} onChange={handleInputChange} className="input-field" required>
+                      <option value="" disabled>Select Identity Proof</option>
                       <option>Aadhaar Card</option>
                       <option>PAN Card</option>
                       <option>Voter ID</option>
@@ -592,6 +596,7 @@ const Register = () => {
                         <h4 className="font-bold dark:text-white text-xs uppercase tracking-widest text-primary-light">OR UPI Details</h4>
                         <div className="grid grid-cols-1 gap-4">
                           <select name="bankDetails.upiApp" value={formData.bankDetails.upiApp} onChange={handleInputChange} className="input-field">
+                            <option value="" disabled>Select UPI App</option>
                             <option>Google Pay</option>
                             <option>PhonePe</option>
                             <option>Paytm</option>
