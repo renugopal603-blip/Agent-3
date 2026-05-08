@@ -1151,62 +1151,7 @@ const AgentDashboard = () => {
           </div>
         );
 
-      case 'Leads / Orders':
-        return (
-          <div className="p-8 space-y-8 animate-in slide-in-from-bottom-4 duration-500">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-2xl font-bold dark:text-white">Order Tracking</h3>
-                <p className="text-sm text-text-secondary-light">Monitoring sales across your partner shops.</p>
-              </div>
-              <div className="flex gap-2">
-                <button className="btn-outline px-4 py-2 text-sm flex items-center gap-2"><Search size={18} /> Search</button>
-                <button className="btn-outline px-4 py-2 text-sm flex items-center gap-2"><Filter size={18} /> Filter</button>
-              </div>
-            </div>
 
-            <div className="card-premium">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="text-left border-b border-border-light dark:border-border-dark">
-                      <th className="pb-4 font-bold dark:text-white">Order ID</th>
-                      <th className="pb-4 font-bold dark:text-white">Customer</th>
-                      <th className="pb-4 font-bold dark:text-white">Shop</th>
-                      <th className="pb-4 font-bold dark:text-white">Amount</th>
-                      <th className="pb-4 font-bold dark:text-white">Commission</th>
-                      <th className="pb-4 font-bold dark:text-white">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border-light dark:divide-border-dark">
-                    {[
-                      { id: '#ORD-9901', customer: 'Rohan S.', shop: 'Fresh Mart', amount: '₹1,250', comm: '₹62.50', status: 'Delivered' },
-                      { id: '#ORD-9905', customer: 'Priya K.', shop: 'Electro World', amount: '₹45,000', comm: '₹2,250.00', status: 'Processing' },
-                      { id: '#ORD-9912', customer: 'Vijay M.', shop: 'Gourmet Kitchen', amount: '₹2,800', comm: '₹140.00', status: 'Shipped' },
-                      { id: '#ORD-9918', customer: 'Anjali G.', shop: 'Fresh Mart', amount: '₹950', comm: '₹47.50', status: 'Pending' },
-                      { id: '#ORD-9922', customer: 'Suresh R.', shop: 'Style Studio', amount: '₹3,400', comm: '₹170.00', status: 'Delivered' },
-                    ].map((order) => (
-                      <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50 transition-colors">
-                        <td className="py-4 font-bold text-primary-light text-sm">{order.id}</td>
-                        <td className="py-4 dark:text-white text-sm font-medium">{order.customer}</td>
-                        <td className="py-4 text-text-secondary-light text-sm">{order.shop}</td>
-                        <td className="py-4 font-bold dark:text-white text-sm">{order.amount}</td>
-                        <td className="py-4 font-bold text-emerald-500 text-sm">{order.comm}</td>
-                        <td className="py-4">
-                          <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${
-                            order.status === 'Delivered' ? 'bg-success/10 text-success' : 
-                            order.status === 'Processing' ? 'bg-blue-500/10 text-blue-500' : 
-                            order.status === 'Shipped' ? 'bg-purple-500/10 text-purple-500' : 'bg-warning/10 text-warning'
-                          }`}>{order.status}</span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        );
 
       case 'Membership Sales':
         return (
@@ -2264,7 +2209,7 @@ const AgentDashboard = () => {
 
           <SidebarSection title="BUSINESS">
             <SidebarLink icon={<Target size={18} />} label="Sales Targets" active={activeTab === 'Sales Targets'} onClick={() => setActiveTab('Sales Targets')} />
-            <SidebarLink icon={<ShoppingBag size={18} />} label="Leads / Orders" active={activeTab === 'Leads / Orders'} onClick={() => setActiveTab('Leads / Orders')} />
+
           </SidebarSection>
 
           <SidebarSection title="EARNINGS">
