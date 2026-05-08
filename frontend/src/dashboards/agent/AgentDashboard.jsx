@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -49,14 +49,22 @@ const AgentDashboard = () => {
     { id: 3, name: 'Amit Singh', role: 'Agent', location: 'Nashik', status: 'Pending', joined: '2026-05-01' },
     { id: 4, name: 'Sneha Patel', role: 'Agent', location: 'Pune', status: 'Active', joined: '2026-03-10' },
   ]);
-  const [shops, setShops] = useState([
-    { id: 1, name: 'Fresh Mart Grocery', category: 'Grocery', owner: 'Ramesh K.', sales: '₹1.2L', status: 'Active', rating: '4.8' },
-    { id: 2, name: 'Electro World', category: 'Electronics', owner: 'Vijay M.', sales: '₹4.5L', status: 'Active', rating: '4.5' },
-    { id: 3, name: 'Style Studio', category: 'Fashion', owner: 'Anjali S.', sales: '₹85K', status: 'Pending', rating: 'N/A' },
-    { id: 4, name: 'Gourmet Kitchen', category: 'Restaurant', owner: 'Suresh R.', sales: '₹2.1L', status: 'Active', rating: '4.9' },
-    { id: 5, name: 'Comfort Beds', category: 'Furniture', owner: 'Vikram B.', sales: '₹1.8L', status: 'Inactive', rating: '4.2' },
-    { id: 6, name: 'City Inn Hotel', category: 'Hotel', owner: 'Priya X.', sales: '₹6.2L', status: 'Active', rating: '4.7' },
-  ]);
+  const [shops, setShops] = useState(() => {
+    const saved = localStorage.getItem('agentShops');
+    if (saved) return JSON.parse(saved);
+    return [
+      { id: 1, name: 'Fresh Mart Grocery', category: 'Grocery', owner: 'Ramesh K.', sales: '₹1.2L', status: 'Active', rating: '4.8', date: 'May 01, 2026' },
+      { id: 2, name: 'Electro World', category: 'Electronics', owner: 'Vijay M.', sales: '₹4.5L', status: 'Active', rating: '4.5', date: 'May 02, 2026' },
+      { id: 3, name: 'Style Studio', category: 'Fashion', owner: 'Anjali S.', sales: '₹85K', status: 'Pending Admin', rating: 'N/A', date: 'May 03, 2026' },
+      { id: 4, name: 'Raj Electronics', category: 'Electronics', owner: 'Rajesh P.', sales: '₹0', status: 'Pending Review', rating: 'N/A', date: 'May 04, 2026' },
+      { id: 5, name: 'Gourmet Kitchen', category: 'Restaurant', owner: 'Suresh R.', sales: '₹2.1L', status: 'Active', rating: '4.9', date: 'May 05, 2026' },
+      { id: 6, name: 'City Inn Hotel', category: 'Hotel', owner: 'Priya X.', sales: '₹6.2L', status: 'Active', rating: '4.7', date: 'May 06, 2026' },
+    ];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('agentShops', JSON.stringify(shops));
+  }, [shops]);
 
   const handleDeleteShop = (id) => {
     if (window.confirm('Are you sure you want to remove this shop onboarding?')) {
@@ -746,69 +754,76 @@ const AgentDashboard = () => {
                 <p className="text-xs text-text-secondary-light">Track the approval workflow of your recently added shops.</p>
                 
                 <div className="space-y-4 mt-6">
-                  {/* Shop 1: Approved */}
-                  <div className="p-4 bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-sm">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h4 className="font-bold dark:text-white">Fresh Mart Grocery</h4>
-                        <p className="text-[10px] text-text-secondary-light">Submitted on May 01, 2026</p>
-                      </div>
-                      <span className="px-2 py-1 bg-success/10 text-success text-[10px] font-bold rounded-md">Shop Active</span>
-                    </div>
-                    <div className="flex items-center gap-1 w-full justify-between relative before:absolute before:top-1/2 before:-translate-y-1/2 before:w-full before:h-0.5 before:bg-success/30">
-                      <div className="w-3 h-3 rounded-full bg-success ring-4 ring-white dark:ring-surface-dark relative z-10" title="Upload Details"></div>
-                      <div className="w-3 h-3 rounded-full bg-success ring-4 ring-white dark:ring-surface-dark relative z-10" title="Sub Admin Review"></div>
-                      <div className="w-3 h-3 rounded-full bg-success ring-4 ring-white dark:ring-surface-dark relative z-10" title="Admin Approval"></div>
-                    </div>
-                    <div className="flex justify-between text-[8px] font-bold text-text-secondary-light uppercase mt-2">
-                      <span>Submitted</span>
-                      <span className="text-center">Sub Admin Verified</span>
-                      <span className="text-right">Admin Approved</span>
-                    </div>
-                  </div>
+                  {shops.slice().reverse().map((shop) => {
+                    const isActive = shop.status === 'Active' || shop.status === 'Shop Active';
+                    const isPendingAdmin = shop.status === 'Pending Admin';
+                    const isPendingReview = shop.status === 'Pending Review' || shop.status === 'Pending';
+                    
+                    let statusColor = 'bg-warning text-warning';
+                    let progressWidth = '0%';
+                    let progressBarColor = 'bg-gray-200 dark:bg-gray-700';
+                    let statusText = 'Pending Review';
 
-                  {/* Shop 2: Sub Admin Verified */}
-                  <div className="p-4 bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-sm">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h4 className="font-bold dark:text-white">Style Studio</h4>
-                        <p className="text-[10px] text-text-secondary-light">Submitted on May 03, 2026</p>
-                      </div>
-                      <span className="px-2 py-1 bg-blue-500/10 text-blue-500 text-[10px] font-bold rounded-md">Pending Admin</span>
-                    </div>
-                    <div className="flex items-center gap-1 w-full justify-between relative before:absolute before:top-1/2 before:-translate-y-1/2 before:w-full before:h-0.5 before:bg-gray-200 dark:before:bg-gray-700">
-                      <div className="absolute top-1/2 -translate-y-1/2 h-0.5 bg-blue-500 w-1/2"></div>
-                      <div className="w-3 h-3 rounded-full bg-blue-500 ring-4 ring-white dark:ring-surface-dark relative z-10" title="Upload Details"></div>
-                      <div className="w-3 h-3 rounded-full bg-blue-500 ring-4 ring-white dark:ring-surface-dark relative z-10" title="Sub Admin Review"></div>
-                      <div className="w-3 h-3 rounded-full bg-gray-300 dark:bg-gray-600 ring-4 ring-white dark:ring-surface-dark relative z-10" title="Admin Approval"></div>
-                    </div>
-                    <div className="flex justify-between text-[8px] font-bold text-text-secondary-light uppercase mt-2">
-                      <span className="text-blue-500">Submitted</span>
-                      <span className="text-center text-blue-500">Sub Admin Verified</span>
-                      <span className="text-right">Admin Pending</span>
-                    </div>
-                  </div>
+                    if (isActive) {
+                      statusColor = 'bg-success/10 text-success';
+                      progressWidth = '100%';
+                      progressBarColor = 'bg-success';
+                      statusText = 'Shop Active';
+                    } else if (isPendingAdmin) {
+                      statusColor = 'bg-blue-500/10 text-blue-500';
+                      progressWidth = '50%';
+                      progressBarColor = 'bg-blue-500';
+                      statusText = 'Pending Admin';
+                    } else {
+                      statusColor = 'bg-warning/10 text-warning';
+                      progressWidth = '0%';
+                      progressBarColor = 'bg-warning';
+                      statusText = 'Pending Review';
+                    }
 
-                  {/* Shop 3: Pending Sub Admin */}
-                  <div className="p-4 bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-sm">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h4 className="font-bold dark:text-white">Raj Electronics</h4>
-                        <p className="text-[10px] text-text-secondary-light">Submitted on May 04, 2026</p>
+                    return (
+                      <div key={shop.id} className="p-4 bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-sm animate-in slide-in-from-right duration-500">
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <h4 className="font-bold dark:text-white">{shop.name}</h4>
+                            <p className="text-[10px] text-text-secondary-light">Submitted on {shop.date || 'Today'}</p>
+                          </div>
+                          <span className={`px-2 py-1 ${statusColor} text-[10px] font-bold rounded-md uppercase tracking-wider`}>
+                            {statusText}
+                          </span>
+                        </div>
+                        
+                        <div className="flex items-center gap-1 w-full justify-between relative before:absolute before:top-1/2 before:-translate-y-1/2 before:w-full before:h-0.5 before:bg-gray-200 dark:before:bg-gray-700">
+                          <div className={`absolute top-1/2 -translate-y-1/2 h-0.5 ${progressBarColor} transition-all duration-1000`} style={{ width: progressWidth }}></div>
+                          
+                          {/* Dot 1: Submitted */}
+                          <div className={`w-3.5 h-3.5 rounded-full ring-4 ring-white dark:ring-surface-dark relative z-10 transition-colors duration-500 ${
+                            isActive || isPendingAdmin || isPendingReview ? progressBarColor : 'bg-gray-300 dark:bg-gray-600'
+                          }`} title="Submitted"></div>
+                          
+                          {/* Dot 2: Sub Admin Review */}
+                          <div className={`w-3.5 h-3.5 rounded-full ring-4 ring-white dark:ring-surface-dark relative z-10 transition-colors duration-500 ${
+                            isActive || isPendingAdmin ? progressBarColor : 'bg-gray-300 dark:bg-gray-600'
+                          }`} title="Sub Admin Review"></div>
+                          
+                          {/* Dot 3: Admin Approval */}
+                          <div className={`w-3.5 h-3.5 rounded-full ring-4 ring-white dark:ring-surface-dark relative z-10 transition-colors duration-500 ${
+                            isActive ? progressBarColor : 'bg-gray-300 dark:bg-gray-600'
+                          }`} title="Admin Approval"></div>
+                        </div>
+
+                        <div className="flex justify-between text-[8px] font-black text-text-secondary-light uppercase mt-2 tracking-widest">
+                          <span className={isActive || isPendingAdmin || isPendingReview ? (isActive ? 'text-success' : isPendingAdmin ? 'text-blue-500' : 'text-warning') : ''}>Submitted</span>
+                          <span className={`text-center ${isActive || isPendingAdmin ? (isActive ? 'text-success' : 'text-blue-500') : ''}`}>
+                            {isActive || isPendingAdmin ? 'Sub Admin Verified' : 'Sub Admin Pending'}
+                          </span>
+                          <span className={`text-right ${isActive ? 'text-success' : ''}`}>
+                            {isActive ? 'Admin Approved' : 'Admin Pending'}
+                          </span>
+                        </div>
                       </div>
-                      <span className="px-2 py-1 bg-warning/10 text-warning text-[10px] font-bold rounded-md">Pending Review</span>
-                    </div>
-                    <div className="flex items-center gap-1 w-full justify-between relative before:absolute before:top-1/2 before:-translate-y-1/2 before:w-full before:h-0.5 before:bg-gray-200 dark:before:bg-gray-700">
-                      <div className="w-3 h-3 rounded-full bg-warning ring-4 ring-white dark:ring-surface-dark relative z-10" title="Upload Details"></div>
-                      <div className="w-3 h-3 rounded-full bg-gray-300 dark:bg-gray-600 ring-4 ring-white dark:ring-surface-dark relative z-10" title="Sub Admin Review"></div>
-                      <div className="w-3 h-3 rounded-full bg-gray-300 dark:bg-gray-600 ring-4 ring-white dark:ring-surface-dark relative z-10" title="Admin Approval"></div>
-                    </div>
-                    <div className="flex justify-between text-[8px] font-bold text-text-secondary-light uppercase mt-2">
-                      <span className="text-warning">Submitted</span>
-                      <span className="text-center">Sub Admin Pending</span>
-                      <span className="text-right">Admin Pending</span>
-                    </div>
-                  </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -2305,7 +2320,17 @@ const AgentDashboard = () => {
               <button 
                 onClick={() => {
                   const newId = shops.length + 1;
-                  setShops([...shops, { id: newId, name: shopForm.name, category: shopForm.category, owner: shopForm.owner, sales: '₹0', status: 'Pending', rating: 'N/A' }]);
+                  const newShop = { 
+                    id: newId, 
+                    name: shopForm.name, 
+                    category: shopForm.category, 
+                    owner: shopForm.owner, 
+                    sales: '₹0', 
+                    status: 'Pending Review', 
+                    rating: 'N/A',
+                    date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: '2026' })
+                  };
+                  setShops([...shops, newShop]);
                   setShowShopModal(false);
                   addNotification({ title: 'Shop Added', message: `${shopForm.name} registration is pending approval.`, type: 'success' });
                 }}
