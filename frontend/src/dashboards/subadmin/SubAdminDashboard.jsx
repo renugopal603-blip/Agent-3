@@ -53,6 +53,7 @@ const SubAdminDashboard = () => {
   const [showTicketModal, setShowTicketModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
+  const [savingProfile, setSavingProfile] = useState(false);
 
   const handleDownload = (docName) => {
     addNotification({ title: 'Download Started', message: `Preparing ${docName} for secure download...`, type: 'info' });
@@ -580,7 +581,19 @@ const SubAdminDashboard = () => {
                   <input type="tel" defaultValue={user?.phone || "+91 8888888888"} className="w-full px-4 py-3 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl outline-none dark:text-white focus:border-primary-light" />
                 </div>
                 <div className="pt-4">
-                  <button className="btn-primary px-8 py-3 rounded-xl font-bold shadow-lg shadow-primary-light/20 hover:scale-[1.02] transition-transform">Save Changes</button>
+                  <button 
+                    onClick={() => {
+                      setSavingProfile(true);
+                      setTimeout(() => {
+                        setSavingProfile(false);
+                        addNotification({ title: 'Profile Updated', message: 'Your changes have been saved successfully.', type: 'success' });
+                      }, 1500);
+                    }}
+                    disabled={savingProfile}
+                    className={`btn-primary px-8 py-3 rounded-xl font-bold shadow-lg shadow-primary-light/20 transition-all ${savingProfile ? 'opacity-50 cursor-not-allowed scale-[0.98]' : 'hover:scale-[1.02] active:scale-[0.98]'}`}
+                  >
+                    {savingProfile ? 'Saving...' : 'Save Changes'}
+                  </button>
                 </div>
               </div>
             </div>
