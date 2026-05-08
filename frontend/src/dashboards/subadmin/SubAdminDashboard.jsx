@@ -54,26 +54,9 @@ const SubAdminDashboard = () => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
   const [savingProfile, setSavingProfile] = useState(false);
-
-  const handleSettingAction = (item) => {
-    switch(item) {
-      case 'Change Password':
-        addNotification({ title: 'Security Protocol', message: 'A password reset link has been sent to your registered email.', type: 'info' });
-        break;
-      case 'Two-Factor Authentication':
-        addNotification({ title: '2FA Enabled', message: 'Two-factor authentication has been successfully configured.', type: 'success' });
-        break;
-      case 'Active Sessions':
-        addNotification({ title: 'Sessions Reviewed', message: 'Current sessions are secure across 3 devices.', type: 'info' });
-        break;
-      case 'Dark Mode Toggle':
-        toggleTheme();
-        addNotification({ title: 'Theme Updated', message: `Switched to ${isDarkMode ? 'Light' : 'Dark'} mode.`, type: 'info' });
-        break;
-      default:
-        addNotification({ title: 'Setting Updated', message: `${item} preference has been saved.`, type: 'success' });
-    }
-  };
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [show2FAModal, setShow2FAModal] = useState(false);
+  const [showSessionsModal, setShowSessionsModal] = useState(false);
 
   const handleDownload = (docName) => {
     addNotification({ title: 'Download Started', message: `Preparing ${docName} for secure download...`, type: 'info' });
@@ -561,8 +544,13 @@ const SubAdminDashboard = () => {
                         {group.items.map(item => (
                           <div 
                             key={item} 
-                            onClick={() => handleSettingAction(item)}
-                            className="flex items-center justify-between p-3 bg-gray-50 dark:bg-secondary-dark/50 rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-secondary-dark transition-all group active:scale-[0.98]"
+                            onClick={() => {
+                              if (item === 'Change Password') setShowPasswordModal(true);
+                              if (item === 'Two-Factor Authentication') setShow2FAModal(true);
+                              if (item === 'Active Sessions') setShowSessionsModal(true);
+                              if (item === 'Dark Mode Toggle') toggleTheme();
+                            }}
+                            className="flex items-center justify-between p-3 bg-gray-50 dark:bg-secondary-dark/50 rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-secondary-dark transition-all group"
                           >
                             <span className="text-sm dark:text-white font-medium">{item}</span>
                             <ChevronRight size={14} className="text-text-secondary-light group-hover:translate-x-1 transition-transform" />
@@ -1363,6 +1351,29 @@ const SubAdminDashboard = () => {
           onClose={() => setShowReportModal(false)}
           reportTitle={selectedReport}
         />
+
+        <ChangePasswordModal 
+          isOpen={showPasswordModal}
+          onClose={() => setShowPasswordModal(false)}
+          onSuccess={() => {
+            addNotification({ title: 'Password Changed', message: 'Your security credentials have been updated.', type: 'success' });
+            setShowPasswordModal(false);
+          }}
+        />
+
+        <TwoFactorModal 
+          isOpen={show2FAModal}
+          onClose={() => setShow2FAModal(false)}
+          onUpdate={(enabled) => {
+            addNotification({ title: 'Security Updated', message: `Two-Factor Authentication is now ${enabled ? 'Enabled' : 'Disabled'}.`, type: 'info' });
+            setShow2FAModal(false);
+          }}
+        />
+
+        <SessionsModal 
+          isOpen={showSessionsModal}
+          onClose={() => setShowSessionsModal(false)}
+        />
       </main>
     </div>
   );
@@ -1813,6 +1824,114 @@ const ReportDetailsModal = ({ isOpen, onClose, reportTitle }) => {
 
         <div className="p-8 border-t dark:border-border-dark bg-gray-50/50 dark:bg-secondary-dark/30">
           <button onClick={onClose} className="w-full py-4 bg-emerald-500 text-white rounded-2xl font-black text-sm shadow-xl shadow-emerald-500/20 hover:scale-[1.02] transition-all">Close Report View</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+const ChangePasswordModal = ({ isOpen, onClose, onSuccess }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
+      <div className="relative w-full max-w-md bg-surface-light dark:bg-surface-dark rounded-[32px] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="p-8 border-b dark:border-border-dark flex justify-between items-center bg-primary-light text-white">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center"><Lock size={24}/></div>
+            <h3 className="text-xl font-black">Security Update</h3>
+          </div>
+          <button onClick={onClose} className="p-3 hover:bg-white/10 rounded-2xl transition-all"><X size={24}/></button>
+        </div>
+        <div className="p-8 space-y-6">
+          <div className="space-y-4">
+            {['Current Password', 'New Password', 'Confirm New Password'].map(label => (
+              <div key={label} className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-text-secondary-light">{label}</label>
+                <div className="relative">
+                  <input type="password" placeholder="••••••••" className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
+                  <Key className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary-light" size={18} />
+                </div>
+              </div>
+            ))}
+          </div>
+          <button onClick={onSuccess} className="w-full py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] transition-all">Update Credentials</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const TwoFactorModal = ({ isOpen, onClose, onUpdate }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
+      <div className="relative w-full max-w-md bg-surface-light dark:bg-surface-dark rounded-[32px] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="p-8 border-b dark:border-border-dark flex justify-between items-center bg-emerald-500 text-white">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center"><ShieldCheck size={24}/></div>
+            <h3 className="text-xl font-black">Two-Step Verification</h3>
+          </div>
+          <button onClick={onClose} className="p-3 hover:bg-white/10 rounded-2xl transition-all"><X size={24}/></button>
+        </div>
+        <div className="p-8 space-y-8">
+          <div className="flex items-center justify-between p-4 bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-500/20 rounded-2xl">
+            <div>
+              <p className="text-sm font-black dark:text-white">Authenticator App</p>
+              <p className="text-[10px] text-text-secondary-light font-bold">Use Google or Microsoft Authenticator</p>
+            </div>
+            <div className="w-12 h-6 bg-emerald-500 rounded-full relative cursor-pointer" onClick={() => onUpdate(false)}>
+              <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <p className="text-xs text-text-secondary-light leading-relaxed text-center font-medium">Protect your account with an extra layer of security. We will ask for a verification code when you login.</p>
+            <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-dashed border-border-light dark:border-border-dark text-center">
+              <span className="text-[10px] font-black text-primary-light uppercase tracking-widest cursor-pointer hover:underline">View Backup Codes</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const SessionsModal = ({ isOpen, onClose }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
+      <div className="relative w-full max-xl bg-surface-light dark:bg-surface-dark rounded-[32px] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="p-8 border-b dark:border-border-dark flex justify-between items-center bg-gray-100 dark:bg-secondary-dark">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-primary-light text-white rounded-2xl flex items-center justify-center shadow-lg"><Clock size={24}/></div>
+            <div>
+              <h3 className="text-xl font-black dark:text-white">Active Sessions</h3>
+              <p className="text-xs font-bold text-text-secondary-light uppercase">Devices currently logged in</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-3 hover:bg-gray-200 dark:hover:bg-white/10 rounded-2xl transition-all"><X size={24} className="dark:text-white"/></button>
+        </div>
+        <div className="p-8 space-y-4">
+          {[
+            { device: 'Windows PC · Chrome', location: 'Delhi, India (Current)', status: 'Online', icon: <History /> },
+            { device: 'iPhone 15 · Safari', location: 'Mumbai, India', status: '2h ago', icon: <History /> },
+            { device: 'macOS · Firefox', location: 'Pune, India', status: 'Yesterday', icon: <History /> },
+          ].map((s, i) => (
+            <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-secondary-dark/50 rounded-2xl border border-border-light dark:border-border-dark group">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-white dark:bg-surface-dark rounded-xl flex items-center justify-center text-text-secondary-light group-hover:text-primary-light transition-colors">{s.icon}</div>
+                <div>
+                  <p className="text-sm font-black dark:text-white">{s.device}</p>
+                  <p className="text-[10px] text-text-secondary-light font-bold uppercase">{s.location}</p>
+                </div>
+              </div>
+              <span className={`text-[10px] font-black uppercase tracking-widest ${s.status === 'Online' ? 'text-success' : 'text-text-secondary-light'}`}>{s.status}</span>
+            </div>
+          ))}
+          <button className="w-full py-4 mt-4 bg-error/10 text-error rounded-2xl font-black text-sm hover:bg-error hover:text-white transition-all">Sign out from all other devices</button>
         </div>
       </div>
     </div>
