@@ -1311,7 +1311,28 @@ const AgentDashboard = () => {
                 <h3 className="text-2xl font-bold dark:text-white">Commission Ledger</h3>
                 <p className="text-sm text-text-secondary-light">Detailed breakdown of all earnings.</p>
               </div>
-              <button className="btn-outline px-4 py-2 text-sm flex items-center gap-2"><Download size={18} /> Download Statement</button>
+              <button 
+                onClick={() => {
+                  const csvContent = "data:text/csv;charset=utf-8," 
+                    + "Source,Type,Date,Order Value,Rate,Earning\n"
+                    + "Fresh Mart,Shop Sale,May 02 2026,₹1250,5%,₹62.50\n"
+                    + "Anjali G.,Membership,May 02 2026,₹9999,10%,₹999.90\n"
+                    + "Electro World,Shop Sale,May 01 2026,₹45000,5%,₹2250.00\n"
+                    + "Gourmet Kitchen,Shop Sale,Apr 30 2026,₹2800,5%,₹140.00\n"
+                    + "System,Referral Bonus,Apr 28 2026,N/A,Flat,₹500.00";
+                  const encodedUri = encodeURI(csvContent);
+                  const link = document.createElement("a");
+                  link.setAttribute("href", encodedUri);
+                  link.setAttribute("download", "Commission_Statement.csv");
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                  addNotification({ title: 'Statement Downloaded', message: 'Your commission statement is ready.', type: 'success' });
+                }}
+                className="btn-outline px-4 py-2 text-sm flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-secondary-dark transition-all active:scale-95 shadow-sm"
+              >
+                <Download size={18} /> Download Statement
+              </button>
             </div>
 
             <div className="card-premium">
