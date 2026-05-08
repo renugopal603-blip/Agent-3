@@ -29,6 +29,7 @@ const AgentDashboard = () => {
   const [showMap, setShowMap] = useState(false);
   const [selectedMarker, setSelectedMarker] = useState(null);
   const [showExpansionModal, setShowExpansionModal] = useState(false);
+  const [showTicketModal, setShowTicketModal] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [analyticsTimeframe, setAnalyticsTimeframe] = useState('Monthly View');
   const [paymentMethod, setPaymentMethod] = useState('UPI'); // 'UPI' or 'Manual'
@@ -2062,7 +2063,7 @@ const AgentDashboard = () => {
                 <p className="text-text-secondary-light font-bold">Need help? Raise a ticket or browse our FAQ.</p>
               </div>
               <button 
-                onClick={() => addNotification({ title: 'New Ticket', message: 'Opening the support ticket creation form...', type: 'info' })}
+                onClick={() => setShowTicketModal(true)}
                 className="btn-primary px-6 py-3 rounded-2xl flex items-center gap-2 shadow-xl shadow-primary-light/20 active:scale-95 transition-all"
               >
                 <PlusSquare size={20}/> New Support Ticket
@@ -2751,6 +2752,81 @@ const AgentDashboard = () => {
       )}
       {/* Commission Plan Modal */}
       <CommissionPlanModal isOpen={showCommissionModal} onClose={() => setShowCommissionModal(false)} />
+      <SupportTicketModal isOpen={showTicketModal} onClose={() => setShowTicketModal(false)} />
+    </div>
+  );
+};
+
+const SupportTicketModal = ({ isOpen, onClose }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+      <div className="bg-white dark:bg-surface-dark w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border border-border-light dark:border-border-dark">
+        <div className="p-6 border-b dark:border-border-dark flex justify-between items-center bg-gray-50 dark:bg-secondary-dark/50">
+          <div>
+            <h3 className="text-xl font-black dark:text-white uppercase tracking-tight">Create Support Ticket</h3>
+            <p className="text-xs text-text-secondary-light font-bold">Expect a response within 4-6 business hours.</p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-gray-200 dark:hover:bg-surface-dark rounded-xl transition-colors"><X size={20}/></button>
+        </div>
+        
+        <form className="p-6 space-y-6" onSubmit={(e) => {
+          e.preventDefault();
+          setIsSubmitting(true);
+          setTimeout(() => {
+            setIsSubmitting(false);
+            onClose();
+            window.alert('Support ticket #TK-' + Math.floor(1000 + Math.random() * 9000) + ' has been created successfully.');
+          }, 1500);
+        }}>
+          <div className="space-y-2">
+            <label className="text-xs font-black text-text-secondary-light uppercase tracking-widest">Subject</label>
+            <input required type="text" placeholder="e.g., Payout delay or technical glitch" className="w-full px-4 py-3 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl outline-none focus:ring-2 focus:ring-primary-light font-bold dark:text-white" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-xs font-black text-text-secondary-light uppercase tracking-widest">Category</label>
+              <select className="w-full px-4 py-3 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl outline-none focus:ring-2 focus:ring-primary-light font-bold dark:text-white">
+                <option>Payout / Wallet</option>
+                <option>Shop Tie-Up</option>
+                <option>KYC / Verification</option>
+                <option>Technical Issue</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-black text-text-secondary-light uppercase tracking-widest">Priority</label>
+              <select className="w-full px-4 py-3 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl outline-none focus:ring-2 focus:ring-primary-light font-bold dark:text-white">
+                <option>Low</option>
+                <option>Medium</option>
+                <option>High</option>
+                <option>Urgent</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-black text-text-secondary-light uppercase tracking-widest">Description</label>
+            <textarea required rows={4} placeholder="Describe your issue in detail..." className="w-full px-4 py-3 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl outline-none focus:ring-2 focus:ring-primary-light font-bold dark:text-white resize-none"></textarea>
+          </div>
+
+          <button 
+            type="submit" 
+            disabled={isSubmitting}
+            className="w-full btn-primary py-4 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl shadow-primary-light/20 flex items-center justify-center gap-2"
+          >
+            {isSubmitting ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                Creating Ticket...
+              </>
+            ) : 'Submit Support Ticket'}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
