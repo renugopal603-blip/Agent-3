@@ -90,6 +90,45 @@ const AgentDashboard = () => {
     navigate('/login');
   };
 
+  const handleSubmitShop = () => {
+    console.log('Submitting shop:', shopForm);
+    if (!shopForm.name || !shopForm.owner || !shopForm.contact) {
+      addNotification({ title: 'Missing Info', message: 'Please fill in the shop name, owner, and contact number.', type: 'error' });
+      return;
+    }
+
+    const newId = shops.length + 1;
+    const newShop = { 
+      id: newId, 
+      name: shopForm.name, 
+      category: shopForm.category, 
+      owner: shopForm.owner, 
+      sales: '₹0', 
+      status: 'Pending Review', 
+      rating: 'N/A',
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: '2026' }),
+      documents: {
+        license: shopForm.documents.licenseName,
+        gst: shopForm.documents.gstName
+      }
+    };
+
+    setShops([...shops, newShop]);
+    setShowShopModal(false);
+    
+    // Reset form
+    setShopForm({ 
+      name: '', 
+      category: 'Grocery', 
+      owner: '', 
+      location: '', 
+      contact: '',
+      documents: { license: null, licenseName: '', gst: null, gstName: '' }
+    });
+
+    addNotification({ title: 'Shop Added', message: `${shopForm.name} registration is pending approval.`, type: 'success' });
+  };
+
   const chartData = [
     { name: 'Mon', sales: 3200, commission: 320 },
     { name: 'Tue', sales: 4100, commission: 410 },
@@ -2365,41 +2404,25 @@ const AgentDashboard = () => {
 
             <div className="p-8 border-t dark:border-border-dark flex gap-4 shrink-0 bg-gray-50 dark:bg-secondary-dark/30">
               <button 
+                type="button"
                 onClick={() => setShowShopModal(false)}
                 className="flex-1 py-4 border-2 border-border-light dark:border-border-dark rounded-2xl font-black text-sm dark:text-white hover:bg-white dark:hover:bg-secondary-dark transition-all"
               >
                 Cancel
               </button>
               <button 
-                onClick={() => {
-                  const newId = shops.length + 1;
-                  const newShop = { 
-                    id: newId, 
-                    name: shopForm.name, 
-                    category: shopForm.category, 
-                    owner: shopForm.owner, 
-                    sales: '₹0', 
-                    status: 'Pending Review', 
-                    rating: 'N/A',
-                    date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: '2026' }),
-                    documents: {
-                      license: shopForm.documents.licenseName,
-                      gst: shopForm.documents.gstName
-                    }
-                  };
-                  setShops([...shops, newShop]);
-                  setShowShopModal(false);
-                  // Reset form
-                  setShopForm({ 
-                    name: '', category: 'Grocery', owner: '', location: '', contact: '',
-                    documents: { license: null, licenseName: '', gst: null, gstName: '' }
-                  });
-                  addNotification({ title: 'Shop Added', message: `${shopForm.name} registration is pending approval.`, type: 'success' });
-                }}
-                className="flex-1 py-4 bg-emerald-500 text-white rounded-2xl font-black text-sm shadow-xl shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                type="button"
+                onClick={handleSubmitShop}
+                disabled={!shopForm.name || !shopForm.owner || !shopForm.contact}
+                className={`flex-1 py-4 rounded-2xl font-black text-sm shadow-xl transition-all ${
+                  (!shopForm.name || !shopForm.owner || !shopForm.contact)
+                    ? 'bg-gray-300 cursor-not-allowed opacity-50' 
+                    : 'bg-emerald-500 text-white shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98]'
+                }`}
               >
                 Submit Registration
               </button>
+            </div>
             </div>
           </div>
         </div>
