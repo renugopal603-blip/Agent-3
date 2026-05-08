@@ -2423,7 +2423,6 @@ const AgentDashboard = () => {
                 Submit Registration
               </button>
             </div>
-            </div>
           </div>
         </div>
       )}
