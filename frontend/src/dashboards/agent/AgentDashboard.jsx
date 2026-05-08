@@ -28,6 +28,7 @@ const AgentDashboard = () => {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [selectedMarker, setSelectedMarker] = useState(null);
+  const [showExpansionModal, setShowExpansionModal] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('UPI'); // 'UPI' or 'Manual'
   const [showOnboardModal, setShowOnboardModal] = useState(false);
   const [onboardForm, setOnboardForm] = useState({ name: '', email: '', phone: '', role: 'Agent', location: '' });
@@ -1741,10 +1742,71 @@ const AgentDashboard = () => {
                   </div>
                   <p className="text-sm dark:text-white font-bold">Request New Territory</p>
                   <p className="text-xs text-text-secondary-light">Apply for exclusive rights in adjacent pincodes or districts.</p>
-                  <button className="w-full btn-primary py-3 rounded-xl">Apply Now</button>
+                  <button 
+                    onClick={() => setShowExpansionModal(true)}
+                    className="w-full btn-primary py-3 rounded-xl transition-transform active:scale-95"
+                  >
+                    Apply Now
+                  </button>
                 </div>
               </div>
             </div>
+
+            {/* Expansion Application Modal */}
+            {showExpansionModal && (
+              <div className="fixed inset-0 z-[300] flex items-center justify-center p-6">
+                <div className="absolute inset-0 bg-background-dark/60 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setShowExpansionModal(false)}></div>
+                <div className="relative w-full max-w-lg bg-white dark:bg-surface-dark rounded-[32px] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300">
+                  <div className="p-8 space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-primary-light/10 text-primary-light rounded-xl flex items-center justify-center">
+                           <GitBranch size={20} />
+                        </div>
+                        <h3 className="text-xl font-black dark:text-white">New Territory Request</h3>
+                      </div>
+                      <button onClick={() => setShowExpansionModal(false)} className="text-text-secondary-light hover:text-error transition-colors"><X size={20}/></button>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Target Pincode / Area</label>
+                        <input type="text" placeholder="e.g. 400001 or Bandra West" className="w-full px-4 py-3.5 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Expansion Type</label>
+                        <select className="w-full px-4 py-3.5 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold appearance-none cursor-pointer">
+                          <option>Exclusive Pincode</option>
+                          <option>Sub-District Expansion</option>
+                          <option>Full District Rights</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Business Case / Reason</label>
+                        <textarea placeholder="Briefly describe why you want to expand here..." className="w-full px-4 py-3.5 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold h-24 resize-none transition-all"></textarea>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <button onClick={() => setShowExpansionModal(false)} className="flex-1 py-4 font-black uppercase text-[11px] tracking-widest text-text-secondary-light hover:bg-gray-50 dark:hover:bg-secondary-dark rounded-2xl transition-all">Cancel</button>
+                      <button 
+                        onClick={() => {
+                          setIsProcessing(true);
+                          setTimeout(() => {
+                            setIsProcessing(false);
+                            setShowExpansionModal(false);
+                            addNotification({ title: 'Application Sent', message: 'Your expansion request is under review by the Admin.', type: 'success' });
+                          }, 1500);
+                        }}
+                        className="flex-2 btn-primary px-10 py-4 rounded-2xl font-black uppercase text-[11px] tracking-widest flex items-center justify-center gap-2"
+                      >
+                        {isProcessing ? 'Sending...' : 'Submit Application'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Global Map Overlay */}
             {showMap && (
