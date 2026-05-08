@@ -1079,7 +1079,10 @@ const AgentDashboard = () => {
                 <h3 className="text-2xl font-bold dark:text-white">Sales Performance</h3>
                 <p className="text-sm text-text-secondary-light">Monthly Target: ₹5,00,000</p>
               </div>
-              <div className="p-3 bg-purple-500/10 text-purple-500 rounded-xl">
+              <div 
+                onClick={() => setShowCommissionModal(true)}
+                className="p-3 bg-purple-500/10 text-purple-500 rounded-xl cursor-pointer hover:bg-purple-500/20 transition-all active:scale-95 shadow-sm"
+              >
                 <Target size={24} />
               </div>
             </div>
@@ -1136,7 +1139,12 @@ const AgentDashboard = () => {
                   <p className="text-xs text-text-secondary-light mt-2 leading-relaxed">
                     Achieve 100% target by end of month to unlock **₹15,000 Milestone Bonus** and upgrade to **Diamond Agent** level!
                   </p>
-                  <button className="w-full btn-primary mt-4 py-2 text-xs">View Rewards</button>
+                  <button 
+                    onClick={() => setShowCommissionModal(true)}
+                    className="w-full btn-primary mt-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:shadow-lg shadow-primary-light/20 transition-all active:scale-[0.98]"
+                  >
+                    View Rewards
+                  </button>
                 </div>
               </div>
             </div>
