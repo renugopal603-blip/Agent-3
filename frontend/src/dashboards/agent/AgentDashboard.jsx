@@ -253,7 +253,12 @@ const AgentDashboard = () => {
                     </div>
                   ))}
                 </div>
-                <button className="w-full btn-outline py-2 text-sm">View All History</button>
+                <button 
+                  onClick={() => setActiveTab('Commission History')}
+                  className="w-full btn-outline py-2 text-sm hover:bg-gray-50 dark:hover:bg-secondary-dark transition-colors"
+                >
+                  View All History
+                </button>
               </div>
 
               {/* Quick Onboarding Card */}
