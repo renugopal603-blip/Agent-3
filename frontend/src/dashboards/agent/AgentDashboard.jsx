@@ -250,15 +250,23 @@ const AgentDashboard = () => {
                     { title: 'KYC Verified', desc: 'Your KYC was approved by Admin', time: '1d ago', icon: <ShieldCheck />, color: 'text-purple-500' },
                     { title: 'Payment Received', desc: 'Payout for April processed', time: '2d ago', icon: <Wallet />, color: 'text-blue-500' },
                   ].map((activity, i) => (
-                    <div key={i} className="flex gap-4 p-3 bg-gray-50 dark:bg-secondary-dark rounded-xl">
-                      <div className={`p-2 rounded-lg bg-white dark:bg-surface-dark ${activity.color} shadow-sm`}>
-                        {React.cloneElement(activity.icon, { size: 18 })}
+                    <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-secondary-dark rounded-xl group relative">
+                      <div className="flex gap-4">
+                        <div className={`p-2 rounded-lg bg-white dark:bg-surface-dark ${activity.color} shadow-sm`}>
+                          {React.cloneElement(activity.icon, { size: 18 })}
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold dark:text-white">{activity.title}</p>
+                          <p className="text-xs text-text-secondary-light">{activity.desc}</p>
+                          <p className="text-[10px] text-text-secondary-light mt-1 font-medium">{activity.time}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-bold dark:text-white">{activity.title}</p>
-                        <p className="text-xs text-text-secondary-light">{activity.desc}</p>
-                        <p className="text-[10px] text-text-secondary-light mt-1 font-medium">{activity.time}</p>
-                      </div>
+                      <button 
+                        onClick={() => addNotification({ title: activity.title, message: 'Activity details have been logged.', type: 'info' })}
+                        className="p-1.5 hover:bg-white dark:hover:bg-surface-dark rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                      >
+                        <MoreVertical size={16} className="text-text-secondary-light" />
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -2033,7 +2041,12 @@ const AgentDashboard = () => {
                     </div>
                     <p className="text-sm text-text-secondary-light mt-1">{notif.desc}</p>
                   </div>
-                  <button className="p-2 hover:bg-gray-100 dark:hover:bg-secondary-dark rounded-xl transition-all"><MoreVertical size={18} className="text-text-secondary-light"/></button>
+                  <button 
+                    onClick={() => addNotification({ title: 'Notification Action', message: `Option selected for: ${notif.title}`, type: 'info' })}
+                    className="p-2 hover:bg-gray-100 dark:hover:bg-secondary-dark rounded-xl transition-all"
+                  >
+                    <MoreVertical size={18} className="text-text-secondary-light"/>
+                  </button>
                 </div>
               ))}
             </div>
@@ -2086,11 +2099,7 @@ const AgentDashboard = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y dark:divide-border-dark">
-                    {[
-                      { id: '#TK-9921', sub: 'Commission payout delay for April', status: 'In Progress', priority: 'High', activity: '1 hour ago' },
-                      { id: '#TK-9845', sub: 'Technical issue with shop upload', status: 'Pending', priority: 'Medium', activity: '5 hours ago' },
-                      { id: '#TK-9721', sub: 'How to update KYC documents?', status: 'Resolved', priority: 'Low', activity: '2 days ago' }
-                    ].map((ticket, i) => (
+                    {tickets.map((ticket, i) => (
                       <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/30 transition-colors cursor-pointer group">
                         <td className="px-6 py-4 text-sm font-black dark:text-white">{ticket.id}</td>
                         <td className="px-6 py-4 text-sm font-bold dark:text-white group-hover:text-primary-light transition-colors">{ticket.sub}</td>
@@ -2106,7 +2115,18 @@ const AgentDashboard = () => {
                             ticket.priority === 'Medium' ? 'text-orange-500' : 'text-emerald-500'
                           }`}>{ticket.priority}</span>
                         </td>
-                        <td className="px-6 py-4 text-xs text-text-secondary-light font-bold">{ticket.activity}</td>
+                        <td className="px-6 py-4 text-xs text-text-secondary-light font-bold flex items-center justify-between">
+                          {ticket.activity}
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              addNotification({ title: 'Ticket Options', message: `Managing Ticket ${ticket.id}`, type: 'info' });
+                            }}
+                            className="p-1.5 hover:bg-white dark:hover:bg-surface-dark rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                          >
+                            <MoreVertical size={16} />
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
