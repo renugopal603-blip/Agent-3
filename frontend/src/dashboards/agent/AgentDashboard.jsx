@@ -63,6 +63,12 @@ const AgentDashboard = () => {
     { id: 3, name: 'Amit Singh', role: 'Agent', location: 'Nashik', status: 'Pending', joined: '2026-05-01' },
     { id: 4, name: 'Sneha Patel', role: 'Agent', location: 'Pune', status: 'Active', joined: '2026-03-10' },
   ]);
+  const [tasks, setTasks] = useState([
+    { id: 1, title: 'Visit Fresh Mart', desc: 'Discuss monthly target achievement and commission payout.', time: '11:00 AM', priority: 'High', done: false },
+    { id: 2, title: 'Verify KYC for Rahul S.', desc: 'Review uploaded documents for new member onboarding.', time: '02:00 PM', priority: 'Medium', done: true },
+    { id: 3, title: 'Shop Audit - Electro World', desc: 'Verify stock levels for premium member exclusive offers.', time: '04:30 PM', priority: 'High', done: false },
+    { id: 4, title: 'Update Area Report', desc: 'Submit weekly territory growth report to Admin hub.', time: '06:00 PM', priority: 'Medium', done: false },
+  ]);
   const [shops, setShops] = useState(() => {
     try {
       const saved = localStorage.getItem('agentShops');
@@ -976,13 +982,16 @@ const AgentDashboard = () => {
         );
 
       case 'Daily Tasks':
+        const pendingCount = tasks.filter(t => !t.done).length;
         return (
           <div className="p-8 max-w-4xl animate-in slide-in-from-bottom-4 duration-500">
             <div className="card-premium space-y-8">
               <div className="border-b dark:border-border-dark pb-6 flex justify-between items-center">
                 <div>
                   <h3 className="text-2xl font-bold dark:text-white">Daily Tasks</h3>
-                  <p className="text-text-secondary-light">Saturday, May 02, 2026 — 4 pending tasks</p>
+                  <p className="text-text-secondary-light font-bold">
+                    {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: '2-digit' })} — {pendingCount} pending tasks
+                  </p>
                 </div>
                 <div className="w-12 h-12 bg-primary-light/10 text-primary-light rounded-xl flex items-center justify-center">
                   <CheckSquare size={24} />
@@ -990,18 +999,23 @@ const AgentDashboard = () => {
               </div>
 
               <div className="space-y-4">
-                {[
-                  { title: 'Visit Fresh Mart', desc: 'Discuss monthly target achievement and commission payout.', time: '11:00 AM', priority: 'High', done: false },
-                  { title: 'Verify KYC for Rahul S.', desc: 'Review uploaded documents for new member onboarding.', time: '02:00 PM', priority: 'Medium', done: true },
-                  { title: 'Shop Audit - Electro World', desc: 'Verify stock levels for premium member exclusive offers.', time: '04:30 PM', priority: 'High', done: false },
-                  { title: 'Update Area Report', desc: 'Submit weekly territory growth report to Admin hub.', time: '06:00 PM', priority: 'Medium', done: false },
-                ].map((task, i) => (
-                  <div key={i} className={`flex items-start gap-4 p-4 rounded-2xl border transition-all ${
+                {tasks.map((task, i) => (
+                  <div key={task.id} className={`flex items-start gap-4 p-4 rounded-2xl border transition-all ${
                     task.done ? 'bg-gray-50/50 dark:bg-secondary-dark/20 border-border-light dark:border-border-dark' : 'bg-white dark:bg-secondary-dark border-border-light dark:border-border-dark hover:border-primary-light'
                   }`}>
-                    <button className={`mt-1 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-colors ${
-                      task.done ? 'bg-success border-success text-white' : 'border-border-light dark:border-border-dark'
-                    }`}>
+                    <button 
+                      onClick={() => {
+                        setTasks(tasks.map(t => t.id === task.id ? {...t, done: !t.done} : t));
+                        addNotification({ 
+                          title: task.done ? 'Task Reopened' : 'Task Completed', 
+                          message: task.title, 
+                          type: task.done ? 'info' : 'success' 
+                        });
+                      }}
+                      className={`mt-1 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-colors ${
+                        task.done ? 'bg-success border-success text-white' : 'border-border-light dark:border-border-dark'
+                      }`}
+                    >
                       {task.done && <CheckCircle size={14} />}
                     </button>
                     <div className="flex-1">
@@ -1015,15 +1029,43 @@ const AgentDashboard = () => {
                       <div className="flex items-center gap-3 mt-3">
                         <span className="text-[10px] font-bold text-text-secondary-light flex items-center gap-1"><Clock size={12} /> {task.time}</span>
                         <div className="h-1 w-1 bg-gray-300 rounded-full"></div>
-                        <button className="text-[10px] font-bold text-primary-light hover:underline">Edit Task</button>
+                        <button 
+                          onClick={() => {
+                            const newTitle = window.prompt('Update Task Title:', task.title);
+                            if (newTitle) {
+                              setTasks(tasks.map(t => t.id === task.id ? {...t, title: newTitle} : t));
+                              addNotification({ title: 'Task Updated', message: 'The task title has been changed.', type: 'info' });
+                            }
+                          }}
+                          className="text-[10px] font-bold text-primary-light hover:underline"
+                        >
+                          Edit Task
+                        </button>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <button className="w-full py-4 border-2 border-dashed border-border-light dark:border-border-dark rounded-2xl text-text-secondary-light font-bold text-sm hover:border-primary-light hover:text-primary-light transition-all flex items-center justify-center gap-2">
-                <PlusSquare size={18} /> Add Custom Task
+              <button 
+                onClick={() => {
+                  const title = window.prompt('Enter New Task:');
+                  if (title) {
+                    const newTask = {
+                      id: Date.now(),
+                      title,
+                      desc: 'Custom task added by agent.',
+                      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                      priority: 'Medium',
+                      done: false
+                    };
+                    setTasks([...tasks, newTask]);
+                    addNotification({ title: 'Task Added', message: 'New custom task has been created.', type: 'success' });
+                  }
+                }}
+                className="w-full py-4 border-2 border-dashed border-border-light dark:border-border-dark rounded-2xl text-text-secondary-light font-bold text-sm hover:border-primary-light hover:text-primary-light transition-all flex items-center justify-center gap-2 group"
+              >
+                <PlusSquare size={18} className="group-hover:scale-110 transition-transform" /> Add Custom Task
               </button>
             </div>
           </div>
