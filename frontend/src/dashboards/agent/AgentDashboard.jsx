@@ -100,7 +100,11 @@ const AgentDashboard = () => {
   const handleSubmitShop = () => {
     try {
       console.log('Submitting shop:', shopForm);
-      if (!shopForm.name || !shopForm.owner || !shopForm.contact) {
+      const shopName = (shopForm.name || '').trim();
+      const ownerName = (shopForm.owner || '').trim();
+      const contactNum = (shopForm.contact || '').trim();
+
+      if (!shopName || !ownerName || !contactNum) {
         addNotification({ title: 'Missing Info', message: 'Please fill in all required fields marked with *', type: 'error' });
         return;
       }
@@ -117,9 +121,9 @@ const AgentDashboard = () => {
 
       const newShop = { 
         id: newId, 
-        name: shopForm.name, 
+        name: shopName, 
         category: shopForm.category || 'Grocery', 
-        owner: shopForm.owner, 
+        owner: ownerName, 
         sales: '₹0', 
         status: 'Pending Review', 
         rating: 'N/A',
@@ -133,28 +137,28 @@ const AgentDashboard = () => {
       const updatedShops = [...currentShops, newShop];
       setShops(updatedShops);
       
-      // Save to localStorage immediately as well
+      // Save to localStorage immediately
       localStorage.setItem('agentShops', JSON.stringify(updatedShops));
 
-      // Reset form and close modal
-      setTimeout(() => {
-        setShopForm({ 
-          name: '', 
-          category: 'Grocery', 
-          owner: '', 
-          location: '', 
-          contact: '',
-          documents: { license: null, licenseName: '', gst: null, gstName: '' }
-        });
-        setShowShopModal(false);
-        setIsProcessing(false);
-        addNotification({ title: 'Shop Added', message: `${newShop.name} registration is pending approval.`, type: 'success' });
-      }, 500);
+      // Reset form and close modal immediately
+      setShopForm({ 
+        name: '', 
+        category: 'Grocery', 
+        owner: '', 
+        location: '', 
+        contact: '',
+        documents: { license: null, licenseName: '', gst: null, gstName: '' }
+      });
+      setShowShopModal(false);
+      setIsProcessing(false);
+      
+      addNotification({ title: 'Shop Added', message: `${newShop.name} registration is pending approval.`, type: 'success' });
+      window.alert('Registration Successful! Shop added to the tracker.');
 
     } catch (error) {
       console.error('Submit Shop Error:', error);
       setIsProcessing(false);
-      addNotification({ title: 'System Error', message: 'Failed to save shop. Please try again.', type: 'error' });
+      alert('System Error: ' + error.message);
     }
   };
 
