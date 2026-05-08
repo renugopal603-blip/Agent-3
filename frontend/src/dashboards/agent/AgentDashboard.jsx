@@ -2099,7 +2099,11 @@ const AgentDashboard = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y dark:divide-border-dark">
-                    {tickets.map((ticket, i) => (
+                    {[
+                      { id: '#TK-9921', sub: 'Commission payout delay for April', status: 'In Progress', priority: 'High', activity: '1 hour ago' },
+                      { id: '#TK-9845', sub: 'Technical issue with shop upload', status: 'Pending', priority: 'Medium', activity: '5 hours ago' },
+                      { id: '#TK-9721', sub: 'How to update KYC documents?', status: 'Resolved', priority: 'Low', activity: '2 days ago' }
+                    ].map((ticket, i) => (
                       <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/30 transition-colors cursor-pointer group">
                         <td className="px-6 py-4 text-sm font-black dark:text-white">{ticket.id}</td>
                         <td className="px-6 py-4 text-sm font-bold dark:text-white group-hover:text-primary-light transition-colors">{ticket.sub}</td>
