@@ -60,6 +60,8 @@ const SubAdminDashboard = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showNotificationSettingsModal, setShowNotificationSettingsModal] = useState(false);
   const [showAppearanceSettingsModal, setShowAppearanceSettingsModal] = useState(false);
+  const [timeRange, setTimeRange] = useState('Yesterday');
+  const [showTimeDropdown, setShowTimeDropdown] = useState(false);
   const [supportTickets, setSupportTickets] = useState([
     { id: 'TKT-4821', subject: 'Agent unable to login', by: 'Amit Singh', priority: 'High', status: 'Open', time: '10 min ago' },
     { id: 'TKT-4820', subject: 'Shop KYC document rejected incorrectly', by: 'Fresh Mart', priority: 'High', status: 'In Progress', time: '1h ago' },
@@ -132,8 +134,38 @@ const SubAdminDashboard = () => {
       case 'Dashboard':
         return (
           <div className="p-8 space-y-8 animate-in fade-in duration-500">
-            <h3 className="text-2xl font-bold dark:text-white">Sub-Admin Dashboard</h3>
-            <p className="text-sm text-text-secondary-light">Overview of your assigned responsibilities.</p>
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-2xl font-bold dark:text-white">Sub-Admin Dashboard</h3>
+                <p className="text-sm text-text-secondary-light">Overview of your assigned responsibilities.</p>
+              </div>
+              <div className="relative">
+                <button 
+                  onClick={() => setShowTimeDropdown(!showTimeDropdown)}
+                  className="px-4 py-2 bg-white dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl flex items-center gap-3 text-sm font-bold dark:text-white shadow-sm hover:border-primary-light transition-all"
+                >
+                  <Filter size={14} className="text-primary-light" />
+                  <span>{timeRange}</span>
+                </button>
+                {showTimeDropdown && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl shadow-2xl z-[100] py-2 animate-in zoom-in-95 duration-200">
+                    {['Today', 'Yesterday', 'Last 7 Days', 'Last 30 Days', 'This Quarter', 'Custom Range'].map(range => (
+                      <div 
+                        key={range}
+                        onClick={() => {
+                          setTimeRange(range);
+                          setShowTimeDropdown(false);
+                          addNotification({ title: 'Filter Applied', message: `Showing data for ${range}`, type: 'info' });
+                        }}
+                        className={`px-4 py-2.5 text-sm font-medium cursor-pointer transition-colors ${timeRange === range ? 'bg-primary-light text-white' : 'dark:text-white hover:bg-primary-light/10 hover:text-primary-light'}`}
+                      >
+                        {range}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
               {[
                 { title: 'Agents Managed', value: '42', icon: <Users />, color: 'bg-blue-500' },
@@ -1205,9 +1237,37 @@ const SubAdminDashboard = () => {
       case 'Reports':
         return (
           <div className="p-8 space-y-8 animate-in fade-in duration-500">
-            <div>
-              <h3 className="text-2xl font-bold dark:text-white">Reports Overview</h3>
-              <p className="text-sm text-text-secondary-light mt-1">Consolidated performance reports for your assigned territory.</p>
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-2xl font-bold dark:text-white">Reports Overview</h3>
+                <p className="text-sm text-text-secondary-light mt-1">Consolidated performance reports for your assigned territory.</p>
+              </div>
+              <div className="relative">
+                <button 
+                  onClick={() => setShowTimeDropdown(!showTimeDropdown)}
+                  className="px-4 py-2 bg-white dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl flex items-center gap-3 text-sm font-bold dark:text-white shadow-sm hover:border-primary-light transition-all"
+                >
+                  <Filter size={14} className="text-primary-light" />
+                  <span>{timeRange}</span>
+                </button>
+                {showTimeDropdown && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl shadow-2xl z-[100] py-2 animate-in zoom-in-95 duration-200">
+                    {['Today', 'Yesterday', 'Last 7 Days', 'Last 30 Days', 'This Quarter', 'Custom Range'].map(range => (
+                      <div 
+                        key={range}
+                        onClick={() => {
+                          setTimeRange(range);
+                          setShowTimeDropdown(false);
+                          addNotification({ title: 'Data Filtered', message: `Compiling reports for ${range}...`, type: 'info' });
+                        }}
+                        className={`px-4 py-2.5 text-sm font-medium cursor-pointer transition-colors ${timeRange === range ? 'bg-primary-light text-white' : 'dark:text-white hover:bg-primary-light/10 hover:text-primary-light'}`}
+                      >
+                        {range}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
