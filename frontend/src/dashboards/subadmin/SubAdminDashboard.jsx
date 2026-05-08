@@ -51,6 +51,8 @@ const SubAdminDashboard = () => {
   const [selectedShopDetail, setSelectedShopDetail] = useState(null);
   const [reportSubmitted, setReportSubmitted] = useState(false);
   const [showTicketModal, setShowTicketModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [selectedReport, setSelectedReport] = useState(null);
 
   const handleDownload = (docName) => {
     addNotification({ title: 'Download Started', message: `Preparing ${docName} for secure download...`, type: 'info' });
@@ -1112,8 +1114,14 @@ const SubAdminDashboard = () => {
                 <div key={section.title} className="card-premium space-y-4">
                   <h4 className="font-bold dark:text-white text-lg border-b border-border-light dark:border-border-dark pb-3">{section.title}</h4>
                   <div className="space-y-2">
-                    {section.items.map((item) => (
-                      <div key={item} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-secondary-dark rounded-xl group hover:bg-primary-light/5 cursor-pointer transition-all">
+                       <div 
+                        key={item} 
+                        onClick={() => {
+                          setSelectedReport(item);
+                          setShowReportModal(true);
+                        }}
+                        className="flex items-center justify-between p-3 bg-gray-50 dark:bg-secondary-dark rounded-xl group hover:bg-primary-light/5 cursor-pointer transition-all"
+                      >
                         <span className="text-sm font-medium dark:text-white">{item}</span>
                         <button className="text-[10px] font-black text-primary-light px-3 py-1 bg-primary-light/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">View →</button>
                       </div>
@@ -1310,6 +1318,12 @@ const SubAdminDashboard = () => {
             addNotification({ title: 'Ticket Created', message: 'Your support ticket has been logged successfully.', type: 'success' });
             setShowTicketModal(false);
           }}
+        />
+
+        <ReportDetailsModal 
+          isOpen={showReportModal}
+          onClose={() => setShowReportModal(false)}
+          reportTitle={selectedReport}
         />
       </main>
     </div>
@@ -1690,6 +1704,77 @@ const SupportTicketModal = ({ isOpen, onClose, onAdd }) => {
             <textarea rows="3" placeholder="Provide full details here..." className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold resize-none"></textarea>
           </div>
           <button onClick={onAdd} className="w-full py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] transition-all">Submit Support Ticket</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+const ReportDetailsModal = ({ isOpen, onClose, reportTitle }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
+      <div className="relative w-full max-w-2xl bg-surface-light dark:bg-surface-dark rounded-[40px] shadow-2xl border border-white/10 overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
+        <div className="p-8 border-b dark:border-border-dark flex justify-between items-center bg-gradient-to-r from-emerald-500 to-emerald-700 text-white">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center shadow-inner">
+              <BarChart2 size={28} />
+            </div>
+            <div>
+              <h3 className="text-2xl font-black tracking-tight">{reportTitle}</h3>
+              <p className="text-xs font-bold uppercase tracking-widest opacity-80">Detailed Analytical View</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-3 hover:bg-white/10 rounded-2xl transition-all">
+            <X size={24} />
+          </button>
+        </div>
+
+        <div className="p-8 overflow-y-auto custom-scrollbar space-y-8">
+          <div className="grid grid-cols-3 gap-4">
+            {[
+              { l: 'Total Units', v: '1,284', s: '+12%' },
+              { l: 'Completion', v: '94.2%', s: 'Optimal' },
+              { l: 'Risk Index', v: '0.02', s: 'Very Low' },
+            ].map((d, i) => (
+              <div key={i} className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark text-center">
+                <p className="text-[10px] font-black text-text-secondary-light uppercase mb-1">{d.l}</p>
+                <p className="text-xl font-black dark:text-white">{d.v}</p>
+                <p className="text-[10px] font-bold text-emerald-500 mt-1">{d.s}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-4">
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light border-b-2 border-primary-light/10 pb-2">Data Breakdown</h4>
+            <div className="space-y-3">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-secondary-dark rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                    <span className="text-sm font-bold dark:text-white">Region Zone - {i * 10} Alpha</span>
+                  </div>
+                  <span className="text-sm font-black text-primary-light">₹{(i * 12.5).toFixed(1)}L</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="p-6 bg-primary-light/5 rounded-3xl border border-primary-light/10 flex items-center justify-between">
+            <div>
+              <h4 className="font-bold dark:text-white flex items-center gap-2 mb-1">
+                <ShieldCheck size={18} className="text-primary-light" /> Data Integrity
+              </h4>
+              <p className="text-xs text-text-secondary-light">This report is verified and synced in real-time.</p>
+            </div>
+            <button className="px-4 py-2 bg-primary-light text-white rounded-xl text-xs font-black shadow-lg">Export CSV</button>
+          </div>
+        </div>
+
+        <div className="p-8 border-t dark:border-border-dark bg-gray-50/50 dark:bg-secondary-dark/30">
+          <button onClick={onClose} className="w-full py-4 bg-emerald-500 text-white rounded-2xl font-black text-sm shadow-xl shadow-emerald-500/20 hover:scale-[1.02] transition-all">Close Report View</button>
         </div>
       </div>
     </div>
