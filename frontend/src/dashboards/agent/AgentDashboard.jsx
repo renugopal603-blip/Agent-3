@@ -29,6 +29,7 @@ const AgentDashboard = () => {
   const [showMap, setShowMap] = useState(false);
   const [selectedMarker, setSelectedMarker] = useState(null);
   const [showExpansionModal, setShowExpansionModal] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('UPI'); // 'UPI' or 'Manual'
   const [showOnboardModal, setShowOnboardModal] = useState(false);
   const [onboardForm, setOnboardForm] = useState({ name: '', email: '', phone: '', role: 'Agent', location: '' });
@@ -1447,16 +1448,60 @@ const AgentDashboard = () => {
                     <label className="text-xs font-bold text-text-secondary-light uppercase">Withdrawal Amount</label>
                     <div className="relative">
                       <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold dark:text-white">₹</span>
-                      <input type="number" placeholder="0.00" className="w-full pl-8 pr-4 py-3 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl outline-none focus:ring-2 focus:ring-primary-light" />
+                      <input 
+                        type="number" 
+                        placeholder="0.00" 
+                        className="w-full pl-8 pr-4 py-3 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl outline-none focus:ring-2 focus:ring-primary-light dark:text-white font-bold" 
+                        value={withdrawAmount}
+                        onChange={(e) => setWithdrawAmount(e.target.value)}
+                      />
                     </div>
                     <div className="flex gap-2 pt-2">
                       {[5000, 10000, 'Max'].map((v, i) => (
-                        <button key={i} className="px-3 py-1 bg-gray-100 dark:bg-secondary-dark rounded-lg text-[10px] font-bold text-text-secondary-light hover:bg-primary-light hover:text-white transition-all">{v}</button>
+                        <button 
+                          key={i} 
+                          onClick={() => setWithdrawAmount(v === 'Max' ? '12450' : v.toString())}
+                          className={`px-3 py-1 rounded-lg text-[10px] font-bold transition-all ${
+                            withdrawAmount === (v === 'Max' ? '12450' : v.toString()) 
+                              ? 'bg-primary-light text-white' 
+                              : 'bg-gray-100 dark:bg-secondary-dark text-text-secondary-light hover:bg-gray-200'
+                          }`}
+                        >
+                          {v}
+                        </button>
                       ))}
                     </div>
                   </div>
 
-                  <button className="w-full btn-primary py-4 rounded-xl font-bold text-lg">Confirm Withdrawal</button>
+                  <button 
+                    onClick={() => {
+                      if (!withdrawAmount || parseFloat(withdrawAmount) <= 0) {
+                        return window.alert('Please enter a valid amount.');
+                      }
+                      if (parseFloat(withdrawAmount) > 12450) {
+                        return window.alert('Insufficient balance.');
+                      }
+                      setIsProcessing(true);
+                      setTimeout(() => {
+                        setIsProcessing(false);
+                        setWithdrawAmount('');
+                        addNotification({ 
+                          title: 'Withdrawal Successful', 
+                          message: `₹${withdrawAmount} has been initiated to your HDFC bank account.`, 
+                          type: 'success' 
+                        });
+                      }, 2000);
+                    }}
+                    disabled={isProcessing}
+                    className={`w-full btn-primary py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all ${isProcessing ? 'opacity-70 cursor-wait' : 'active:scale-95'}`}
+                  >
+                    {isProcessing ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        Processing...
+                      </>
+                    ) : 'Confirm Withdrawal'}
+                  </button>
                 </div>
 
                 <div className="space-y-6">
@@ -1476,7 +1521,28 @@ const AgentDashboard = () => {
                       </div>
                     ))}
                   </div>
-                  <button className="w-full btn-outline py-2 text-sm">Download History</button>
+                  <button 
+                    onClick={() => {
+                      const csvContent = "data:text/csv;charset=utf-8," 
+                        + "Date,Amount,Status\n"
+                        + "Apr 25 2026,₹15000,Completed\n"
+                        + "Apr 12 2026,₹8400,Completed\n"
+                        + "Mar 30 2026,₹22000,Completed";
+                      const encodedUri = encodeURI(csvContent);
+                      const link = document.createElement("a");
+                      link.setAttribute("href", encodedUri);
+                      link.setAttribute("download", "Payout_History.csv");
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      addNotification({ title: 'Report Generated', message: 'Payout history has been downloaded.', type: 'info' });
+                    }}
+                    className="w-full btn-outline py-2 text-sm hover:bg-gray-50 dark:hover:bg-secondary-dark transition-all"
+                  >
+                    Download History
+                  </button>
+                </div>
+              </div>
                 </div>
               </div>
             </div>
