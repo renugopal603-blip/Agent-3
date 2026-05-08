@@ -283,11 +283,17 @@ const SubAdminDashboard = () => {
                   {systemUsers.filter(u => u.role === 'Agent').map((a, i) => (
                     <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50">
                       <td className="py-4 font-bold dark:text-white flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-primary-light/20 flex items-center justify-center text-primary-light text-xs">{a.name[0]}</div>
+                        <div className="w-8 h-8 rounded-full bg-primary-light/20 flex items-center justify-center text-primary-light text-xs font-black">{a.name[0]}</div>
                         {a.name}
                       </td>
-                      <td className="py-4 text-sm text-text-secondary-light">{a.role}</td>
-                      <td className="py-4 text-sm text-text-secondary-light">{a.territory || a.location}</td>
+                      <td className="py-4">
+                        <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-tight ${
+                          a.role === 'District Agent' ? 'bg-blue-500/10 text-blue-500' :
+                          a.role === 'Divisional Agent' ? 'bg-purple-500/10 text-purple-500' :
+                          'bg-emerald-500/10 text-emerald-500'
+                        }`}>{a.role}</span>
+                      </td>
+                      <td className="py-4 text-sm text-text-secondary-light font-medium">{a.territory || a.location}</td>
                       <td className="py-4"><span className={`px-2 py-1 text-[10px] rounded-lg font-bold uppercase ${a.status === 'Active' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}`}>{a.status}</span></td>
                       <td className="py-4 text-right">
                         <button 
@@ -637,9 +643,21 @@ const SubAdminDashboard = () => {
 
             <div className="grid grid-cols-1 gap-6">
               {[
-                { title: 'Security', icon: <Lock />, desc: 'Password, 2FA, and session management', items: ['Change Password', 'Two-Factor Authentication', 'Active Sessions'] },
-                { title: 'Notifications', icon: <BellRing />, desc: 'Configure email and system alerts', items: ['Task Reminders', 'Agent Alerts', 'Weekly Digest'] },
-                { title: 'System Appearance', icon: <Palette />, desc: 'Customize dashboard look and feel', items: ['Dark Mode Toggle', 'Primary Brand Color', 'Compact Sidebar'] },
+                { title: 'Security', icon: <Lock />, desc: 'Password, 2FA, and session management', items: [
+                  { name: 'Change Password', icon: <Key size={14} /> },
+                  { name: 'Two-Factor Authentication', icon: <ShieldCheck size={14} /> },
+                  { name: 'Active Sessions', icon: <Clock size={14} /> }
+                ] },
+                { title: 'Notifications', icon: <BellRing />, desc: 'Configure email and system alerts', items: [
+                  { name: 'Task Reminders', icon: <CheckSquare size={14} /> },
+                  { name: 'Agent Alerts', icon: <AlertCircle size={14} /> },
+                  { name: 'Weekly Digest', icon: <BarChart2 size={14} /> }
+                ] },
+                { title: 'System Appearance', icon: <Palette />, desc: 'Customize dashboard look and feel', items: [
+                  { name: 'Dark Mode Toggle', icon: <Moon size={14} /> },
+                  { name: 'Primary Brand Color', icon: <Palette size={14} /> },
+                  { name: 'Compact Sidebar', icon: <LayoutDashboard size={14} /> }
+                ] },
               ].map((group) => (
                 <div key={group.title} className="card-premium space-y-4">
                   <div className="flex items-start gap-4">
@@ -652,26 +670,29 @@ const SubAdminDashboard = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
                         {group.items.map(item => (
                           <div 
-                            key={item} 
+                            key={item.name} 
                             onClick={() => {
-                              if (item === 'Change Password') setShowPasswordModal(true);
-                              if (item === 'Two-Factor Authentication') setShow2FAModal(true);
-                              if (item === 'Active Sessions') setShowSessionsModal(true);
+                              if (item.name === 'Change Password') setShowPasswordModal(true);
+                              if (item.name === 'Two-Factor Authentication') setShow2FAModal(true);
+                              if (item.name === 'Active Sessions') setShowSessionsModal(true);
                               
-                              if (['Task Reminders', 'Agent Alerts', 'Weekly Digest'].includes(item)) {
+                              if (['Task Reminders', 'Agent Alerts', 'Weekly Digest'].includes(item.name)) {
                                 setShowNotificationSettingsModal(true);
                               }
                               
-                              if (['Primary Brand Color'].includes(item)) {
+                              if (['Primary Brand Color'].includes(item.name)) {
                                 setShowAppearanceSettingsModal(true);
                               }
 
-                              if (item === 'Dark Mode Toggle') toggleTheme();
-                              if (item === 'Compact Sidebar') setIsSidebarCollapsed(!isSidebarCollapsed);
+                              if (item.name === 'Dark Mode Toggle') toggleTheme();
+                              if (item.name === 'Compact Sidebar') setIsSidebarCollapsed(!isSidebarCollapsed);
                             }}
                             className="flex items-center justify-between p-3 bg-gray-50 dark:bg-secondary-dark/50 rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-secondary-dark transition-all group"
                           >
-                            <span className="text-sm dark:text-white font-medium">{item}</span>
+                            <div className="flex items-center gap-3">
+                              <span className="text-primary-light p-1.5 bg-white dark:bg-surface-dark rounded-lg shadow-sm">{item.icon}</span>
+                              <span className="text-sm dark:text-white font-medium">{item.name}</span>
+                            </div>
                             <ChevronRight size={14} className="text-text-secondary-light group-hover:translate-x-1 transition-transform" />
                           </div>
                         ))}
