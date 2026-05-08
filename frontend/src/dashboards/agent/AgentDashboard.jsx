@@ -1960,17 +1960,32 @@ const AgentDashboard = () => {
                 </div>
                 <div className="space-y-4">
                   {[
-                    { label: 'Email Payout Alerts', desc: 'Receive an email when commissions are credited.' },
-                    { label: 'Shop Status Updates', desc: 'Instant notification when a shop is approved or rejected.' },
-                    { label: 'Network Activity', desc: 'Monthly report of your team performance.' }
+                    { key: 'commissionAlerts', label: 'Email Payout Alerts', desc: 'Receive an email when commissions are credited.' },
+                    { key: 'smsNotifications', label: 'Shop Status Updates', desc: 'Instant notification when a shop is approved or rejected.' },
+                    { key: 'browserPushes', label: 'Network Activity', desc: 'Monthly report of your team performance.' }
                   ].map((item, i) => (
                     <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-transparent hover:border-border-light dark:hover:border-border-dark transition-all">
                       <div>
                         <p className="text-sm font-bold dark:text-white">{item.label}</p>
                         <p className="text-[10px] text-text-secondary-light font-bold">{item.desc}</p>
                       </div>
-                      <div className="w-12 h-6 bg-primary-light rounded-full relative cursor-pointer shadow-inner shadow-black/10">
-                        <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-md"></div>
+                      <div 
+                        onClick={() => {
+                          const newValue = !settings[item.key];
+                          setSettings({...settings, [item.key]: newValue});
+                          addNotification({ 
+                            title: 'Settings Updated', 
+                            message: `${item.label} ${newValue ? 'Enabled' : 'Disabled'}`, 
+                            type: 'info' 
+                          });
+                        }}
+                        className={`w-12 h-6 rounded-full relative cursor-pointer transition-all duration-300 shadow-inner ${
+                          settings[item.key] ? 'bg-emerald-500 shadow-emerald-500/20' : 'bg-gray-300 dark:bg-gray-700'
+                        }`}
+                      >
+                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 ${
+                          settings[item.key] ? 'right-1' : 'left-1'
+                        }`}></div>
                       </div>
                     </div>
                   ))}
