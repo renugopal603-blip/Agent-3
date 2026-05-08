@@ -104,23 +104,20 @@ const AgentDashboard = () => {
     }
     
     console.log('DEBUG: handleSubmitShop triggered');
-    window.alert('Processing Registration... Please wait.');
+    window.alert('Saving Registration Data...');
 
     try {
-      console.log('DEBUG: Current form state:', shopForm);
       const shopName = (shopForm.name || '').trim();
       const ownerName = (shopForm.owner || '').trim();
       const contactNum = (shopForm.contact || '').trim();
+      const shopLoc = (shopForm.location || '').trim();
 
       if (!shopName || !ownerName || !contactNum) {
-        console.warn('DEBUG: Validation failed - missing fields');
-        addNotification({ title: 'Missing Info', message: 'Please fill in Shop Name, Owner, and Contact Number.', type: 'error' });
-        window.alert('Validation Error: Please fill in all required fields.');
+        window.alert('Validation Error: Shop Name, Owner, and Contact are required.');
         return;
       }
 
       setIsProcessing(true);
-      console.log('DEBUG: Validation passed, proceeding with submission');
 
       const currentShops = Array.isArray(shops) ? shops : [];
       const maxId = currentShops.reduce((max, s) => {
@@ -134,47 +131,35 @@ const AgentDashboard = () => {
         name: shopName, 
         category: shopForm.category || 'Grocery', 
         owner: ownerName, 
-        location: shopForm.location || '',
+        location: shopLoc,
         sales: '₹0', 
         status: 'Pending Review', 
         rating: 'N/A',
         date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: '2026' }),
         documents: {
-          license: shopForm.documents?.licenseName || '',
-          gst: shopForm.documents?.gstName || ''
+          license: (shopForm.documents && shopForm.documents.licenseName) ? shopForm.documents.licenseName : '',
+          gst: (shopForm.documents && shopForm.documents.gstName) ? shopForm.documents.gstName : ''
         }
       };
 
-      console.log('DEBUG: Creating new shop object:', newShop);
       const updatedShops = [...currentShops, newShop];
       
-      // Update state
+      // PERSIST FIRST
+      localStorage.setItem('agentShops', JSON.stringify(updatedShops));
+      
+      // UPDATE STATE
       setShops(updatedShops);
       
-      // Persist to storage
-      localStorage.setItem('agentShops', JSON.stringify(updatedShops));
-      console.log('DEBUG: LocalStorage updated successfully');
-
-      // Clear form and close modal
-      setShopForm({ 
-        name: '', 
-        category: 'Grocery', 
-        owner: '', 
-        location: '', 
-        contact: '',
-        documents: { license: null, licenseName: '', gst: null, gstName: '' }
-      });
+      console.log('DEBUG: Saved successfully', newShop);
+      window.alert('SUCCESS: ' + newShop.name + ' has been saved successfully! The page will now refresh to update your list.');
       
-      setShowShopModal(false);
-      setIsProcessing(false);
-      
-      addNotification({ title: 'Shop Added', message: `${newShop.name} registration is pending approval.`, type: 'success' });
-      window.alert('SUCCESS: Registration complete! ' + newShop.name + ' has been added.');
+      // RELOAD TO FORCE SYNC
+      window.location.reload();
 
     } catch (error) {
-      console.error('DEBUG: handleSubmitShop CRASHED:', error);
+      console.error('DEBUG: Save Failed', error);
       setIsProcessing(false);
-      window.alert('CRITICAL ERROR: ' + error.message);
+      window.alert('CRITICAL SAVE ERROR: ' + error.message);
     }
   };
 
