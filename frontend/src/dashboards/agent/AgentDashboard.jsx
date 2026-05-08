@@ -97,22 +97,32 @@ const AgentDashboard = () => {
     navigate('/login');
   };
 
-  const handleSubmitShop = () => {
+  const handleSubmitShop = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    console.log('DEBUG: handleSubmitShop triggered');
+    window.alert('Processing Registration... Please wait.');
+
     try {
-      console.log('Submitting shop:', shopForm);
+      console.log('DEBUG: Current form state:', shopForm);
       const shopName = (shopForm.name || '').trim();
       const ownerName = (shopForm.owner || '').trim();
       const contactNum = (shopForm.contact || '').trim();
 
       if (!shopName || !ownerName || !contactNum) {
-        addNotification({ title: 'Missing Info', message: 'Please fill in all required fields marked with *', type: 'error' });
+        console.warn('DEBUG: Validation failed - missing fields');
+        addNotification({ title: 'Missing Info', message: 'Please fill in Shop Name, Owner, and Contact Number.', type: 'error' });
+        window.alert('Validation Error: Please fill in all required fields.');
         return;
       }
 
       setIsProcessing(true);
+      console.log('DEBUG: Validation passed, proceeding with submission');
 
       const currentShops = Array.isArray(shops) ? shops : [];
-      // Robust ID generation
       const maxId = currentShops.reduce((max, s) => {
         const id = parseInt(s.id);
         return !isNaN(id) ? Math.max(max, id) : max;
@@ -124,6 +134,7 @@ const AgentDashboard = () => {
         name: shopName, 
         category: shopForm.category || 'Grocery', 
         owner: ownerName, 
+        location: shopForm.location || '',
         sales: '₹0', 
         status: 'Pending Review', 
         rating: 'N/A',
@@ -134,13 +145,17 @@ const AgentDashboard = () => {
         }
       };
 
+      console.log('DEBUG: Creating new shop object:', newShop);
       const updatedShops = [...currentShops, newShop];
+      
+      // Update state
       setShops(updatedShops);
       
-      // Save to localStorage immediately
+      // Persist to storage
       localStorage.setItem('agentShops', JSON.stringify(updatedShops));
+      console.log('DEBUG: LocalStorage updated successfully');
 
-      // Reset form and close modal immediately
+      // Clear form and close modal
       setShopForm({ 
         name: '', 
         category: 'Grocery', 
@@ -149,16 +164,17 @@ const AgentDashboard = () => {
         contact: '',
         documents: { license: null, licenseName: '', gst: null, gstName: '' }
       });
+      
       setShowShopModal(false);
       setIsProcessing(false);
       
       addNotification({ title: 'Shop Added', message: `${newShop.name} registration is pending approval.`, type: 'success' });
-      window.alert('Registration Successful! Shop added to the tracker.');
+      window.alert('SUCCESS: Registration complete! ' + newShop.name + ' has been added.');
 
     } catch (error) {
-      console.error('Submit Shop Error:', error);
+      console.error('DEBUG: handleSubmitShop CRASHED:', error);
       setIsProcessing(false);
-      alert('System Error: ' + error.message);
+      window.alert('CRITICAL ERROR: ' + error.message);
     }
   };
 
@@ -2294,7 +2310,11 @@ const AgentDashboard = () => {
       {showShopModal && (
         <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setShowShopModal(false)}></div>
-          <div className="relative w-full max-w-2xl bg-surface-light dark:bg-surface-dark rounded-[40px] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
+          <form 
+            onSubmit={handleSubmitShop}
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-2xl bg-surface-light dark:bg-surface-dark rounded-[40px] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]"
+          >
             <div className="p-8 border-b dark:border-border-dark flex justify-between items-center bg-emerald-500 text-white shrink-0">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm"><PlusSquare size={24}/></div>
@@ -2303,7 +2323,7 @@ const AgentDashboard = () => {
                   <p className="text-xs opacity-80 font-bold uppercase tracking-wider">Retail Partner Onboarding</p>
                 </div>
               </div>
-              <button onClick={() => setShowShopModal(false)} className="p-3 hover:bg-white/10 rounded-2xl transition-all"><X size={24}/></button>
+              <button type="button" onClick={() => setShowShopModal(false)} className="p-3 hover:bg-white/10 rounded-2xl transition-all"><X size={24}/></button>
             </div>
             
             <div className="p-8 overflow-y-auto custom-scrollbar space-y-8">
@@ -2314,6 +2334,7 @@ const AgentDashboard = () => {
                     <Store className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary-light" size={18} />
                     <input 
                       type="text" 
+                      required
                       placeholder="e.g. Metro Supermarket" 
                       className="w-full pl-12 pr-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-emerald-500 outline-none dark:text-white font-bold transition-all"
                       value={shopForm.name}
@@ -2345,6 +2366,7 @@ const AgentDashboard = () => {
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary-light" size={18} />
                     <input 
                       type="text" 
+                      required
                       placeholder="Full legal name" 
                       className="w-full pl-12 pr-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-emerald-500 outline-none dark:text-white font-bold transition-all"
                       value={shopForm.owner}
@@ -2358,6 +2380,7 @@ const AgentDashboard = () => {
                     <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary-light" size={18} />
                     <input 
                       type="text" 
+                      required
                       placeholder="+91 XXXXX XXXXX" 
                       className="w-full pl-12 pr-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-emerald-500 outline-none dark:text-white font-bold transition-all"
                       value={shopForm.contact}
@@ -2397,6 +2420,7 @@ const AgentDashboard = () => {
                     }}
                   />
                   <button 
+                    type="button"
                     onClick={() => document.getElementById('shopLicense').click()}
                     className={`flex-1 py-4 rounded-2xl text-sm font-bold transition-all flex items-center justify-center gap-3 border ${
                       shopForm.documents.licenseName 
@@ -2421,6 +2445,7 @@ const AgentDashboard = () => {
                     }}
                   />
                   <button 
+                    type="button"
                     onClick={() => document.getElementById('gstPan').click()}
                     className={`flex-1 py-4 rounded-2xl text-sm font-bold transition-all flex items-center justify-center gap-3 border ${
                       shopForm.documents.gstName 
@@ -2444,8 +2469,7 @@ const AgentDashboard = () => {
                 Cancel
               </button>
               <button 
-                type="button"
-                onClick={handleSubmitShop}
+                type="submit"
                 className={`flex-1 py-4 rounded-2xl font-black text-sm shadow-xl transition-all flex items-center justify-center gap-2 bg-emerald-500 text-white shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] ${
                   isProcessing ? 'opacity-70 cursor-wait' : ''
                 }`}
@@ -2458,7 +2482,7 @@ const AgentDashboard = () => {
                 ) : 'Submit Registration'}
               </button>
             </div>
-          </div>
+          </form>
         </div>
       )}
       {/* Commission Plan Modal */}
