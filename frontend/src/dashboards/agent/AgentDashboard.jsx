@@ -27,6 +27,7 @@ const AgentDashboard = () => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showMap, setShowMap] = useState(false);
+  const [selectedMarker, setSelectedMarker] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('UPI'); // 'UPI' or 'Manual'
   const [showOnboardModal, setShowOnboardModal] = useState(false);
   const [onboardForm, setOnboardForm] = useState({ name: '', email: '', phone: '', role: 'Agent', location: '' });
@@ -1773,29 +1774,45 @@ const AgentDashboard = () => {
 
                        {/* Map Markers */}
                        {[
-                         { x: '20%', y: '30%', label: 'North Zone', active: true },
-                         { x: '50%', y: '50%', label: 'Central Hub', active: true },
-                         { x: '75%', y: '70%', label: 'South Zone', active: false },
-                         { x: '40%', y: '20%', label: 'West Region', active: true },
+                         { x: '20%', y: '30%', label: 'North Zone', active: true, agents: 45, shops: 120 },
+                         { x: '50%', y: '50%', label: 'Central Hub', active: true, agents: 89, shops: 340 },
+                         { x: '75%', y: '70%', label: 'South Zone', active: false, agents: 12, shops: 45 },
+                         { x: '40%', y: '20%', label: 'West Region', active: true, agents: 34, shops: 110 },
                        ].map((marker, i) => (
-                         <div key={i} className="absolute flex flex-col items-center group cursor-pointer" style={{ left: marker.x, top: marker.y }}>
-                            <div className={`w-4 h-4 rounded-full border-4 border-white shadow-lg animate-pulse ${marker.active ? 'bg-emerald-500' : 'bg-gray-400'}`}></div>
-                            <div className="mt-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-lg border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity">
+                         <div 
+                           key={i} 
+                           onClick={() => {
+                             setSelectedMarker(marker);
+                             addNotification({ title: 'Region Selected', message: `Showing live data for ${marker.label}`, type: 'success' });
+                           }}
+                           className="absolute flex flex-col items-center group cursor-pointer transition-all hover:scale-110 z-10" 
+                           style={{ left: marker.x, top: marker.y }}
+                         >
+                            <div className={`w-5 h-5 rounded-full border-4 border-white shadow-xl animate-pulse ${
+                              selectedMarker?.label === marker.label ? 'bg-primary-light scale-125 ring-4 ring-primary-light/30' :
+                              marker.active ? 'bg-emerald-500' : 'bg-gray-400'
+                            }`}></div>
+                            <div className={`mt-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-lg border border-white/10 transition-all ${
+                              selectedMarker?.label === marker.label ? 'opacity-100 translate-y-0' : 'opacity-0 group-hover:opacity-100 translate-y-1'
+                            }`}>
                                <span className="text-[10px] font-black text-white whitespace-nowrap">{marker.label}</span>
                             </div>
                          </div>
                        ))}
 
-                       <div className="absolute bottom-8 left-8 p-6 bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 max-w-xs space-y-4">
-                          <h4 className="text-white font-bold text-sm">Live Network Stats</h4>
-                          <div className="grid grid-cols-2 gap-4">
+                       <div className="absolute bottom-8 left-8 p-6 bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 max-w-xs space-y-4 animate-in slide-in-from-left-4 duration-500">
+                          <div className="flex items-center justify-between gap-4">
+                             <h4 className="text-white font-bold text-sm">{selectedMarker ? selectedMarker.label : 'Global Overview'}</h4>
+                             {selectedMarker && <button onClick={(e) => { e.stopPropagation(); setSelectedMarker(null); }} className="text-[10px] text-primary-light font-black uppercase hover:underline">Reset</button>}
+                          </div>
+                          <div className="grid grid-cols-2 gap-6">
                              <div>
-                                <p className="text-[10px] text-white/50 uppercase font-black">Active Regions</p>
-                                <p className="text-xl font-bold text-white">12</p>
+                                <p className="text-[10px] text-white/50 uppercase font-black">{selectedMarker ? 'Active Agents' : 'Active Regions'}</p>
+                                <p className="text-xl font-bold text-white tracking-tight">{selectedMarker ? selectedMarker.agents : '12'}</p>
                              </div>
                              <div>
-                                <p className="text-[10px] text-white/50 uppercase font-black">Total Reach</p>
-                                <p className="text-xl font-bold text-emerald-400">85%</p>
+                                <p className="text-[10px] text-white/50 uppercase font-black">{selectedMarker ? 'Total Shops' : 'Total Reach'}</p>
+                                <p className="text-xl font-bold text-emerald-400 tracking-tight">{selectedMarker ? selectedMarker.shops : '85%'}</p>
                              </div>
                           </div>
                        </div>
