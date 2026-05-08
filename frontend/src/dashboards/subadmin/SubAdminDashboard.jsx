@@ -1114,6 +1114,7 @@ const SubAdminDashboard = () => {
                 <div key={section.title} className="card-premium space-y-4">
                   <h4 className="font-bold dark:text-white text-lg border-b border-border-light dark:border-border-dark pb-3">{section.title}</h4>
                   <div className="space-y-2">
+                    {section.items.map((item) => (
                        <div 
                         key={item} 
                         onClick={() => {
