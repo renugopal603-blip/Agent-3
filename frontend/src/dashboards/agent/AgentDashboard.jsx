@@ -135,7 +135,7 @@ const AgentDashboard = () => {
         sales: '₹0', 
         status: 'Pending Review', 
         rating: 'N/A',
-        date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: '2026' }),
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
         documents: {
           license: (shopForm.documents && shopForm.documents.licenseName) ? shopForm.documents.licenseName : '',
           gst: (shopForm.documents && shopForm.documents.gstName) ? shopForm.documents.gstName : ''
