@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Map, Settings, Bell,
   CheckSquare, CheckCircle, FileText, BarChart2,
   Clock, LogOut, Briefcase, LifeBuoy, Sun, Moon, User,
-  Lock, BellRing, Palette, ChevronRight, Download, Gift, Trophy, Zap, Filter,
+  Lock, BellRing, Palette, ChevronRight, Download, Gift, Trophy, Zap, Filter, Trash2,
   Key, History, X, Edit, Eye, XCircle, Phone, Mail, MapPin, Plus, Send
 } from 'lucide-react';
 
@@ -236,6 +236,7 @@ const SubAdminDashboard = () => {
                     <th className="pb-4 font-bold">Role</th>
                     <th className="pb-4 font-bold">Territory</th>
                     <th className="pb-4 font-bold">Status</th>
+                    <th className="pb-4 font-bold text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border-light dark:divide-border-dark">
@@ -252,6 +253,26 @@ const SubAdminDashboard = () => {
                       <td className="py-4 text-sm text-text-secondary-light">{a.role}</td>
                       <td className="py-4 text-sm text-text-secondary-light">{a.territory}</td>
                       <td className="py-4"><span className={`px-2 py-1 text-[10px] rounded-lg font-bold uppercase ${a.status === 'Active' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}`}>{a.status}</span></td>
+                      <td className="py-4 text-right">
+                        <div className="flex justify-end gap-2">
+                          <button 
+                            onClick={() => addNotification({ title: 'Edit Agent', message: `Opening profile for ${a.name}...`, type: 'info' })}
+                            className="p-2 bg-gray-50 dark:bg-secondary-dark rounded-xl hover:bg-primary-light hover:text-white transition-all shadow-sm"
+                          >
+                            <Edit size={14} />
+                          </button>
+                          <button 
+                            onClick={() => {
+                              if(window.confirm(`Are you sure you want to remove ${a.name} from your territory?`)) {
+                                addNotification({ title: 'Agent Removed', message: `${a.name} has been detached from your management.`, type: 'success' });
+                              }
+                            }}
+                            className="p-2 bg-error/5 text-error rounded-xl hover:bg-error hover:text-white transition-all shadow-sm"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
