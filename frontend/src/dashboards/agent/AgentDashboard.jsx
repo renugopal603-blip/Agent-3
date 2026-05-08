@@ -175,7 +175,6 @@ const AgentDashboard = () => {
 
   const stats = [
     { title: 'Total Earnings', value: '₹42,850', icon: <Wallet />, color: 'bg-emerald-500', trend: '+12.5%' },
-    { title: 'Active Members', value: '156', icon: <Users />, color: 'bg-blue-500', trend: '+5.2%' },
     { title: 'Shop Onboarded', value: '12', icon: <Store />, color: 'bg-orange-500', trend: '+2 this week' },
     { title: 'Current Target', value: '85%', icon: <Target />, color: 'bg-purple-500', trend: 'In Progress' },
   ];
@@ -237,9 +236,9 @@ const AgentDashboard = () => {
                 <h3 className="text-lg font-bold dark:text-white">Recent Activities</h3>
                 <div className="space-y-4">
                   {[
-                    { title: 'New Member Joined', desc: 'Rahul S. via referral link', time: '2h ago', icon: <Users />, color: 'text-blue-500' },
-                    { title: 'Commission Credited', desc: 'From Shop: Fresh Mart', time: '5h ago', icon: <Wallet />, color: 'text-emerald-500' },
+                    { title: 'Shop Registration', desc: 'New Shop: Fresh Mart', time: '5h ago', icon: <Store />, color: 'text-emerald-500' },
                     { title: 'KYC Verified', desc: 'Your KYC was approved by Admin', time: '1d ago', icon: <ShieldCheck />, color: 'text-purple-500' },
+                    { title: 'Payment Received', desc: 'Payout for April processed', time: '2d ago', icon: <Wallet />, color: 'text-blue-500' },
                   ].map((activity, i) => (
                     <div key={i} className="flex gap-4 p-3 bg-gray-50 dark:bg-secondary-dark rounded-xl">
                       <div className={`p-2 rounded-lg bg-white dark:bg-surface-dark ${activity.color} shadow-sm`}>
@@ -259,22 +258,6 @@ const AgentDashboard = () => {
                 >
                   View All History
                 </button>
-              </div>
-
-              {/* Quick Onboarding Card */}
-              <div className="card-premium bg-gradient-to-br from-emerald-500 to-emerald-600 border-none text-white p-6 relative overflow-hidden group">
-                <div className="relative z-10 space-y-4">
-                  <h3 className="text-xl font-black">Expand Your Network</h3>
-                  <p className="text-xs opacity-90 leading-relaxed">Onboard new members directly to your downline and start earning multi-level commissions today.</p>
-                  <button 
-                    onClick={() => setActiveTab('Onboard New Member')}
-                    className="w-full bg-white text-emerald-600 font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:scale-[1.02] transition-all shadow-lg"
-                  >
-                    <PlusSquare size={18} />
-                    Onboard New Member
-                  </button>
-                </div>
-                <Users size={120} className="absolute -right-8 -bottom-8 opacity-10 group-hover:scale-110 transition-transform duration-700" />
               </div>
             </div>
           </div>
@@ -2142,11 +2125,6 @@ const AgentDashboard = () => {
             <SidebarLink icon={<User size={18} />} label="My Profile" active={activeTab === 'My Profile'} onClick={() => setActiveTab('My Profile')} />
             <SidebarLink icon={<ShieldCheck size={18} />} label="KYC Status" active={activeTab === 'KYC Status'} onClick={() => setActiveTab('KYC Status')} />
             <SidebarLink icon={<Lock size={18} />} label="Security Deposit" active={activeTab === 'Security Deposit'} onClick={() => setActiveTab('Security Deposit')} />
-          </SidebarSection>
-
-          <SidebarSection title="NETWORK">
-            <SidebarLink icon={<Users size={18} />} label="My Members" active={activeTab === 'My Members'} onClick={() => setActiveTab('My Members')} badge="156" />
-            <SidebarLink icon={<LinkIcon size={18} />} label="Referral Links" active={activeTab === 'Referral Links'} onClick={() => setActiveTab('Referral Links')} />
           </SidebarSection>
 
           <SidebarSection title="OPERATIONS">
