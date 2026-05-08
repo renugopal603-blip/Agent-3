@@ -30,7 +30,19 @@ const AgentDashboard = () => {
   const [paymentMethod, setPaymentMethod] = useState('UPI'); // 'UPI' or 'Manual'
   const [showOnboardModal, setShowOnboardModal] = useState(false);
   const [onboardForm, setOnboardForm] = useState({ name: '', email: '', phone: '', role: 'Agent', location: '' });
-  const [shopForm, setShopForm] = useState({ name: '', category: 'Grocery', owner: '', location: '', contact: '' });
+  const [shopForm, setShopForm] = useState({ 
+    name: '', 
+    category: 'Grocery', 
+    owner: '', 
+    location: '', 
+    contact: '',
+    documents: {
+      license: null,
+      licenseName: '',
+      gst: null,
+      gstName: ''
+    }
+  });
   const [showShopModal, setShowShopModal] = useState(false);
   const [settings, setSettings] = useState({
     twoFactor: true,
@@ -2300,11 +2312,52 @@ const AgentDashboard = () => {
               <div className="p-6 bg-emerald-500/5 border-2 border-dashed border-emerald-500/20 rounded-[32px] space-y-4">
                 <p className="text-[10px] text-text-secondary-light font-black mb-2 uppercase tracking-widest">Required Documents</p>
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <button className="flex-1 py-4 bg-white dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-2xl text-sm font-bold dark:text-white hover:border-emerald-500 hover:shadow-lg transition-all flex items-center justify-center gap-3">
-                    <FileText size={20} className="text-emerald-500" /> Shop License
+                  <input 
+                    type="file" 
+                    id="shopLicense" 
+                    className="hidden" 
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) setShopForm({
+                        ...shopForm, 
+                        documents: { ...shopForm.documents, license: file, licenseName: file.name }
+                      });
+                    }}
+                  />
+                  <button 
+                    onClick={() => document.getElementById('shopLicense').click()}
+                    className={`flex-1 py-4 rounded-2xl text-sm font-bold transition-all flex items-center justify-center gap-3 border ${
+                      shopForm.documents.licenseName 
+                        ? 'bg-emerald-500/10 border-emerald-500 text-emerald-600' 
+                        : 'bg-white dark:bg-secondary-dark border-border-light dark:border-border-dark dark:text-white hover:border-emerald-500 hover:shadow-lg'
+                    }`}
+                  >
+                    <FileText size={20} className="text-emerald-500" /> 
+                    {shopForm.documents.licenseName || 'Shop License'}
                   </button>
-                  <button className="flex-1 py-4 bg-white dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-2xl text-sm font-bold dark:text-white hover:border-emerald-500 hover:shadow-lg transition-all flex items-center justify-center gap-3">
-                    <FileText size={20} className="text-emerald-500" /> GST / PAN
+
+                  <input 
+                    type="file" 
+                    id="gstPan" 
+                    className="hidden" 
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) setShopForm({
+                        ...shopForm, 
+                        documents: { ...shopForm.documents, gst: file, gstName: file.name }
+                      });
+                    }}
+                  />
+                  <button 
+                    onClick={() => document.getElementById('gstPan').click()}
+                    className={`flex-1 py-4 rounded-2xl text-sm font-bold transition-all flex items-center justify-center gap-3 border ${
+                      shopForm.documents.gstName 
+                        ? 'bg-emerald-500/10 border-emerald-500 text-emerald-600' 
+                        : 'bg-white dark:bg-secondary-dark border-border-light dark:border-border-dark dark:text-white hover:border-emerald-500 hover:shadow-lg'
+                    }`}
+                  >
+                    <FileText size={20} className="text-emerald-500" /> 
+                    {shopForm.documents.gstName || 'GST / PAN'}
                   </button>
                 </div>
               </div>
@@ -2328,10 +2381,19 @@ const AgentDashboard = () => {
                     sales: '₹0', 
                     status: 'Pending Review', 
                     rating: 'N/A',
-                    date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: '2026' })
+                    date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: '2026' }),
+                    documents: {
+                      license: shopForm.documents.licenseName,
+                      gst: shopForm.documents.gstName
+                    }
                   };
                   setShops([...shops, newShop]);
                   setShowShopModal(false);
+                  // Reset form
+                  setShopForm({ 
+                    name: '', category: 'Grocery', owner: '', location: '', contact: '',
+                    documents: { license: null, licenseName: '', gst: null, gstName: '' }
+                  });
                   addNotification({ title: 'Shop Added', message: `${shopForm.name} registration is pending approval.`, type: 'success' });
                 }}
                 className="flex-1 py-4 bg-emerald-500 text-white rounded-2xl font-black text-sm shadow-xl shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
