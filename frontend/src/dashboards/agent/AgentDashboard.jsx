@@ -1543,8 +1543,6 @@ const AgentDashboard = () => {
                   </button>
                 </div>
               </div>
-                </div>
-              </div>
             </div>
           </div>
         );
