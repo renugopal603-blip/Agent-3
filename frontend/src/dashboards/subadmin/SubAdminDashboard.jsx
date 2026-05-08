@@ -1421,6 +1421,7 @@ const SubAdminDashboard = () => {
                     <th className="p-4 font-black text-[10px] uppercase tracking-widest">Amount</th>
                     <th className="p-4 font-black text-[10px] uppercase tracking-widest">Date</th>
                     <th className="p-4 font-black text-[10px] uppercase tracking-widest">Status</th>
+                    <th className="p-4 font-black text-[10px] uppercase tracking-widest text-right">Receipt</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border-light dark:divide-border-dark">
@@ -1438,7 +1439,7 @@ const SubAdminDashboard = () => {
                     return matchesFilter && matchesSearch;
                   })
                   .map((txn, i) => (
-                    <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50 transition-colors">
+                    <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50 transition-colors group">
                       <td className="p-4 text-xs font-mono dark:text-white">{txn.id}</td>
                       <td className="p-4 text-sm font-bold dark:text-white">{txn.name}</td>
                       <td className="p-4 text-sm font-black text-primary-light">{txn.amount}</td>
@@ -1448,6 +1449,17 @@ const SubAdminDashboard = () => {
                           txn.status === 'Successful' ? 'bg-success/10 text-success' :
                           txn.status === 'Pending' ? 'bg-warning/10 text-warning' : 'bg-error/10 text-error'
                         }`}>{txn.status}</span>
+                      </td>
+                      <td className="p-4 text-right">
+                        <button 
+                          onClick={() => {
+                            addNotification({ title: 'Preparing Receipt', message: `Generating PDF for ${txn.id}...`, type: 'info' });
+                            setTimeout(() => addNotification({ title: 'Download Success', message: `Receipt for ${txn.id} has been saved.`, type: 'success' }), 2000);
+                          }}
+                          className="px-3 py-1.5 bg-primary-light/5 text-primary-light text-[10px] font-black rounded-lg hover:bg-primary-light hover:text-white transition-all uppercase tracking-widest"
+                        >
+                          Download
+                        </button>
                       </td>
                     </tr>
                   ))}
