@@ -63,6 +63,7 @@ const SubAdminDashboard = () => {
   const [timeRange, setTimeRange] = useState('Yesterday');
   const [showTimeDropdown, setShowTimeDropdown] = useState(false);
   const [financeFilter, setFinanceFilter] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
   const [supportTickets, setSupportTickets] = useState([
     { id: 'TKT-4821', subject: 'Agent unable to login', by: 'Amit Singh', priority: 'High', status: 'Open', time: '10 min ago' },
     { id: 'TKT-4820', subject: 'Shop KYC document rejected incorrectly', by: 'Fresh Mart', priority: 'High', status: 'In Progress', time: '1h ago' },
@@ -1360,24 +1361,38 @@ const SubAdminDashboard = () => {
               </div>
             </div>
 
-            {/* Filter Chips */}
-            <div className="flex items-center gap-3">
-              {['All', 'Successful', 'Pending', 'Refunded'].map(filter => (
-                <button 
-                  key={filter}
-                  onClick={() => {
-                    setFinanceFilter(filter);
-                    addNotification({ title: 'Filter Updated', message: `Showing ${filter} transactions`, type: 'info' });
-                  }}
-                  className={`px-6 py-2 rounded-full text-xs font-black transition-all duration-300 ${
-                    financeFilter === filter 
-                      ? 'bg-primary-light text-white shadow-lg shadow-primary-light/20 scale-105' 
-                      : 'bg-gray-100 dark:bg-secondary-dark text-text-secondary-light hover:bg-gray-200 dark:hover:bg-background-dark'
-                  }`}
-                >
-                  {filter}
-                </button>
-              ))}
+            {/* Search and Filter Row */}
+            <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+              <div className="relative w-full md:w-96">
+                <BarChart2 className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary-light" size={18} />
+                <input 
+                  type="text"
+                  placeholder="Search Txn ID, User or Amount..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light rounded-2xl outline-none dark:text-white font-bold transition-all"
+                />
+              </div>
+
+              {/* Filter Chips */}
+              <div className="flex items-center gap-3 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto">
+                {['All', 'Successful', 'Pending', 'Refunded'].map(filter => (
+                  <button 
+                    key={filter}
+                    onClick={() => {
+                      setFinanceFilter(filter);
+                      addNotification({ title: 'Filter Updated', message: `Showing ${filter} transactions`, type: 'info' });
+                    }}
+                    className={`px-6 py-2 rounded-full text-xs font-black transition-all duration-300 whitespace-nowrap ${
+                      financeFilter === filter 
+                        ? 'bg-primary-light text-white shadow-lg shadow-primary-light/20 scale-105' 
+                        : 'bg-gray-100 dark:bg-secondary-dark text-text-secondary-light hover:bg-gray-200 dark:hover:bg-background-dark'
+                    }`}
+                  >
+                    {filter}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Commission Stats */}
@@ -1415,7 +1430,13 @@ const SubAdminDashboard = () => {
                     { id: 'TXN-9018', name: 'Rahul Dev (Style Studio)', amount: '₹2,100', date: 'Oct 11, 2023', status: 'Successful' },
                     { id: 'TXN-9015', name: 'Vikram Kumar (Gadget Zone)', amount: '₹420', date: 'Oct 11, 2023', status: 'Refunded' },
                   ]
-                  .filter(txn => financeFilter === 'All' || txn.status === financeFilter)
+                  .filter(txn => {
+                    const matchesFilter = financeFilter === 'All' || txn.status === financeFilter;
+                    const matchesSearch = txn.id.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                        txn.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                        txn.amount.toLowerCase().includes(searchQuery.toLowerCase());
+                    return matchesFilter && matchesSearch;
+                  })
                   .map((txn, i) => (
                     <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50 transition-colors">
                       <td className="p-4 text-xs font-mono dark:text-white">{txn.id}</td>
