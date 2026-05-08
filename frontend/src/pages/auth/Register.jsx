@@ -181,6 +181,19 @@ const Register = () => {
 
       await register(submissionData);
       
+      // Store in localStorage for persistence
+      const currentRegistrations = JSON.parse(localStorage.getItem('agentRegistrations') || '[]');
+      const newRegistration = {
+        ...submissionData,
+        id: `AGT-${Math.floor(100000 + Math.random() * 900000)}`,
+        submittedAt: new Date().toISOString(),
+        status: 'Pending'
+      };
+      currentRegistrations.push(newRegistration);
+      localStorage.setItem('agentRegistrations', JSON.stringify(currentRegistrations));
+      // Also store as 'lastRegistration' for quick access
+      localStorage.setItem('lastRegistration', JSON.stringify(newRegistration));
+
       // Trigger notification for Admin
       addNotification({
         title: 'New Agent Registration',
