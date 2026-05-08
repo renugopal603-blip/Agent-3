@@ -30,6 +30,7 @@ const AgentDashboard = () => {
   const [selectedMarker, setSelectedMarker] = useState(null);
   const [showExpansionModal, setShowExpansionModal] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [analyticsTimeframe, setAnalyticsTimeframe] = useState('Monthly View');
   const [paymentMethod, setPaymentMethod] = useState('UPI'); // 'UPI' or 'Manual'
   const [showOnboardModal, setShowOnboardModal] = useState(false);
   const [onboardForm, setOnboardForm] = useState({ name: '', email: '', phone: '', role: 'Agent', location: '' });
@@ -1569,6 +1570,27 @@ const AgentDashboard = () => {
         );
 
       case 'Analytics':
+        const timeframeData = {
+          'Monthly View': [
+            { name: 'Week 1', sales: 4000, commission: 2400 },
+            { name: 'Week 2', sales: 3000, commission: 1398 },
+            { name: 'Week 3', sales: 2000, commission: 9800 },
+            { name: 'Week 4', sales: 2780, commission: 3908 },
+          ],
+          'Quarterly View': [
+            { name: 'Jan', sales: 12000, commission: 7200 },
+            { name: 'Feb', sales: 15000, commission: 9000 },
+            { name: 'Mar', sales: 18000, commission: 10800 },
+          ],
+          'Yearly View': [
+            { name: '2023', sales: 150000, commission: 90000 },
+            { name: '2024', sales: 210000, commission: 126000 },
+            { name: '2025', sales: 280000, commission: 168000 },
+            { name: '2026', sales: 350000, commission: 210000 },
+          ]
+        };
+        const currentData = timeframeData[analyticsTimeframe] || timeframeData['Monthly View'];
+
         return (
           <div className="p-8 space-y-8 animate-in slide-in-from-bottom-4 duration-500">
             <div className="flex justify-between items-center">
@@ -1576,7 +1598,14 @@ const AgentDashboard = () => {
                 <h3 className="text-2xl font-bold dark:text-white">Deep Analytics</h3>
                 <p className="text-sm text-text-secondary-light">Performance metrics across your territory.</p>
               </div>
-              <select className="bg-gray-100 dark:bg-secondary-dark border-none rounded-lg text-sm dark:text-white px-4 py-2 outline-none">
+              <select 
+                value={analyticsTimeframe}
+                onChange={(e) => {
+                  setAnalyticsTimeframe(e.target.value);
+                  addNotification({ title: 'View Updated', message: `Showing ${e.target.value} data.`, type: 'info' });
+                }}
+                className="bg-gray-100 dark:bg-secondary-dark border-none rounded-lg text-sm dark:text-white px-4 py-2 outline-none cursor-pointer hover:bg-gray-200 dark:hover:bg-secondary-dark/80 transition-all font-bold"
+              >
                 <option>Monthly View</option>
                 <option>Quarterly View</option>
                 <option>Yearly View</option>
@@ -1585,10 +1614,10 @@ const AgentDashboard = () => {
 
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
               <div className="xl:col-span-2 card-premium space-y-6">
-                <h4 className="font-bold dark:text-white">Network Growth vs Sales</h4>
+                <h4 className="font-bold dark:text-white">Network Growth vs Sales ({analyticsTimeframe})</h4>
                 <div className="h-[350px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={chartData}>
+                    <LineChart data={currentData}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
                       <XAxis dataKey="name" fontSize={12} />
                       <YAxis fontSize={12} />
