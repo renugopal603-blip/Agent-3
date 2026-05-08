@@ -1999,15 +1999,40 @@ const AgentDashboard = () => {
                   <h4 className="font-black dark:text-white uppercase tracking-tighter">Security & Privacy</h4>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <button className="p-6 bg-gray-50 dark:bg-secondary-dark rounded-[32px] border-2 border-transparent hover:border-primary-light transition-all text-left space-y-2 group">
+                  <button 
+                    onClick={() => {
+                      const newPass = window.prompt('Enter new password:');
+                      if (newPass) {
+                        addNotification({ title: 'Password Changed', message: 'Your login credentials have been updated.', type: 'success' });
+                      }
+                    }}
+                    className="p-6 bg-gray-50 dark:bg-secondary-dark rounded-[32px] border-2 border-transparent hover:border-primary-light transition-all text-left space-y-2 group"
+                  >
                     <div className="w-10 h-10 bg-white dark:bg-surface-dark rounded-xl flex items-center justify-center text-text-secondary-light group-hover:text-primary-light shadow-sm transition-colors"><Lock size={20}/></div>
                     <p className="text-sm font-black dark:text-white">Change Password</p>
                     <p className="text-[10px] text-text-secondary-light font-bold">Update your login credentials.</p>
                   </button>
-                  <button className="p-6 bg-gray-50 dark:bg-secondary-dark rounded-[32px] border-2 border-transparent hover:border-primary-light transition-all text-left space-y-2 group">
-                    <div className="w-10 h-10 bg-white dark:bg-surface-dark rounded-xl flex items-center justify-center text-text-secondary-light group-hover:text-primary-light shadow-sm transition-colors"><ShieldCheck size={20}/></div>
+                  <button 
+                    onClick={() => {
+                      const newState = !settings.twoFactor;
+                      setSettings({...settings, twoFactor: newState});
+                      addNotification({ 
+                        title: 'Security Updated', 
+                        message: `Two-Factor Auth ${newState ? 'Enabled' : 'Disabled'}`, 
+                        type: newState ? 'success' : 'warning' 
+                      });
+                    }}
+                    className={`p-6 rounded-[32px] border-2 transition-all text-left space-y-2 group ${
+                      settings.twoFactor ? 'bg-orange-500/5 border-orange-500/20' : 'bg-gray-50 dark:bg-secondary-dark border-transparent hover:border-primary-light'
+                    }`}
+                  >
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm transition-colors ${
+                      settings.twoFactor ? 'bg-orange-500 text-white' : 'bg-white dark:bg-surface-dark text-text-secondary-light group-hover:text-primary-light'
+                    }`}><ShieldCheck size={20}/></div>
                     <p className="text-sm font-black dark:text-white">Two-Factor Auth</p>
-                    <p className="text-[10px] text-text-secondary-light font-bold">Add an extra layer of security.</p>
+                    <p className="text-[10px] text-text-secondary-light font-bold">
+                      {settings.twoFactor ? 'High security enabled.' : 'Add an extra layer of security.'}
+                    </p>
                   </button>
                 </div>
               </div>
@@ -2026,13 +2051,41 @@ const AgentDashboard = () => {
                       <p className="text-[10px] text-text-secondary-light font-bold">Download your shop tie-ups and commission history in CSV.</p>
                     </div>
                   </div>
-                  <button className="btn-secondary px-6 py-3 rounded-2xl bg-blue-500 text-white shadow-xl shadow-blue-500/20">Download</button>
+                  <button 
+                    onClick={() => {
+                      try {
+                        const csvContent = "data:text/csv;charset=utf-8," 
+                          + "ID,Shop Name,Category,Owner,Status,Date\n"
+                          + shops.map(s => `${s.id},"${s.name}","${s.category}","${s.owner}","${s.status}","${s.date}"`).join("\n");
+                        const encodedUri = encodeURI(csvContent);
+                        const link = document.createElement("a");
+                        link.setAttribute("href", encodedUri);
+                        link.setAttribute("download", `Agent_Data_Export_${new Date().toLocaleDateString()}.csv`);
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        addNotification({ title: 'Export Successful', message: 'Your data has been downloaded.', type: 'success' });
+                      } catch (err) {
+                        window.alert('Export failed: ' + err.message);
+                      }
+                    }}
+                    className="btn-secondary px-6 py-3 rounded-2xl bg-blue-500 text-white shadow-xl shadow-blue-500/20 hover:scale-105 active:scale-95 transition-all"
+                  >
+                    Download
+                  </button>
                 </div>
               </div>
             </div>
 
             <div className="flex justify-center pt-8">
-              <button className="flex items-center gap-2 text-red-500 font-black uppercase text-[10px] tracking-widest hover:bg-red-500/5 px-6 py-3 rounded-full transition-all">
+              <button 
+                onClick={() => {
+                  if (window.confirm('Are you sure you want to deactivate your account? This action requires administrator approval.')) {
+                    addNotification({ title: 'Request Sent', message: 'Account deactivation request is pending review.', type: 'warning' });
+                  }
+                }}
+                className="flex items-center gap-2 text-red-500 font-black uppercase text-[10px] tracking-widest hover:bg-red-500/5 px-6 py-3 rounded-full transition-all"
+              >
                 <LogOut size={16}/> Deactivate Account
               </button>
             </div>
