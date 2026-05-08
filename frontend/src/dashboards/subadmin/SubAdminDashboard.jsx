@@ -1732,10 +1732,7 @@ const SidebarLink = ({ icon, label, active, onClick, collapsed }) => (
     {collapsed && (
       <div className="absolute left-full ml-4 px-2 py-1 bg-gray-900 text-white text-[10px] font-black rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
         {label}
-        active ? 'bg-primary-light text-white' : 'bg-gray-100 dark:bg-secondary-dark text-text-secondary-light'
-      }`}>
-        {badge}
-      </span>
+      </div>
     )}
   </div>
 );
