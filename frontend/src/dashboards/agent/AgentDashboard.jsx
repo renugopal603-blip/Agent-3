@@ -439,14 +439,14 @@ const AgentDashboard = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-6">
-                  <h4 className="font-bold dark:text-white">Uploaded Documents</h4>
+                  <h4 className="font-bold dark:text-white">Uploaded Identity</h4>
                   <div className="space-y-4">
                     {[
                       { name: 'Aadhar Card', status: 'Approved', date: 'Jan 16, 2024' },
                       { name: 'PAN Card', status: 'Approved', date: 'Jan 16, 2024' },
                       { name: 'Address Proof', status: 'Approved', date: 'Jan 16, 2024' },
                     ].map((doc, i) => (
-                      <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-secondary-dark rounded-xl border border-border-light dark:border-border-dark">
+                      <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-secondary-dark rounded-xl border border-border-light dark:border-border-dark group hover:border-primary-light transition-all">
                         <div className="flex items-center gap-3">
                           <FileText className="text-primary-light" size={20} />
                           <div>
@@ -454,7 +454,41 @@ const AgentDashboard = () => {
                             <p className="text-[10px] text-text-secondary-light">Verified on {doc.date}</p>
                           </div>
                         </div>
-                        <CheckCircle className="text-success" size={16} />
+                        <div className="flex items-center gap-2">
+                          <button 
+                            onClick={() => {
+                              addNotification({ title: 'Preparing Download', message: `Securing ${doc.name}...`, type: 'info' });
+                              setTimeout(() => addNotification({ title: 'Download Ready', message: `${doc.name} saved.`, type: 'success' }), 1500);
+                            }}
+                            className="p-2 hover:bg-white dark:hover:bg-surface-dark rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                          >
+                            <Download size={14} className="text-text-secondary-light hover:text-primary-light" />
+                          </button>
+                          <CheckCircle className="text-success" size={16} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <h4 className="font-bold dark:text-white mt-8">Business Certificates</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { name: 'Trade_License.pdf', size: '2.4 MB' },
+                      { name: 'GST_Cert.png', size: '1.1 MB' }
+                    ].map((doc, i) => (
+                      <div 
+                        key={i} 
+                        onClick={() => {
+                          addNotification({ title: 'System Access', message: `Opening ${doc.name} for viewing...`, type: 'info' });
+                          setTimeout(() => addNotification({ title: 'File Viewed', message: `${doc.name} successfully retrieved.`, type: 'success' }), 2000);
+                        }}
+                        className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark flex items-center justify-between group cursor-pointer hover:border-primary-light transition-all active:scale-95"
+                      >
+                        <div>
+                          <p className="text-[10px] font-black dark:text-white truncate max-w-[100px]">{doc.name}</p>
+                          <p className="text-[8px] text-text-secondary-light font-bold uppercase">{doc.size}</p>
+                        </div>
+                        <Eye size={16} className="text-text-secondary-light group-hover:text-primary-light" />
                       </div>
                     ))}
                   </div>
