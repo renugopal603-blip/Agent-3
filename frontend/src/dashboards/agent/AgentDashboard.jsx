@@ -98,43 +98,64 @@ const AgentDashboard = () => {
   };
 
   const handleSubmitShop = () => {
-    console.log('Submitting shop:', shopForm);
-    if (!shopForm.name || !shopForm.owner || !shopForm.contact) {
-      addNotification({ title: 'Missing Info', message: 'Please fill in the shop name, owner, and contact number.', type: 'error' });
-      return;
-    }
-
-    const currentShops = Array.isArray(shops) ? shops : [];
-    const newId = currentShops.length > 0 ? Math.max(...currentShops.map(s => s.id)) + 1 : 1;
-    const newShop = { 
-      id: newId, 
-      name: shopForm.name, 
-      category: shopForm.category || 'Grocery', 
-      owner: shopForm.owner, 
-      sales: '₹0', 
-      status: 'Pending Review', 
-      rating: 'N/A',
-      date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: '2026' }),
-      documents: {
-        license: shopForm.documents?.licenseName || '',
-        gst: shopForm.documents?.gstName || ''
+    try {
+      console.log('Submitting shop:', shopForm);
+      if (!shopForm.name || !shopForm.owner || !shopForm.contact) {
+        addNotification({ title: 'Missing Info', message: 'Please fill in all required fields marked with *', type: 'error' });
+        return;
       }
-    };
 
-    setShops([...currentShops, newShop]);
-    setShowShopModal(false);
-    
-    // Reset form
-    setShopForm({ 
-      name: '', 
-      category: 'Grocery', 
-      owner: '', 
-      location: '', 
-      contact: '',
-      documents: { license: null, licenseName: '', gst: null, gstName: '' }
-    });
+      setIsProcessing(true);
 
-    addNotification({ title: 'Shop Added', message: `${shopForm.name} registration is pending approval.`, type: 'success' });
+      const currentShops = Array.isArray(shops) ? shops : [];
+      // Robust ID generation
+      const maxId = currentShops.reduce((max, s) => {
+        const id = parseInt(s.id);
+        return !isNaN(id) ? Math.max(max, id) : max;
+      }, 0);
+      const newId = maxId + 1;
+
+      const newShop = { 
+        id: newId, 
+        name: shopForm.name, 
+        category: shopForm.category || 'Grocery', 
+        owner: shopForm.owner, 
+        sales: '₹0', 
+        status: 'Pending Review', 
+        rating: 'N/A',
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: '2026' }),
+        documents: {
+          license: shopForm.documents?.licenseName || '',
+          gst: shopForm.documents?.gstName || ''
+        }
+      };
+
+      const updatedShops = [...currentShops, newShop];
+      setShops(updatedShops);
+      
+      // Save to localStorage immediately as well
+      localStorage.setItem('agentShops', JSON.stringify(updatedShops));
+
+      // Reset form and close modal
+      setTimeout(() => {
+        setShopForm({ 
+          name: '', 
+          category: 'Grocery', 
+          owner: '', 
+          location: '', 
+          contact: '',
+          documents: { license: null, licenseName: '', gst: null, gstName: '' }
+        });
+        setShowShopModal(false);
+        setIsProcessing(false);
+        addNotification({ title: 'Shop Added', message: `${newShop.name} registration is pending approval.`, type: 'success' });
+      }, 500);
+
+    } catch (error) {
+      console.error('Submit Shop Error:', error);
+      setIsProcessing(false);
+      addNotification({ title: 'System Error', message: 'Failed to save shop. Please try again.', type: 'error' });
+    }
   };
 
   const chartData = [
@@ -2421,14 +2442,19 @@ const AgentDashboard = () => {
               <button 
                 type="button"
                 onClick={handleSubmitShop}
-                disabled={!shopForm.name || !shopForm.owner || !shopForm.contact}
-                className={`flex-1 py-4 rounded-2xl font-black text-sm shadow-xl transition-all ${
-                  (!shopForm.name || !shopForm.owner || !shopForm.contact)
+                disabled={!shopForm.name || !shopForm.owner || !shopForm.contact || isProcessing}
+                className={`flex-1 py-4 rounded-2xl font-black text-sm shadow-xl transition-all flex items-center justify-center gap-2 ${
+                  (!shopForm.name || !shopForm.owner || !shopForm.contact || isProcessing)
                     ? 'bg-gray-300 cursor-not-allowed opacity-50' 
                     : 'bg-emerald-500 text-white shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98]'
                 }`}
               >
-                Submit Registration
+                {isProcessing ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Processing...
+                  </>
+                ) : 'Submit Registration'}
               </button>
             </div>
           </div>
