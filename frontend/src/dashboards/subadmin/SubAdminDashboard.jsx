@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Map, Settings, Bell,
   CheckSquare, CheckCircle, FileText, BarChart2,
   Clock, LogOut, Briefcase, LifeBuoy, Sun, Moon, User,
-  Lock, BellRing, Palette, ChevronRight, Download, Gift, Trophy, Zap,
+  Lock, BellRing, Palette, ChevronRight, Download, Gift, Trophy, Zap, Filter,
   Key, History, X, Edit, Eye, XCircle, Phone, Mail, MapPin, Plus, Send
 } from 'lucide-react';
 
@@ -209,7 +209,24 @@ const SubAdminDashboard = () => {
           <div className="p-8 space-y-8 animate-in fade-in duration-500">
             <div className="flex justify-between items-center">
               <h3 className="text-2xl font-bold dark:text-white">Assigned Agents</h3>
-              <button onClick={() => setShowAddAgentModal(true)} className="btn-primary px-4 py-2 text-sm flex items-center gap-2"><Plus size={16}/> Add Agent</button>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => addNotification({ title: 'System Filter', message: 'Opening advanced agent filters...', type: 'info' })}
+                  className="px-4 py-2 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl text-xs font-black text-text-secondary-light flex items-center gap-2 hover:border-primary-light transition-all"
+                >
+                  <Filter size={14} /> Filters
+                </button>
+                <button 
+                  onClick={() => {
+                    addNotification({ title: 'Exporting Data', message: 'Preparing Agent Ledger (CSV)...', type: 'info' });
+                    setTimeout(() => addNotification({ title: 'Export Ready', message: 'Agent Ledger downloaded successfully.', type: 'success' }), 2000);
+                  }}
+                  className="px-4 py-2 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl text-xs font-black text-text-secondary-light flex items-center gap-2 hover:border-primary-light transition-all"
+                >
+                  <Download size={14} /> Export
+                </button>
+                <button onClick={() => setShowAddAgentModal(true)} className="btn-primary px-4 py-2 text-sm font-black flex items-center gap-2 shadow-lg shadow-primary-light/20"><Plus size={16}/> Add Agent</button>
+              </div>
             </div>
             <div className="card-premium">
               <table className="w-full text-left">
@@ -251,6 +268,23 @@ const SubAdminDashboard = () => {
               <div>
                 <h3 className="text-2xl font-bold dark:text-white">Shop Verification Queue</h3>
                 <p className="text-sm text-text-secondary-light">Review and verify shop tie-up requests from agents.</p>
+              </div>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => addNotification({ title: 'System Filter', message: 'Opening shop verification filters...', type: 'info' })}
+                  className="px-4 py-2 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl text-xs font-black text-text-secondary-light flex items-center gap-2 hover:border-primary-light transition-all"
+                >
+                  <Filter size={14} /> Filters
+                </button>
+                <button 
+                  onClick={() => {
+                    addNotification({ title: 'Preparing Data', message: 'Compiling Shop Verification Report...', type: 'info' });
+                    setTimeout(() => addNotification({ title: 'Secure Download', message: 'Verification report secured and saved.', type: 'success' }), 2000);
+                  }}
+                  className="px-4 py-2 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl text-xs font-black text-text-secondary-light flex items-center gap-2 hover:border-primary-light transition-all"
+                >
+                  <Download size={14} /> Export
+                </button>
               </div>
             </div>
             
@@ -344,8 +378,23 @@ const SubAdminDashboard = () => {
                 <h3 className="text-2xl font-black dark:text-white tracking-tight uppercase">KYC Review Queue</h3>
                 <p className="text-sm text-text-secondary-light">Manage and verify onboarding documents for agents and shops.</p>
               </div>
-              <div className="flex gap-2">
-                <span className="px-4 py-2 bg-primary-light/10 text-primary-light rounded-xl font-black text-xs">
+              <div className="flex gap-2 items-center">
+                <button 
+                  onClick={() => addNotification({ title: 'System Filter', message: 'Opening advanced KYC filters...', type: 'info' })}
+                  className="px-4 py-2 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl text-xs font-black text-text-secondary-light flex items-center gap-2 hover:border-primary-light transition-all"
+                >
+                  <Filter size={14} /> Filters
+                </button>
+                <button 
+                  onClick={() => {
+                    addNotification({ title: 'Exporting KYC Data', message: 'Preparing identity and business ledger...', type: 'info' });
+                    setTimeout(() => addNotification({ title: 'Export Complete', message: 'KYC Document Ledger saved successfully.', type: 'success' }), 2000);
+                  }}
+                  className="px-4 py-2 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl text-xs font-black text-text-secondary-light flex items-center gap-2 hover:border-primary-light transition-all"
+                >
+                  <Download size={14} /> Export
+                </button>
+                <span className="px-4 py-2 bg-primary-light/10 text-primary-light rounded-xl font-black text-xs ml-2">
                   {kycRequests.filter(k => k.status === 'Pending Review').length} Pending
                 </span>
               </div>
