@@ -2061,7 +2061,10 @@ const AgentDashboard = () => {
                 <h3 className="text-2xl font-black dark:text-white">Support Center</h3>
                 <p className="text-text-secondary-light font-bold">Need help? Raise a ticket or browse our FAQ.</p>
               </div>
-              <button className="btn-primary px-6 py-3 rounded-2xl flex items-center gap-2 shadow-xl shadow-primary-light/20">
+              <button 
+                onClick={() => addNotification({ title: 'New Ticket', message: 'Opening the support ticket creation form...', type: 'info' })}
+                className="btn-primary px-6 py-3 rounded-2xl flex items-center gap-2 shadow-xl shadow-primary-light/20 active:scale-95 transition-all"
+              >
                 <PlusSquare size={20}/> New Support Ticket
               </button>
             </div>
@@ -2083,8 +2086,21 @@ const AgentDashboard = () => {
               <div className="p-6 border-b dark:border-border-dark flex justify-between items-center bg-gray-50/50 dark:bg-secondary-dark/30">
                 <h4 className="font-black dark:text-white uppercase tracking-tighter">Recent Tickets</h4>
                 <div className="flex gap-2">
-                  <button className="p-2 hover:bg-white dark:hover:bg-secondary-dark rounded-xl transition-all border border-transparent hover:border-border-light shadow-sm"><Search size={18}/></button>
-                  <button className="p-2 hover:bg-white dark:hover:bg-secondary-dark rounded-xl transition-all border border-transparent hover:border-border-light shadow-sm"><Filter size={18}/></button>
+                  <button 
+                    onClick={() => {
+                      const query = window.prompt("Search Tickets by Subject or ID:");
+                      if (query) addNotification({ title: 'Search Results', message: `Found 2 tickets matching "${query}"`, type: 'info' });
+                    }}
+                    className="p-2 hover:bg-white dark:hover:bg-secondary-dark rounded-xl transition-all border border-transparent hover:border-border-light shadow-sm"
+                  >
+                    <Search size={18}/>
+                  </button>
+                  <button 
+                    onClick={() => addNotification({ title: 'Filter Applied', message: 'Showing active tickets only.', type: 'info' })}
+                    className="p-2 hover:bg-white dark:hover:bg-secondary-dark rounded-xl transition-all border border-transparent hover:border-border-light shadow-sm"
+                  >
+                    <Filter size={18}/>
+                  </button>
                 </div>
               </div>
               <div className="overflow-x-auto">
