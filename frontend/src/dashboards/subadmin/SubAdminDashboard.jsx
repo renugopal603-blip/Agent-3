@@ -62,6 +62,7 @@ const SubAdminDashboard = () => {
   const [showAppearanceSettingsModal, setShowAppearanceSettingsModal] = useState(false);
   const [timeRange, setTimeRange] = useState('Yesterday');
   const [showTimeDropdown, setShowTimeDropdown] = useState(false);
+  const [financeFilter, setFinanceFilter] = useState('All');
   const [supportTickets, setSupportTickets] = useState([
     { id: 'TKT-4821', subject: 'Agent unable to login', by: 'Amit Singh', priority: 'High', status: 'Open', time: '10 min ago' },
     { id: 'TKT-4820', subject: 'Shop KYC document rejected incorrectly', by: 'Fresh Mart', priority: 'High', status: 'In Progress', time: '1h ago' },
@@ -1334,6 +1335,103 @@ const SubAdminDashboard = () => {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        );
+
+      case 'Commission View':
+        return (
+          <div className="p-8 space-y-8 animate-in fade-in duration-500">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-2xl font-bold dark:text-white">Commission & Payouts</h3>
+                <p className="text-sm text-text-secondary-light mt-1">Monitor and manage agent commissions and payout statuses.</p>
+              </div>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => {
+                    addNotification({ title: 'Exporting Ledger', message: 'Preparing financial report (CSV)...', type: 'info' });
+                    setTimeout(() => addNotification({ title: 'Export Ready', message: 'Ledger downloaded successfully.', type: 'success' }), 2000);
+                  }}
+                  className="px-4 py-2 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl text-xs font-black text-text-secondary-light flex items-center gap-2 hover:border-primary-light transition-all"
+                >
+                  <Download size={14} /> Export CSV
+                </button>
+              </div>
+            </div>
+
+            {/* Filter Chips */}
+            <div className="flex items-center gap-3">
+              {['All', 'Successful', 'Pending', 'Refunded'].map(filter => (
+                <button 
+                  key={filter}
+                  onClick={() => {
+                    setFinanceFilter(filter);
+                    addNotification({ title: 'Filter Updated', message: `Showing ${filter} transactions`, type: 'info' });
+                  }}
+                  className={`px-6 py-2 rounded-full text-xs font-black transition-all duration-300 ${
+                    financeFilter === filter 
+                      ? 'bg-primary-light text-white shadow-lg shadow-primary-light/20 scale-105' 
+                      : 'bg-gray-100 dark:bg-secondary-dark text-text-secondary-light hover:bg-gray-200 dark:hover:bg-background-dark'
+                  }`}
+                >
+                  {filter}
+                </button>
+              ))}
+            </div>
+
+            {/* Commission Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { title: 'Total Commission', value: '₹4.8L', icon: <DollarSign size={20} />, color: 'bg-primary-light' },
+                { title: 'Payout Processed', value: '₹3.2L', icon: <CheckCircle size={20} />, color: 'bg-emerald-500' },
+                { title: 'Outstanding Balance', value: '₹1.6L', icon: <Clock size={20} />, color: 'bg-orange-500' },
+              ].map((stat) => (
+                <div key={stat.title} className="card-premium flex items-center gap-4">
+                  <div className={`p-4 ${stat.color} text-white rounded-2xl shadow-lg`}>{stat.icon}</div>
+                  <div>
+                    <p className="text-xs text-text-secondary-light">{stat.title}</p>
+                    <h3 className="text-2xl font-bold dark:text-white">{stat.value}</h3>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="card-premium p-0 overflow-hidden">
+               <table className="w-full text-left">
+                <thead>
+                  <tr className="bg-gray-50 dark:bg-secondary-dark/30 border-b dark:border-border-dark text-text-secondary-light">
+                    <th className="p-4 font-black text-[10px] uppercase tracking-widest">Transaction ID</th>
+                    <th className="p-4 font-black text-[10px] uppercase tracking-widest">Agent / Shop</th>
+                    <th className="p-4 font-black text-[10px] uppercase tracking-widest">Amount</th>
+                    <th className="p-4 font-black text-[10px] uppercase tracking-widest">Date</th>
+                    <th className="p-4 font-black text-[10px] uppercase tracking-widest">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border-light dark:divide-border-dark">
+                  {[
+                    { id: 'TXN-9021', name: 'Amit Singh (Fresh Mart)', amount: '₹1,240', date: 'Oct 12, 2023', status: 'Successful' },
+                    { id: 'TXN-9020', name: 'Priya Verma (ElectroHub)', amount: '₹850', date: 'Oct 12, 2023', status: 'Pending' },
+                    { id: 'TXN-9018', name: 'Rahul Dev (Style Studio)', amount: '₹2,100', date: 'Oct 11, 2023', status: 'Successful' },
+                    { id: 'TXN-9015', name: 'Vikram Kumar (Gadget Zone)', amount: '₹420', date: 'Oct 11, 2023', status: 'Refunded' },
+                  ]
+                  .filter(txn => financeFilter === 'All' || txn.status === financeFilter)
+                  .map((txn, i) => (
+                    <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50 transition-colors">
+                      <td className="p-4 text-xs font-mono dark:text-white">{txn.id}</td>
+                      <td className="p-4 text-sm font-bold dark:text-white">{txn.name}</td>
+                      <td className="p-4 text-sm font-black text-primary-light">{txn.amount}</td>
+                      <td className="p-4 text-xs text-text-secondary-light font-medium">{txn.date}</td>
+                      <td className="p-4">
+                        <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest ${
+                          txn.status === 'Successful' ? 'bg-success/10 text-success' :
+                          txn.status === 'Pending' ? 'bg-warning/10 text-warning' : 'bg-error/10 text-error'
+                        }`}>{txn.status}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         );
