@@ -298,15 +298,36 @@ const SubAdminDashboard = () => {
                       <td className="py-4 text-sm text-text-secondary-light font-medium">{a.territory || a.location}</td>
                       <td className="py-4"><span className={`px-2 py-1 text-[10px] rounded-lg font-bold uppercase ${a.status === 'Active' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}`}>{a.status}</span></td>
                       <td className="py-4 text-right">
-                        <button 
-                          onClick={() => {
-                            setSystemUsers(systemUsers.filter(u => u.id !== a.id));
-                            addNotification({ title: 'Agent Removed', message: `${a.name} has been removed from your territory.`, type: 'error' });
-                          }}
-                          className="p-2 text-text-secondary-light hover:text-error transition-colors"
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                        <div className="flex justify-end gap-1.5">
+                          <button 
+                            onClick={() => addNotification({ title: 'Agent View', message: `Viewing profile for ${a.name}`, type: 'info' })}
+                            className="p-2 bg-gray-100 dark:bg-secondary-dark rounded-xl hover:bg-gray-200 text-text-secondary-light" title="View Profile"
+                          >
+                            <Eye size={14} />
+                          </button>
+                          <button 
+                            onClick={() => addNotification({ title: 'Edit Agent', message: `Opening editor for ${a.name}`, type: 'info' })}
+                            className="p-2 bg-emerald-500/10 text-emerald-500 rounded-xl hover:bg-emerald-500 hover:text-white" title="Edit Info"
+                          >
+                            <Edit size={14} />
+                          </button>
+                          <button 
+                            onClick={() => addNotification({ title: 'Agent History', message: `Retrieving activity log for ${a.name}...`, type: 'info' })}
+                            className="p-2 bg-orange-500/10 text-orange-500 rounded-xl hover:bg-orange-500 hover:text-white" title="History"
+                          >
+                            <History size={14} />
+                          </button>
+                          <button 
+                            onClick={() => {
+                              setSystemUsers(systemUsers.filter(u => u.id !== a.id));
+                              addNotification({ title: 'Agent Removed', message: `${a.name} has been removed from your territory.`, type: 'error' });
+                            }}
+                            className="p-2 bg-error/10 text-error rounded-xl hover:bg-error hover:text-white transition-colors"
+                            title="Delete Agent"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -1623,6 +1644,7 @@ const SubAdminDashboard = () => {
           isOpen={showAddAgentModal} 
           onClose={() => setShowAddAgentModal(false)} 
           onAdd={(agent) => {
+            setSystemUsers([...systemUsers, agent]);
             addNotification({ title: 'Agent Added', message: `${agent.name} has been successfully registered.`, type: 'success' });
             setShowAddAgentModal(false);
           }}
@@ -1791,7 +1813,31 @@ const CommissionPlanModal = ({ isOpen, onClose }) => {
 };
 
 const AddAgentModal = ({ isOpen, onClose, onAdd }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    role: 'District Agent',
+    territory: 'Pune Central'
+  });
+
   if (!isOpen) return null;
+
+  const handleSubmit = () => {
+    if (!formData.name || !formData.phone) {
+      alert('Please fill in Name and Phone number');
+      return;
+    }
+    onAdd({
+      ...formData,
+      id: Date.now(),
+      status: 'Active',
+      lastLogin: 'Never',
+      riskLevel: 'Low'
+    });
+    setFormData({ name: '', phone: '', email: '', role: 'District Agent', territory: 'Pune Central' });
+  };
+
   return (
     <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
@@ -1810,21 +1856,43 @@ const AddAgentModal = ({ isOpen, onClose, onAdd }) => {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase text-text-secondary-light">Full Name</label>
-              <input type="text" placeholder="John Doe" className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
+              <input 
+                type="text" 
+                placeholder="John Doe" 
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" 
+              />
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase text-text-secondary-light">Phone Number</label>
-              <input type="tel" placeholder="+91 00000 00000" className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
+              <input 
+                type="tel" 
+                placeholder="+91 00000 00000" 
+                value={formData.phone}
+                onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" 
+              />
             </div>
           </div>
           <div className="space-y-2">
             <label className="text-[10px] font-black uppercase text-text-secondary-light">Email Address</label>
-            <input type="email" placeholder="agent@example.com" className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
+            <input 
+              type="email" 
+              placeholder="agent@example.com" 
+              value={formData.email}
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" 
+            />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase text-text-secondary-light">Assigned Role</label>
-              <select className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold appearance-none">
+              <select 
+                value={formData.role}
+                onChange={(e) => setFormData({...formData, role: e.target.value})}
+                className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold appearance-none"
+              >
                 <option>District Agent</option>
                 <option>Pincode Agent</option>
                 <option>Divisional Agent</option>
@@ -1832,7 +1900,11 @@ const AddAgentModal = ({ isOpen, onClose, onAdd }) => {
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase text-text-secondary-light">Territory / Zone</label>
-              <select className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold appearance-none">
+              <select 
+                value={formData.territory}
+                onChange={(e) => setFormData({...formData, territory: e.target.value})}
+                className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold appearance-none"
+              >
                 <option>Pune Central</option>
                 <option>Mumbai South</option>
                 <option>Delhi NCR Zone A</option>
@@ -1853,7 +1925,7 @@ const AddAgentModal = ({ isOpen, onClose, onAdd }) => {
         </div>
         <div className="p-8 border-t dark:border-border-dark bg-gray-50/50 dark:bg-secondary-dark/30 flex gap-4">
           <button onClick={onClose} className="flex-1 py-4 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl font-black text-sm dark:text-white hover:bg-gray-100 transition-all">Cancel</button>
-          <button onClick={() => onAdd({ name: 'New Agent' })} className="flex-[2] py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] transition-all">Complete Registration</button>
+          <button onClick={handleSubmit} className="flex-[2] py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] transition-all">Complete Registration</button>
         </div>
       </div>
     </div>
