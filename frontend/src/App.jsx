@@ -20,21 +20,32 @@ import { NotificationProvider } from './context/NotificationContext';
 const ProtectedRoute = ({ children, roles }) => {
   const { user, loading } = useAuth();
 
-  if (loading) return <div>Loading...</div>;
-  if (!user) return <Navigate to="/login" />;
+  if (loading) {
+    console.log('ProtectedRoute: Loading auth state...');
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
+        <div className="w-12 h-12 border-4 border-primary-light border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+  
+  if (!user) {
+    console.log('ProtectedRoute: No user found, redirecting to /login');
+    return <Navigate to="/login" />;
+  }
+  
   if (roles && !roles.includes(user.role) && !roles.some(r => user.role.includes(r))) {
+    console.log('ProtectedRoute: Role mismatch. User role:', user.role, 'Required roles:', roles);
     return <Navigate to="/" />;
   }
-
-  // Gated access for Agents - REMOVED Gating to allow full dashboard access as requested
-  // if (user.role === 'Agent' && user.applicationStatus !== 'Approved') {
-  //   return <AgentStatusPage />;
-  // }
-
+  
+  console.log('ProtectedRoute: Access granted for role:', user.role);
   return children;
 };
 
+
 function App() {
+
   console.log('App.jsx: Rendering App');
   return (
     <ThemeProvider>

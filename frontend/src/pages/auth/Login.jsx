@@ -34,13 +34,25 @@ const Login = () => {
       }
       
       // Map roles to dashboard categories
-      if (user.role === 'Admin') window.location.href = '/dashboard/admin';
-      else if (user.role === 'Sub-Admin' || user.role === 'SubAdmin') window.location.href = '/dashboard/subadmin';
-      else if (user.role === 'Agent') window.location.href = '/dashboard/agent';
-      else window.location.href = '/';
+      console.log('Login: Success. User:', user.name, 'Role:', user.role);
+      if (user.role === 'Admin') {
+        console.log('Login: Redirecting to Admin Dashboard...');
+        window.location.href = '/dashboard/admin';
+      } else if (user.role === 'Sub-Admin' || user.role === 'SubAdmin') {
+        console.log('Login: Redirecting to Sub-Admin Dashboard...');
+        window.location.href = '/dashboard/subadmin';
+      } else if (user.role === 'Agent') {
+        console.log('Login: Redirecting to Agent Dashboard...');
+        window.location.href = '/dashboard/agent';
+      } else {
+        console.log('Login: No specific dashboard for role:', user.role);
+        window.location.href = '/';
+      }
     } catch (err) {
+      console.error('Login: Error occurred:', err);
       setError(err.message || 'Login failed. Please try again.');
     } finally {
+
       setLoading(false);
     }
   };
