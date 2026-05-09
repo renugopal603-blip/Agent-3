@@ -20,11 +20,15 @@ app.get('/', (req, res) => {
 });
 
 // Routes
-app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/agents', require('./routes/agentRoutes'));
-app.use('/api/shops', require('./routes/shopRoutes'));
-// app.use('/api/users', require('./routes/userRoutes'));
-// app.use('/api/orders', require('./routes/orderRoutes'));
+const mainRouter = express.Router();
+mainRouter.use('/auth', require('./routes/authRoutes'));
+mainRouter.use('/agents', require('./routes/agentRoutes'));
+mainRouter.use('/shops', require('./routes/shopRoutes'));
+
+// Mount router on both /api and / for maximum compatibility with Vercel routing
+app.use('/api', mainRouter);
+app.use('/', mainRouter);
+
 
 if (require.main === module) {
   const PORT = process.env.PORT || 5000;
