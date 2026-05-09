@@ -3,7 +3,8 @@ const dotenv = require('dotenv');
 const User = require('../models/User');
 const MembershipPlan = require('../models/MembershipPlan');
 
-dotenv.config();
+const path = require('path');
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const plans = [
   {
