@@ -79,6 +79,10 @@ const AdminDashboard = () => {
     { id: 10, name: 'Others', icon: 'MoreHorizontal', count: 10, status: 'Active', color: 'bg-slate-500/10 text-slate-500' }
   ]);
   const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
+  const [showCommissionModal, setShowCommissionModal] = useState(false);
+  const [selectedCommissionAgent, setSelectedCommissionAgent] = useState(null);
+  const [commissionSearch, setCommissionSearch] = useState('');
+  const [commissionRoleFilter, setCommissionRoleFilter] = useState('All Agent Roles');
   
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [agentModalType, setAgentModalType] = useState(null); // 'view', 'edit', 'map', 'team', 'performance'
@@ -1794,12 +1798,16 @@ const AdminDashboard = () => {
             <div className="card-premium">
               <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
                 <div className="flex gap-2">
-                  <select className="px-4 py-1.5 rounded-lg text-xs font-bold bg-gray-100 dark:bg-secondary-dark text-text-secondary-light border-none focus:ring-2 focus:ring-primary-light outline-none">
+                  <select 
+                    value={commissionRoleFilter}
+                    onChange={(e) => setCommissionRoleFilter(e.target.value)}
+                    className="px-4 py-1.5 rounded-lg text-xs font-bold bg-gray-100 dark:bg-secondary-dark text-text-secondary-light border-none focus:ring-2 focus:ring-primary-light outline-none"
+                  >
                     <option>All Agent Roles</option>
-                    <option>State Agents</option>
-                    <option>District Agents</option>
-                    <option>Divisional Agents</option>
-                    <option>Pincode Agents</option>
+                    <option>State Agent</option>
+                    <option>District Agent</option>
+                    <option>Divisional Agent</option>
+                    <option>Pincode Agent</option>
                   </select>
                 </div>
                 <div className="relative w-full md:w-64">
@@ -1807,9 +1815,12 @@ const AdminDashboard = () => {
                   <input 
                     type="text" 
                     placeholder="Search by Agent Name..." 
+                    value={commissionSearch}
+                    onChange={(e) => setCommissionSearch(e.target.value)}
                     className="w-full pl-9 pr-4 py-1.5 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-lg focus:ring-2 focus:ring-primary-light outline-none text-sm"
                   />
                 </div>
+
               </div>
 
               <div className="overflow-x-auto">
@@ -1831,7 +1842,12 @@ const AdminDashboard = () => {
                       { id: 3, name: 'Kiran Deep', role: 'Divisional Agent', volume: '₹5.4L', rate: '10%', earned: '₹54,000', status: 'Processing' },
                       { id: 4, name: 'Rahul Dev', role: 'Pincode Agent', volume: '₹2.4L', rate: '12%', earned: '₹28,800', status: 'Paid' },
                       { id: 5, name: 'Sanjay Dutt', role: 'Category Agent', volume: '₹5.8L', rate: '10%', earned: '₹58,000', status: 'Held' },
-                    ].map((agent) => (
+                    ].filter(agent => {
+                      const roleMatch = commissionRoleFilter === 'All Agent Roles' || agent.role === commissionRoleFilter;
+                      const searchMatch = agent.name.toLowerCase().includes(commissionSearch.toLowerCase());
+                      return roleMatch && searchMatch;
+                    }).map((agent) => (
+
                       <tr key={agent.id} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50 transition-colors group">
                         <td className="py-4">
                           <p className="dark:text-white font-bold text-sm tracking-tight">{agent.name}</p>
@@ -1857,12 +1873,16 @@ const AdminDashboard = () => {
                           <div className="flex justify-end items-center gap-3">
                             {/* View Button */}
                             <button 
-                              onClick={() => addNotification({ title: 'Full Details', message: `Sales breakdown for ${agent.name}`, type: 'info' })}
+                              onClick={() => {
+                                setSelectedCommissionAgent(agent);
+                                setShowCommissionModal(true);
+                              }}
                               className="w-10 h-10 flex items-center justify-center bg-gray-100 dark:bg-secondary-dark rounded-xl text-gray-500 hover:bg-gray-200 dark:hover:bg-secondary-dark/80 transition-all shadow-sm group/btn relative"
                             >
                               <Eye size={18} />
                               <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover/btn:opacity-100 transition-opacity whitespace-nowrap z-[60]">View Details</span>
                             </button>
+
 
                             {/* Release Button */}
                             <button 
@@ -3992,6 +4012,16 @@ const AdminDashboard = () => {
           onClose={() => setShowDeactivateModal(false)}
           user={selectedSystemUser}
           reason={deactivateReason}
+          setReason={setDeactivateReason}
+          onConfirm={handleDeactivateConfirm}
+        />
+
+        <CommissionInsightModal 
+          isOpen={showCommissionModal}
+          onClose={() => setShowCommissionModal(false)}
+          agent={selectedCommissionAgent}
+        />
+
           setReason={setDeactivateReason}
           notes={deactivateNotes}
           setNotes={setDeactivateNotes}
@@ -7716,4 +7746,63 @@ const SidebarLink = ({ icon, label, active, badge, onClick }) => (
   </div>
 );
 
+const CommissionInsightModal = ({ isOpen, onClose, agent }) => {
+  if (!isOpen || !agent) return null;
+
+  return (
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
+      <div className="relative w-full max-w-lg bg-surface-light dark:bg-surface-dark rounded-[2.5rem] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="p-8 border-b border-border-light dark:border-border-dark bg-gray-50/50 dark:bg-secondary-dark/30 flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-primary-light/10 text-primary-light rounded-2xl flex items-center justify-center">
+              <TrendingUp size={24} />
+            </div>
+            <div>
+              <h3 className="text-xl font-black dark:text-white tracking-tight uppercase">Commission Insight</h3>
+              <p className="text-[10px] font-black text-text-secondary-light uppercase tracking-widest">MTD Performance Report</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-secondary-dark rounded-xl transition-all"><X size={20} className="dark:text-white" /></button>
+        </div>
+
+        <div className="p-8 space-y-6">
+          <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-secondary-dark/50 rounded-2xl border border-border-light dark:border-border-dark">
+            <div className="w-12 h-12 bg-primary-light text-white rounded-xl flex items-center justify-center font-bold text-lg">{agent.name[0]}</div>
+            <div>
+              <h4 className="font-bold dark:text-white">{agent.name}</h4>
+              <p className="text-xs text-text-secondary-light">{agent.role}</p>
+            </div>
+            <div className="ml-auto text-right">
+              <p className="text-[10px] font-black text-text-secondary-light uppercase">Status</p>
+              <p className="text-xs font-bold text-primary-light">{agent.status}</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
+              <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Sales Volume</p>
+              <h4 className="text-xl font-black text-emerald-600">{agent.volume}</h4>
+            </div>
+            <div className="p-4 bg-blue-500/5 border border-blue-500/10 rounded-2xl">
+              <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">Commission Rate</p>
+              <h4 className="text-xl font-black text-blue-600">{agent.rate}</h4>
+            </div>
+          </div>
+
+          <div className="p-6 bg-primary-light text-white rounded-3xl shadow-xl shadow-primary-light/20 text-center">
+            <p className="text-xs font-bold opacity-80 uppercase tracking-widest mb-2">Total Earned Commission</p>
+            <h2 className="text-4xl font-black">{agent.earned}</h2>
+          </div>
+
+          <button className="w-full py-4 bg-secondary-dark dark:bg-white dark:text-background-dark text-white rounded-2xl font-black text-sm hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl">
+            Download Payout Receipt
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default AdminDashboard;
+
