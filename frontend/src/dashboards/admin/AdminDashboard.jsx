@@ -10,7 +10,7 @@ import {
   Search, Filter, MoreVertical, Edit, Trash2, CheckCircle, XCircle, X,
   Clock, Star, LogOut, ChevronRight, ChevronDown, Lock, BellRing, Palette,
   CreditCard, Percent, Truck, BarChart as BarChartIcon, LifeBuoy, Share2, Key, History,
-  UserCheck, Briefcase, Megaphone, Sun, Moon, Eye, User, FileText, Shield, MapPin, Coins, Wallet, Trophy, Calendar, Zap, Navigation, Download, ArrowUpRight, ArrowDownRight, PieChart, Activity, FileSpreadsheet, Layout, MessageSquare, Send, Smartphone, Mail, Plus, Headset, Ticket, Paperclip, Smile, Link2, Copy, Gift, Camera, Fingerprint, Monitor, Check
+  UserCheck, Briefcase, Megaphone, Sun, Moon, Eye, User, FileText, Shield, MapPin, Coins, Wallet, Trophy, Calendar, Zap, Navigation, Download, ArrowUpRight, ArrowDownRight, PieChart, Activity, FileSpreadsheet, Layout, MessageSquare, Send, Smartphone, Mail, Plus, Headset, Ticket, Paperclip, Smile, Link2, Copy, Gift, Camera, Fingerprint, Monitor, Check, Menu
 } from 'lucide-react';
 import { useNotifications } from '../../context/NotificationContext';
 import { 
@@ -61,6 +61,7 @@ const AdminDashboard = () => {
   const [showManageAccessModal, setShowManageAccessModal] = useState(false);
   const [showAddServicePartnerModal, setShowAddServicePartnerModal] = useState(false);
   const [showAddProductPartnerModal, setShowAddProductPartnerModal] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const [categories, setCategories] = useState([
     { id: 1, name: 'Food / Restaurant', icon: 'Utensils', count: 42, status: 'Active', color: 'bg-orange-500/10 text-orange-500' },
@@ -3595,9 +3596,20 @@ const AdminDashboard = () => {
 
 
   return (
-    <div className="flex h-screen bg-background-light dark:bg-background-dark overflow-hidden">
+    <div className="flex h-screen bg-background-light dark:bg-background-dark overflow-hidden relative">
+      {/* Mobile Sidebar Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[45] lg:hidden animate-in fade-in duration-300"
+          onClick={() => setIsMobileMenuOpen(false)}
+        ></div>
+      )}
+
       {/* Sidebar */}
-      <aside className="w-72 bg-surface-light dark:bg-surface-dark border-r border-border-light dark:border-border-dark hidden lg:flex flex-col shadow-2xl z-20">
+      <aside className={`
+        fixed lg:static inset-y-0 left-0 w-72 bg-surface-light dark:bg-surface-dark border-r border-border-light dark:border-border-dark flex flex-col shadow-2xl z-[50] transition-transform duration-300 ease-in-out
+        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}>
         <div className="h-20 p-6 border-b dark:border-border-dark flex items-center">
           <div className="flex items-center space-x-4">
             <div className="w-10 h-10 bg-primary-light dark:bg-primary-dark rounded-xl flex items-center justify-center shadow-lg shadow-primary-light/20 transition-transform">
@@ -3654,9 +3666,9 @@ const AdminDashboard = () => {
           </SidebarSection>
 
           <SidebarSection title="System">
-            <SidebarLink icon={<Key size={18} />} label="Role & Permissions" active={activeTab === 'Role & Permissions'} onClick={() => setActiveTab('Role & Permissions')} />
-            <SidebarLink icon={<Settings size={18} />} label="Settings" active={activeTab === 'Settings'} onClick={() => setActiveTab('Settings')} />
-            <SidebarLink icon={<History size={18} />} label="Audit Logs" active={activeTab === 'Audit Logs'} onClick={() => setActiveTab('Audit Logs')} />
+            <SidebarLink icon={<Key size={18} />} label="Role & Permissions" active={activeTab === 'Role & Permissions'} onClick={() => { setActiveTab('Role & Permissions'); setIsMobileMenuOpen(false); }} />
+            <SidebarLink icon={<Settings size={18} />} label="Settings" active={activeTab === 'Settings'} onClick={() => { setActiveTab('Settings'); setIsMobileMenuOpen(false); }} />
+            <SidebarLink icon={<History size={18} />} label="Audit Logs" active={activeTab === 'Audit Logs'} onClick={() => { setActiveTab('Audit Logs'); setIsMobileMenuOpen(false); }} />
           </SidebarSection>
         </div>
 
@@ -3676,14 +3688,24 @@ const AdminDashboard = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto relative bg-gray-50/50 dark:bg-background-dark/50">
-        <header className="h-20 bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md border-b border-border-light dark:border-border-dark flex items-center justify-between px-8 sticky top-0 z-30 shadow-sm">
-          <div className="flex flex-col justify-center gap-1">
-            <h2 className="text-xl font-black dark:text-white tracking-tight leading-none">{activeTab}</h2>
-            <div className="flex items-center gap-1.5 text-[10px] text-text-secondary-light font-bold uppercase tracking-widest">
-              <span>Admin</span>
-              <ChevronRight size={10} className="opacity-40" />
-              <span className="text-primary-light">{activeTab}</span>
+      <main className="flex-1 overflow-y-auto relative bg-gray-50/50 dark:bg-background-dark/50 custom-scrollbar">
+        <header className="h-20 bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md border-b border-border-light dark:border-border-dark flex items-center justify-between px-4 sm:px-8 sticky top-0 z-30 shadow-sm">
+          <div className="flex items-center gap-4">
+            {/* Mobile Menu Toggle */}
+            <button 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden p-2.5 bg-gray-100 dark:bg-secondary-dark text-text-secondary-light dark:text-text-secondary-dark rounded-xl active:scale-95 transition-all"
+            >
+              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+            
+            <div className="flex flex-col justify-center gap-0.5">
+              <h2 className="text-lg sm:text-xl font-black dark:text-white tracking-tight leading-none">{activeTab}</h2>
+              <div className="hidden sm:flex items-center gap-1.5 text-[10px] text-text-secondary-light font-bold uppercase tracking-widest">
+                <span>Admin</span>
+                <ChevronRight size={10} className="opacity-40" />
+                <span className="text-primary-light">{activeTab}</span>
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-4">
