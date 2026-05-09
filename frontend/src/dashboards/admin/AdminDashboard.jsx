@@ -3533,14 +3533,24 @@ const AdminDashboard = () => {
         };
 
         const getAreaData = () => {
+          let data = [];
           switch(activeTab) {
-            case 'State': return states;
-            case 'District': return districts;
-            case 'Taluk': return taluks;
-            case 'Pincode Mapping': return pincodes;
-            default: return [];
+            case 'State': data = states; break;
+            case 'District': data = districts; break;
+            case 'Taluk': data = taluks; break;
+            case 'Pincode Mapping': data = pincodes; break;
+            default: data = [];
           }
+
+          return data.filter(item => {
+            const statusMatch = areaFilters.status === 'All Status' || item.status === areaFilters.status;
+            const searchMatch = !searchTerm || 
+              (item.name && item.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+              (item.code && item.code.toString().toLowerCase().includes(searchTerm.toLowerCase()));
+            return statusMatch && searchMatch;
+          });
         };
+
 
         return (
           <div className="p-8 space-y-8 animate-in slide-in-from-bottom-4 duration-500">
