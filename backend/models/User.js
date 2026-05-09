@@ -52,8 +52,21 @@ const userSchema = new mongoose.Schema({
     date: Date
   },
   applicationStatus: { type: String, enum: ['Not Applied', 'Pending Review', 'Approved', 'Rejected', 'Request Correction'], default: 'Not Applied' },
-  status: { type: String, enum: ['Active', 'Inactive', 'Suspended'], default: 'Inactive' }, // Default to Inactive for new registrations
+  status: { type: String, enum: ['Active', 'Inactive', 'Suspended'], default: 'Inactive' },
+  // Sub-Admin Specific Fields
+  employeeId: { type: String },
+  accessLevel: { type: String },
+  assignedLocation: { type: String },
+  permissions: {
+    manageAgents: { type: Boolean, default: false },
+    manageShops: { type: Boolean, default: false },
+    viewAnalytics: { type: Boolean, default: false },
+    approveKYC: { type: Boolean, default: false },
+    manageAreas: { type: Boolean, default: false },
+    communication: { type: Boolean, default: false }
+  },
   createdAt: { type: Date, default: Date.now }
+
 });
 
 userSchema.pre('save', async function() {

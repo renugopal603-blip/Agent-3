@@ -12,13 +12,15 @@ const registerUser = async (req, res) => {
   try {
     const { 
       name, email, phone, password, role,
-      agentType, territory, kycDocuments, bankDetails, paymentDetails
+      agentType, territory, kycDocuments, bankDetails, paymentDetails,
+      employeeId, accessLevel, assignedLocation, permissions, status, applicationStatus
     } = req.body;
 
     const userExists = await User.findOne({ $or: [{ email }, { phone }] });
 
     if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
+      const field = userExists.email === email ? 'Email' : 'Phone Number';
+      return res.status(400).json({ message: `${field} is already registered` });
     }
 
     const userData = {
@@ -26,8 +28,15 @@ const registerUser = async (req, res) => {
       email,
       phone,
       password,
-      role: role || 'User'
+      role: role || 'User',
+      employeeId,
+      accessLevel,
+      assignedLocation,
+      permissions,
+      status: status || 'Inactive',
+      applicationStatus: applicationStatus || 'Not Applied'
     };
+
 
     if (role === 'Agent') {
       userData.agentType = agentType;
@@ -51,12 +60,23 @@ const registerUser = async (req, res) => {
         token: generateToken(user._id)
       });
     } else {
-      res.status(400).json({ message: 'Invalid user data' });
+      res.status(400).json({ message: 'Invalid user data provided' });
     }
   } catch (error) {
+    // Handle Mongoose validation errors
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(val => val.message);
+      return res.status(400).json({ message: messages.join(', ') });
+    }
+    // Handle Duplicate Key errors (e.g. Email/Phone)
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyValue)[0];
+      return res.status(400).json({ message: `The ${field} you entered is already in use` });
+    }
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // @desc    Auth user & get token
 // @route   POST /api/auth/login
@@ -116,4 +136,17 @@ const getUserProfile = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, getUserProfile };
+// @desc    Get all subadmins
+// @route   GET /api/auth/subadmins
+// @access  Private/Admin
+const getSubAdmins = async (req, res) => {
+  try {
+    const subadmins = await User.find({ role: 'Sub-Admin' }).select('-password');
+    res.json(subadmins);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { registerUser, loginUser, getUserProfile, getSubAdmins };
+
