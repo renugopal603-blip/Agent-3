@@ -12,13 +12,15 @@ const registerUser = async (req, res) => {
   try {
     const { 
       name, email, phone, password, role,
-      agentType, territory, kycDocuments, bankDetails, paymentDetails
+      agentType, territory, kycDocuments, bankDetails, paymentDetails,
+      employeeId, accessLevel, assignedLocation, permissions, status, applicationStatus
     } = req.body;
 
     const userExists = await User.findOne({ $or: [{ email }, { phone }] });
 
     if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
+      const field = userExists.email === email ? 'Email' : 'Phone Number';
+      return res.status(400).json({ message: `${field} is already registered` });
     }
 
     const userData = {
@@ -26,8 +28,15 @@ const registerUser = async (req, res) => {
       email,
       phone,
       password,
-      role: role || 'User'
+      role: role || 'User',
+      employeeId,
+      accessLevel,
+      assignedLocation,
+      permissions,
+      status: status || 'Inactive',
+      applicationStatus: applicationStatus || 'Not Applied'
     };
+
 
     if (role === 'Agent') {
       userData.agentType = agentType;
