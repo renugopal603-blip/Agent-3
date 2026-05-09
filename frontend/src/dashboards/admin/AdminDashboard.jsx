@@ -231,9 +231,22 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteSubAdmin = (id) => {
-    if (window.confirm('Are you sure you want to remove this sub-admin?')) {
-      setSubAdmins(subAdmins.filter(sa => sa.id !== id));
-      addNotification({ title: 'Sub-Admin Removed', message: 'The sub-admin profile has been deleted.', type: 'success' });
+    if (window.confirm('Are you sure you want to delete this sub-admin?')) {
+      setSubAdmins(subAdmins.filter(sa => sa._id !== id));
+      addNotification({ title: 'Deleted', message: 'Sub-admin removed successfully.', type: 'success' });
+    }
+  };
+
+  const handleDeleteArea = (id, type) => {
+    if (window.confirm(`Are you sure you want to delete this ${type}?`)) {
+      switch(type) {
+        case 'State': setStates(prev => prev.filter(s => s.id !== id)); break;
+        case 'District': setDistricts(prev => prev.filter(d => d.id !== id)); break;
+        case 'Taluk': setTaluks(prev => prev.filter(t => t.id !== id)); break;
+        case 'Pincode Mapping': setPincodes(prev => prev.filter(p => p.id !== id)); break;
+        default: break;
+      }
+      addNotification({ title: 'Deleted', message: `${type} removed successfully.`, type: 'success' });
     }
   };
 
@@ -1823,7 +1836,7 @@ const AdminDashboard = () => {
                         </td>
                         <td className="py-4 font-medium dark:text-white text-sm">{agent.volume}</td>
                         <td className="py-4">
-                          <span className="px-2 py-1 bg-gray-100 dark:bg-secondary-dark rounded-lg text-xs font-semibold dark:text-white">{agent.rate}</span>
+                          <span className="px-3 py-1 bg-gray-100 dark:bg-secondary-dark rounded-lg text-xs font-semibold dark:text-white">{agent.rate}</span>
                         </td>
                         <td className="py-4 font-bold text-success text-sm">{agent.earned}</td>
                         <td className="py-4">
@@ -3685,6 +3698,7 @@ const AdminDashboard = () => {
                               <Edit size={14} />
                             </button>
                             <button 
+                              onClick={() => handleDeleteArea(area.id, activeTab)}
                               className="p-2.5 bg-red-50 dark:bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-sm"
                             >
                               <Trash2 size={14} />
