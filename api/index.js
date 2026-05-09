@@ -2,11 +2,41 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const path = require('path');
-const connectDB = require('./config/db');
+const User = require('./models/User');
 
 dotenv.config();
 
-connectDB();
+const seedAdmin = async () => {
+  try {
+    const adminData = {
+      name: 'System Admin',
+      email: 'admin@agenticstore.com',
+      phone: '9876543210',
+      password: 'Admin@123',
+      role: 'Admin',
+      status: 'Active',
+      applicationStatus: 'Approved'
+    };
+
+    const userExists = await User.findOne({ phone: adminData.phone });
+    if (!userExists) {
+      await User.create(adminData);
+      console.log('Admin user auto-created.');
+    } else {
+      // Update password just in case
+      userExists.password = adminData.password;
+      await userExists.save();
+      console.log('Admin user auto-updated.');
+    }
+  } catch (err) {
+    console.error('Auto-seeding error:', err.message);
+  }
+};
+
+connectDB().then(() => {
+  seedAdmin();
+});
+
 
 const app = express();
 
