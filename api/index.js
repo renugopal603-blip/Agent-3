@@ -44,5 +44,9 @@ app.get('*', (req, res) => {
   }
 });
 
-module.exports = app;
+// Explicit export for Vercel serverless environment
+module.exports = (req, res) => {
+  return app(req, res);
+};
+
 

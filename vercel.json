@@ -17,11 +17,11 @@
   ],
   "rewrites": [
     {
-      "source": "/api/(.*)",
+      "source": "/api/:path*",
       "destination": "/api/index.js"
     },
     {
-      "source": "/uploads/(.*)",
+      "source": "/uploads/:path*",
       "destination": "/api/index.js"
     },
     {
@@ -30,6 +30,7 @@
     }
   ]
 }
+
 
 
 
