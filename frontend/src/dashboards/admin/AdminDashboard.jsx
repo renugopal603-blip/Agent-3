@@ -4001,7 +4001,9 @@ const AddSubAdminModal = ({ isOpen, onClose, onSuccess, initialData }) => {
     manageAreas: true,
     communication: false
   });
+  const [isSaving, setIsSaving] = useState(false);
   const { addNotification } = useNotifications();
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -4064,12 +4066,13 @@ const AddSubAdminModal = ({ isOpen, onClose, onSuccess, initialData }) => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (step < 3) {
       handleNext(e);
       return;
     }
     
+    setIsSaving(true);
     try {
       const payload = {
         ...formData,
@@ -4090,15 +4093,17 @@ const AddSubAdminModal = ({ isOpen, onClose, onSuccess, initialData }) => {
       if (onSuccess) onSuccess();
       onClose();
       resetForm();
-
     } catch (error) {
       addNotification({ 
         title: 'Error', 
         message: error.response?.data?.message || 'Failed to save Sub Admin.', 
         type: 'error' 
       });
+    } finally {
+      setIsSaving(false);
     }
   };
+
 
 
 
@@ -4363,8 +4368,16 @@ const AddSubAdminModal = ({ isOpen, onClose, onSuccess, initialData }) => {
             {step < 3 ? (
               <button type="button" onClick={handleNext} className="flex-[2] py-4 rounded-2xl bg-primary-light text-white font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] transition-all">Continue</button>
             ) : (
-              <button type="submit" className="flex-[2] py-4 rounded-2xl bg-success text-white font-black text-sm shadow-xl shadow-success/20 hover:scale-[1.02] transition-all">Complete Setup</button>
+              <button 
+                type="button" 
+                onClick={handleSubmit}
+                disabled={isSaving}
+                className="flex-[2] py-4 rounded-2xl bg-success text-white font-black text-sm shadow-xl shadow-success/20 hover:scale-[1.02] transition-all disabled:opacity-50"
+              >
+                {isSaving ? 'Saving...' : 'Complete Setup'}
+              </button>
             )}
+
           </div>
         </form>
       </div>
