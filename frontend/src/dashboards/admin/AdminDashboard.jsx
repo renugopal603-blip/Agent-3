@@ -153,6 +153,8 @@ const AdminDashboard = () => {
   const [showAreaModal, setShowAreaModal] = useState(false);
   const [selectedArea, setSelectedArea] = useState(null);
 
+  const [showSubAdminFilters, setShowSubAdminFilters] = useState(false);
+  const [subAdminStatusFilter, setSubAdminStatusFilter] = useState('All Status');
   const [subAdminAccessFilter, setSubAdminAccessFilter] = useState('All Levels');
   const [selectedSubAdmin, setSelectedSubAdmin] = useState(null);
   const [subAdminModalType, setSubAdminModalType] = useState(null); // 'view', 'edit', 'location', 'agents', 'performance'
@@ -3179,7 +3181,15 @@ const AdminDashboard = () => {
 
       case 'Subadmin Management':
       case 'Sub Admin Management': {
-        const filteredSubAdmins = subAdmins.filter(sa => subAdminAccessFilter === 'All Levels' || sa.accessLevel === subAdminAccessFilter);
+        const filteredSubAdmins = subAdmins.filter(sa => {
+          const accessMatch = subAdminAccessFilter === 'All Levels' || sa.accessLevel === subAdminAccessFilter;
+          const statusMatch = subAdminStatusFilter === 'All Status' || sa.status === subAdminStatusFilter;
+          const searchMatch = !searchTerm || 
+            sa.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+            sa.employeeId?.toLowerCase().includes(searchTerm.toLowerCase());
+          return accessMatch && statusMatch && searchMatch;
+        });
+
 
         return (
           <div className="p-8 space-y-8 animate-in slide-in-from-bottom-4 duration-500">
@@ -3224,17 +3234,63 @@ const AdminDashboard = () => {
                 />
               </div>
               <div className="flex gap-2">
-                <button className="btn-outline px-6 py-3 flex items-center gap-2 text-sm font-bold bg-white dark:bg-secondary-dark rounded-2xl shadow-sm">
+                <button 
+                  onClick={() => setShowSubAdminFilters(!showSubAdminFilters)}
+                  className={`btn-outline px-6 py-3 flex items-center gap-2 text-sm font-bold rounded-2xl shadow-sm transition-all ${showSubAdminFilters ? 'bg-primary-light text-white border-primary-light' : 'bg-white dark:bg-secondary-dark'}`}
+                >
                   <Filter size={18} /> Filters
                 </button>
                 <button 
-                  onClick={() => exportToCSV(subAdmins, 'sub_admins_report')}
+                  onClick={() => exportToCSV(filteredSubAdmins, 'sub_admins_report')}
                   className="btn-outline px-6 py-3 flex items-center gap-2 text-sm font-bold bg-white dark:bg-secondary-dark rounded-2xl shadow-sm"
                 >
                   <Download size={18} /> Export
                 </button>
               </div>
             </div>
+
+            {/* Expanded Filters */}
+            {showSubAdminFilters && (
+              <div className="p-6 bg-white dark:bg-secondary-dark rounded-2xl shadow-sm border border-border-light dark:border-border-dark flex flex-wrap gap-6 animate-in slide-in-from-top-2 duration-300">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light">Access Level</label>
+                  <select 
+                    value={subAdminAccessFilter}
+                    onChange={(e) => setSubAdminAccessFilter(e.target.value)}
+                    className="w-full bg-gray-50 dark:bg-background-dark px-4 py-2 rounded-xl text-xs font-bold outline-none border border-transparent focus:border-primary-light transition-all"
+                  >
+                    <option>All Levels</option>
+                    <option>State Wise</option>
+                    <option>District Wise</option>
+                    <option>Taluk Wise</option>
+                    <option>Pincode Wise</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light">Account Status</label>
+                  <select 
+                    value={subAdminStatusFilter}
+                    onChange={(e) => setSubAdminStatusFilter(e.target.value)}
+                    className="w-full bg-gray-50 dark:bg-background-dark px-4 py-2 rounded-xl text-xs font-bold outline-none border border-transparent focus:border-primary-light transition-all"
+                  >
+                    <option>All Status</option>
+                    <option>Active</option>
+                    <option>Suspended</option>
+                  </select>
+                </div>
+                <button 
+                  onClick={() => {
+                    setSubAdminAccessFilter('All Levels');
+                    setSubAdminStatusFilter('All Status');
+                    setSearchTerm('');
+                  }}
+                  className="mt-auto pb-1 text-xs font-bold text-error hover:underline"
+                >
+                  Reset All
+                </button>
+              </div>
+            )}
+
 
             {/* Permission Context Note */}
             <div className="p-4 bg-primary-light/5 border border-primary-light/20 rounded-2xl flex items-start gap-4">
