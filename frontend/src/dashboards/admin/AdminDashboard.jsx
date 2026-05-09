@@ -3998,7 +3998,7 @@ const AddSubAdminModal = ({ isOpen, onClose, initialData }) => {
     setTimeout(() => {
       setSendingEmailOtp(false);
       setShowEmailOtpInput(true);
-      addNotification({ title: 'OTP Sent', message: 'Verification code sent to your email.', type: 'info' });
+      addNotification({ title: 'OTP Sent', message: 'Verification code (123456) sent to your email.', type: 'info' });
     }, 1000);
   };
 
@@ -4007,7 +4007,7 @@ const AddSubAdminModal = ({ isOpen, onClose, initialData }) => {
     setTimeout(() => {
       setSendingPhoneOtp(false);
       setShowPhoneOtpInput(true);
-      addNotification({ title: 'OTP Sent', message: 'Verification code sent to your phone.', type: 'info' });
+      addNotification({ title: 'OTP Sent', message: 'Verification code (123456) sent to your phone.', type: 'info' });
     }, 1000);
   };
 
