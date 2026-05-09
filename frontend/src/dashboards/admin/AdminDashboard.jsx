@@ -11,7 +11,10 @@ import {
   Clock, Star, LogOut, ChevronRight, ChevronDown, Lock, BellRing, Palette,
   CreditCard, Percent, Truck, BarChart as BarChartIcon, LifeBuoy, Share2, Key, History,
   UserCheck, Briefcase, Megaphone, Sun, Moon, Eye, User, FileText, Shield, MapPin, Coins, Wallet, Trophy, Calendar, Zap, Navigation, Download, ArrowUpRight, ArrowDownRight, PieChart, Activity, FileSpreadsheet, Layout, MessageSquare, Send, Smartphone, Mail, Plus, Headset, Ticket, Paperclip, Smile, Link2, Copy, Gift, Camera, Fingerprint, Monitor, Check, Menu
+  UserCheck, Briefcase, Megaphone, Sun, Moon, Eye, User, FileText, Shield, MapPin, Coins, Wallet, Trophy, Calendar, Zap, Navigation, Download, ArrowUpRight, ArrowDownRight, PieChart, Activity, FileSpreadsheet, Layout, MessageSquare, Send, Smartphone, Mail, Plus, Headset, Ticket, Paperclip, Smile, Link2, Copy, Gift, Camera, Fingerprint, Monitor, Check, Menu,
+  Flag, Milestone, Hash, Globe, Settings2, ShieldAlert
 } from 'lucide-react';
+
 import { useNotifications } from '../../context/NotificationContext';
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -3357,9 +3360,15 @@ const AdminDashboard = () => {
                         </td>
                         <td className="p-4">
                           <div className="flex items-center gap-1.5 text-xs font-bold dark:text-white">
-                            <Map size={12} className="text-primary-light" /> {sa.assignedLocation || 'All India'}
+                            {sa.accessLevel === 'State Wise' && <Flag size={12} className="text-primary-light" />}
+                            {sa.accessLevel === 'District Wise' && <Milestone size={12} className="text-primary-light" />}
+                            {sa.accessLevel === 'Taluk Wise' && <Navigation size={12} className="text-primary-light" />}
+                            {sa.accessLevel === 'Pincode Wise' && <Hash size={12} className="text-primary-light" />}
+                            {!sa.accessLevel && <Globe size={12} className="text-primary-light" />}
+                            {sa.assignedLocation || 'All India'}
                           </div>
                         </td>
+
                         <td className="p-4">
                           <span className="px-3 py-1 bg-blue-500/10 text-blue-500 rounded-lg text-xs font-black">{sa.agentsCount || 0}</span>
                         </td>
@@ -3651,11 +3660,12 @@ const AdminDashboard = () => {
                         <td className="p-6">
                           <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-primary-light/10 text-primary-light rounded-2xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                              {activeTab === 'State' && <MapPin size={24} />}
-                              {activeTab === 'District' && <Map size={24} />}
+                              {activeTab === 'State' && <Flag size={24} />}
+                              {activeTab === 'District' && <Milestone size={24} />}
                               {activeTab === 'Taluk' && <Navigation size={24} />}
-                              {activeTab === 'Pincode Mapping' && <Zap size={24} />}
+                              {activeTab === 'Pincode Mapping' && <Hash size={24} />}
                             </div>
+
                             <div>
                               <p className="font-black dark:text-white text-base tracking-tight">{area.name || area.code}</p>
                               {area.code && area.name && <p className="text-[10px] font-black text-text-secondary-light uppercase">Code: {area.code}</p>}
