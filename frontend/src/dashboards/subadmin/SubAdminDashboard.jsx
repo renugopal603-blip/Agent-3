@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 
 import { useNotifications } from '../../context/NotificationContext';
+import axios from 'axios';
 
 const SubAdminDashboard = () => {
   const { user, logout } = useAuth();
@@ -86,14 +87,67 @@ const SubAdminDashboard = () => {
     { id: 3, name: 'Style Studio', cat: 'Fashion', loc: 'Delhi NCR', status: 'Verified', agent: 'Sneha Patel', docs: ['GST', 'Photo'] },
   ]);
 
-  const handleVerify = (id) => {
-    const shop = verifyShops.find(s => s.id === id);
-    setVerifyShops(verifyShops.map(s => s.id === id ? { ...s, status: 'Verified' } : s));
-    addNotification({
-      title: 'Shop Verified',
-      message: `Shop "${shop.name}" has been verified and sent to Admin for final approval.`,
-      type: 'success'
-    });
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const config = {
+          headers: { Authorization: `Bearer ${user.token}` }
+        };
+        
+        const [agentsRes, shopsRes] = await Promise.all([
+          axios.get('http://localhost:5000/api/agents', config),
+          axios.get('http://localhost:5000/api/shops', config)
+        ]);
+
+        // Transform backend data to frontend format if necessary
+        const formattedAgents = agentsRes.data.map(a => ({
+          id: a._id,
+          name: a.name,
+          role: a.role,
+          phone: a.phone,
+          email: a.email,
+          location: a.territory?.pincode || 'Not Set',
+          status: a.status,
+          lastLogin: a.lastLogin || 'Never',
+          riskLevel: a.riskLevel || 'Low'
+        }));
+
+        const formattedShops = shopsRes.data.map(s => ({
+          id: s._id,
+          name: s.shopName,
+          cat: s.category,
+          loc: s.taluk + ', ' + s.pincode,
+          status: s.kycStatus,
+          agent: s.ownerId?.name || 'Unassigned',
+          docs: ['GST', 'License']
+        }));
+
+        setSystemUsers(formattedAgents);
+        setVerifyShops(formattedShops);
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      }
+    };
+
+    if (user?.token) fetchData();
+  }, [user]);
+
+  const handleVerify = async (id) => {
+    try {
+      const config = {
+        headers: { Authorization: `Bearer ${user.token}` }
+      };
+      const { data } = await axios.put(`http://localhost:5000/api/shops/${id}/verify`, { status: 'Verified' }, config);
+      
+      setVerifyShops(verifyShops.map(s => s.id === id ? { ...s, status: 'Verified' } : s));
+      addNotification({
+        title: 'Shop Verified',
+        message: `Shop has been verified and sent to Admin for final approval.`,
+        type: 'success'
+      });
+    } catch (error) {
+      addNotification({ title: 'Verification Error', message: error.message, type: 'error' });
+    }
   };
 
   const handleApproveKYC = (id) => {
@@ -318,9 +372,15 @@ const SubAdminDashboard = () => {
                             <History size={14} />
                           </button>
                           <button 
-                            onClick={() => {
-                              setSystemUsers(systemUsers.filter(u => u.id !== a.id));
-                              addNotification({ title: 'Agent Removed', message: `${a.name} has been removed from your territory.`, type: 'error' });
+                            onClick={async () => {
+                              try {
+                                const config = { headers: { Authorization: `Bearer ${user.token}` } };
+                                await axios.delete(`http://localhost:5000/api/agents/${a.id}`, config);
+                                setSystemUsers(systemUsers.filter(u => u.id !== a.id));
+                                addNotification({ title: 'Agent Removed', message: `${a.name} has been removed from your territory.`, type: 'error' });
+                              } catch (error) {
+                                addNotification({ title: 'Delete Error', message: error.message, type: 'error' });
+                              }
                             }}
                             className="p-2 bg-error/10 text-error rounded-xl hover:bg-error hover:text-white transition-colors"
                             title="Delete Agent"
@@ -434,9 +494,15 @@ const SubAdminDashboard = () => {
                               <Eye size={16} />
                             </button>
                             <button 
-                              onClick={() => {
-                                setVerifyShops(verifyShops.filter(item => item.id !== s.id));
-                                addNotification({ title: 'Record Deleted', message: `Shop request for ${s.name} has been removed.`, type: 'error' });
+                              onClick={async () => {
+                                try {
+                                  const config = { headers: { Authorization: `Bearer ${user.token}` } };
+                                  await axios.delete(`http://localhost:5000/api/shops/${s.id}`, config);
+                                  setVerifyShops(verifyShops.filter(item => item.id !== s.id));
+                                  addNotification({ title: 'Record Deleted', message: `Shop request for ${s.name} has been removed.`, type: 'error' });
+                                } catch (error) {
+                                  addNotification({ title: 'Delete Error', message: error.message, type: 'error' });
+                                }
                               }}
                               className="p-2 bg-error/5 text-error/60 rounded-xl hover:bg-error hover:text-white transition-all"
                             >
@@ -1643,10 +1709,31 @@ const SubAdminDashboard = () => {
         <AddAgentModal 
           isOpen={showAddAgentModal} 
           onClose={() => setShowAddAgentModal(false)} 
-          onAdd={(agent) => {
-            setSystemUsers([...systemUsers, agent]);
-            addNotification({ title: 'Agent Added', message: `${agent.name} has been successfully registered.`, type: 'success' });
-            setShowAddAgentModal(false);
+          onAdd={async (agentData) => {
+            try {
+              const config = {
+                headers: { Authorization: `Bearer ${user.token}` }
+              };
+              const { data } = await axios.post('http://localhost:5000/api/agents', agentData, config);
+              
+              const newAgent = {
+                id: data._id,
+                name: data.name,
+                role: data.role,
+                phone: data.phone,
+                email: data.email,
+                location: data.territory?.pincode || 'Not Set',
+                status: data.status,
+                lastLogin: 'Never',
+                riskLevel: 'Low'
+              };
+
+              setSystemUsers([...systemUsers, newAgent]);
+              addNotification({ title: 'Agent Added', message: `${data.name} has been successfully registered.`, type: 'success' });
+              setShowAddAgentModal(false);
+            } catch (error) {
+              addNotification({ title: 'Registration Error', message: error.response?.data?.message || error.message, type: 'error' });
+            }
           }}
         />
 
