@@ -3994,6 +3994,15 @@ const AddSubAdminModal = ({ isOpen, onClose, initialData }) => {
   const [showEmailOtpInput, setShowEmailOtpInput] = useState(false);
   const [showPhoneOtpInput, setShowPhoneOtpInput] = useState(false);
 
+  const [formData, setFormData] = useState({
+    name: '',
+    employeeId: '',
+    email: '',
+    phone: '',
+    accessLevel: 'State Wise',
+    assignedLocation: ''
+  });
+
   const [permissions, setPermissions] = useState({
     manageAgents: true,
     manageShops: true,
@@ -4003,6 +4012,12 @@ const AddSubAdminModal = ({ isOpen, onClose, initialData }) => {
     communication: false
   });
   const { addNotification } = useNotifications();
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
 
   if (!isOpen) return null;
 
@@ -4058,21 +4073,41 @@ const AddSubAdminModal = ({ isOpen, onClose, initialData }) => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (step < 3) {
       handleNext(e);
       return;
     }
     
-    addNotification({ 
-      title: 'Sub Admin Created', 
-      message: 'Credentials have been generated and sent via Email/SMS.', 
-      type: 'success' 
-    });
-    onClose();
-    resetForm();
+    try {
+      const payload = {
+        ...formData,
+        role: 'Sub-Admin',
+        password: 'Password@123', // Temporary password
+        permissions,
+        status: 'Active',
+        applicationStatus: 'Approved'
+      };
+
+      await axios.post('/api/auth/register', payload);
+
+      addNotification({ 
+        title: 'Sub Admin Created', 
+        message: 'Credentials have been generated and stored in the database.', 
+        type: 'success' 
+      });
+      onClose();
+      resetForm();
+    } catch (error) {
+      addNotification({ 
+        title: 'Error', 
+        message: error.response?.data?.message || 'Failed to save Sub Admin.', 
+        type: 'error' 
+      });
+    }
   };
+
 
 
   const resetForm = () => {
@@ -4118,11 +4153,27 @@ const AddSubAdminModal = ({ isOpen, onClose, initialData }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Full Name</label>
-                    <input type="text" placeholder="John Doe" className="w-full px-4 py-3.5 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all" required />
+                    <input 
+                      type="text" 
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      placeholder="John Doe" 
+                      className="w-full px-4 py-3.5 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all" 
+                      required 
+                    />
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Employee ID</label>
-                    <input type="text" placeholder="SA-1004" className="w-full px-4 py-3.5 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all" required />
+                    <input 
+                      type="text" 
+                      name="employeeId"
+                      value={formData.employeeId}
+                      onChange={handleInputChange}
+                      placeholder="SA-1004" 
+                      className="w-full px-4 py-3.5 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all" 
+                      required 
+                    />
                   </div>
                 </div>
 
@@ -4132,7 +4183,9 @@ const AddSubAdminModal = ({ isOpen, onClose, initialData }) => {
                     <div className="relative">
                       <input 
                         type="email" 
-                        placeholder="admin@premium.com" 
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
                         disabled={isEmailVerified}
                         className={`w-full px-4 py-3.5 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all ${isEmailVerified ? 'border-success bg-success/5 pr-12' : 'pr-24'}`} 
                         required 
@@ -4178,6 +4231,9 @@ const AddSubAdminModal = ({ isOpen, onClose, initialData }) => {
                     <div className="relative">
                       <input 
                         type="tel" 
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
                         placeholder="+91 98765 43210" 
                         disabled={isPhoneVerified}
                         className={`w-full px-4 py-3.5 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all ${isPhoneVerified ? 'border-success bg-success/5 pr-12' : 'pr-24'}`} 
@@ -4227,7 +4283,12 @@ const AddSubAdminModal = ({ isOpen, onClose, initialData }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Access Level</label>
-                    <select className="w-full px-4 py-3.5 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all appearance-none">
+                    <select 
+                      name="accessLevel"
+                      value={formData.accessLevel}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3.5 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all appearance-none"
+                    >
                       <option>State Wise</option>
                       <option>District Wise</option>
                       <option>Taluk Wise</option>
@@ -4235,8 +4296,16 @@ const AddSubAdminModal = ({ isOpen, onClose, initialData }) => {
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Assigned Location</label>
-                    <input type="text" placeholder="e.g. Maharashtra" className="w-full px-4 py-3.5 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all" />
+                    <input 
+                      type="text" 
+                      name="assignedLocation"
+                      value={formData.assignedLocation}
+                      onChange={handleInputChange}
+                      placeholder="e.g. Maharashtra" 
+                      className="w-full px-4 py-3.5 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all" 
+                    />
                   </div>
+
                 </div>
 
                 <div className="space-y-4">
