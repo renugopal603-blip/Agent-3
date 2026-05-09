@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -409,6 +410,48 @@ const AdminDashboard = () => {
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const config = { headers: { Authorization: `Bearer ${user.token}` } };
+        const { data } = await axios.get('http://localhost:5000/api/agents', config);
+        
+        const formattedAgents = data.map(a => ({
+          id: a._id,
+          name: a.name,
+          role: a.role,
+          territory: a.territory?.pincode || 'Not Set',
+          status: a.status
+        }));
+        setAgents(formattedAgents);
+      } catch (error) {
+        console.error('Error fetching agents:', error);
+      }
+    };
+    if (user?.token) fetchData();
+  }, [user]);
+
+  const handleAddAgent = async (agentData) => {
+    try {
+      const config = { headers: { Authorization: `Bearer ${user.token}` } };
+      const { data } = await axios.post('http://localhost:5000/api/agents', agentData, config);
+      
+      const newAgent = {
+        id: data._id,
+        name: data.name,
+        role: data.role,
+        territory: data.territory?.pincode || 'Not Set',
+        status: data.status
+      };
+      
+      setAgents([...agents, newAgent]);
+      addNotification({ title: 'Agent Added', message: `${data.name} registered successfully.`, type: 'success' });
+      setShowAddAgentModal(false);
+    } catch (error) {
+      addNotification({ title: 'Registration Error', message: error.response?.data?.message || error.message, type: 'error' });
+    }
   };
 
   const handleApproveVerification = (entityId, docId = null) => {
@@ -3711,6 +3754,7 @@ const AdminDashboard = () => {
             setShowAddAgentModal(false);
             setEditingItem(null);
           }} 
+          onAdd={handleAddAgent}
           initialData={editingItem}
         />
         <AddSubAdminModal 
@@ -4219,7 +4263,35 @@ const AddSubAdminModal = ({ isOpen, onClose, initialData }) => {
   );
 };
 
-const AddAgentModal = ({ isOpen, onClose, initialData }) => {
+const AddAgentModal = ({ isOpen, onClose, onAdd, initialData }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    role: 'Pincode Agent',
+    territory: ''
+  });
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        name: initialData.name || '',
+        email: initialData.email || '',
+        phone: initialData.phone || '',
+        role: initialData.role || 'Pincode Agent',
+        territory: initialData.territory || ''
+      });
+    } else {
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        role: 'Pincode Agent',
+        territory: ''
+      });
+    }
+  }, [initialData, isOpen]);
+
   if (!isOpen) return null;
 
   return (
@@ -4245,7 +4317,7 @@ const AddAgentModal = ({ isOpen, onClose, initialData }) => {
 
         <form className="p-8 grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={(e) => {
           e.preventDefault();
-          onClose();
+          onAdd(formData);
         }}>
           <div className="space-y-2">
             <label className="text-xs font-black uppercase tracking-widest text-text-secondary-light ml-1">Full Name</label>
@@ -4253,7 +4325,9 @@ const AddAgentModal = ({ isOpen, onClose, initialData }) => {
               <input 
                 type="text" 
                 placeholder="John Doe"
-                defaultValue={initialData?.name || ''}
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                required
                 className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light focus:bg-white dark:focus:bg-background-dark transition-all outline-none dark:text-white font-medium"
               />
             </div>
@@ -4264,7 +4338,9 @@ const AddAgentModal = ({ isOpen, onClose, initialData }) => {
             <input 
               type="email" 
               placeholder="john@example.com"
-              defaultValue={initialData?.email || ''}
+              value={formData.email}
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              required
               className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light focus:bg-white dark:focus:bg-background-dark transition-all outline-none dark:text-white font-medium"
             />
           </div>
@@ -4274,7 +4350,9 @@ const AddAgentModal = ({ isOpen, onClose, initialData }) => {
             <input 
               type="tel" 
               placeholder="+91 98765 43210"
-              defaultValue={initialData?.phone || ''}
+              value={formData.phone}
+              onChange={(e) => setFormData({...formData, phone: e.target.value})}
+              required
               className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light focus:bg-white dark:focus:bg-background-dark transition-all outline-none dark:text-white font-medium"
             />
           </div>
@@ -4282,7 +4360,8 @@ const AddAgentModal = ({ isOpen, onClose, initialData }) => {
           <div className="space-y-2">
             <label className="text-xs font-black uppercase tracking-widest text-text-secondary-light ml-1">Agent Role</label>
             <select 
-              defaultValue={initialData?.role || 'Pincode Agent'}
+              value={formData.role}
+              onChange={(e) => setFormData({...formData, role: e.target.value})}
               className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light focus:bg-white dark:focus:bg-background-dark transition-all outline-none dark:text-white font-medium appearance-none"
             >
               <option>Pincode Agent</option>
@@ -4297,7 +4376,9 @@ const AddAgentModal = ({ isOpen, onClose, initialData }) => {
             <input 
               type="text" 
               placeholder="e.g. Maharashtra, Pune, 411001, or Electronics"
-              defaultValue={initialData?.territory || ''}
+              value={formData.territory}
+              onChange={(e) => setFormData({...formData, territory: e.target.value})}
+              required
               className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light focus:bg-white dark:focus:bg-background-dark transition-all outline-none dark:text-white font-medium"
             />
           </div>
