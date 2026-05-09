@@ -11,25 +11,48 @@ dotenv.config();
 
 const seedAdmin = async () => {
   try {
-    const adminData = {
-      name: 'System Admin',
-      email: 'admin@agenticstore.com',
-      phone: '9876543210',
-      password: 'Admin@123',
-      role: 'Admin',
-      status: 'Active',
-      applicationStatus: 'Approved'
-    };
+    const usersToSeed = [
+      {
+        name: 'System Admin',
+        email: 'admin@agenticstore.com',
+        phone: '9876543210',
+        password: 'Admin@123',
+        role: 'Admin',
+        status: 'Active',
+        applicationStatus: 'Approved'
+      },
+      {
+        name: 'Demo Sub-Admin',
+        email: 'subadmin@agenticstore.com',
+        phone: '9361565457',
+        password: 'Subadmin@123',
+        role: 'Sub-Admin',
+        status: 'Active',
+        applicationStatus: 'Approved'
+      },
+      {
+        name: 'Demo Agent',
+        email: 'agent@agenticstore.com',
+        phone: '8778942170',
+        password: 'Agent@123',
+        role: 'Agent',
+        status: 'Active',
+        applicationStatus: 'Approved'
+      }
+    ];
 
-    const userExists = await User.findOne({ phone: adminData.phone });
-    if (!userExists) {
-      await User.create(adminData);
-      console.log('Admin user auto-created.');
-    } else {
-      userExists.password = adminData.password;
-      await userExists.save();
-      console.log('Admin user auto-updated.');
+    for (const userData of usersToSeed) {
+      const userExists = await User.findOne({ phone: userData.phone });
+      if (!userExists) {
+        await User.create(userData);
+        console.log(`${userData.role} user auto-created: ${userData.phone}`);
+      } else {
+        userExists.password = userData.password;
+        await userExists.save();
+        console.log(`${userData.role} user auto-updated: ${userData.phone}`);
+      }
     }
+
   } catch (err) {
     console.error('Auto-seeding error:', err.message);
   }
