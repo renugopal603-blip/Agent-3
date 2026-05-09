@@ -20,18 +20,9 @@ const Login = () => {
       try {
         user = await login(phone, password);
       } catch (apiErr) {
-        // Bypass for testing specific roles
-        if (phone === '1111111111') {
-          user = { _id: 'admin-1', name: 'Demo Admin', phone, role: 'Admin', token: 'demo-token' };
-        } else if (phone === '2222222222') {
-          user = { _id: 'subadmin-1', name: 'Demo Sub-Admin', phone, role: 'Sub-Admin', token: 'demo-token' };
-        } else if (phone === '3333333333') {
-          user = { _id: 'agent-1', name: 'Demo Agent', phone, role: 'Agent', token: 'demo-token' };
-        } else {
-          throw apiErr; // Rethrow original error if not a demo number
-        }
-        localStorage.setItem('user', JSON.stringify(user));
+        throw apiErr; // Rethrow original error if not a demo number
       }
+
       
       // Map roles to dashboard categories
       console.log('Login: Success. User:', user.name, 'Role:', user.role);
