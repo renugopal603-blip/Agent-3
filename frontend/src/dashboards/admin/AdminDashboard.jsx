@@ -160,6 +160,11 @@ const AdminDashboard = () => {
   const [showAreaModal, setShowAreaModal] = useState(false);
   const [selectedArea, setSelectedArea] = useState(null);
   const [showAreaFilterPanel, setShowAreaFilterPanel] = useState(false);
+  const [verificationData, setVerificationData] = useState([
+    { id: 1, name: 'Amit Singh', role: 'Agent', type: 'KYC', status: 'Pending', date: '2024-03-20', docs: ['Aadhar', 'PAN'] },
+    { id: 2, name: 'Priya Verma', role: 'Sub-Admin', type: 'Document', status: 'Pending', date: '2024-03-19', docs: ['ID Card', 'Agreement'] },
+    { id: 3, name: 'Kiran Deep', role: 'Agent', type: 'KYC', status: 'Pending', date: '2024-03-18', docs: ['Aadhar', 'Passbook'] }
+  ]);
 
 
   const [showSubAdminFilters, setShowSubAdminFilters] = useState(false);
@@ -256,6 +261,13 @@ const AdminDashboard = () => {
       addNotification({ title: 'Deleted', message: `${type} removed successfully.`, type: 'success' });
     }
   };
+
+  const handleApproveVerification = (id, name) => {
+    setVerificationData(prev => prev.filter(v => v.id !== id));
+    addNotification({ title: 'Application Approved', message: `Successfully verified documentation for ${name}.`, type: 'success' });
+    setSelectedApplication(null);
+  };
+
 
   const handleDeleteShop = (id) => {
     if (window.confirm('Are you sure you want to remove this shop tie-up?')) {
@@ -910,13 +922,28 @@ const AdminDashboard = () => {
                         <div className="flex items-center gap-2 mt-2">
                           <span className="px-2 py-0.5 bg-warning/10 text-warning text-[10px] font-black rounded uppercase">{kyc.status}</span>
                           <span className="text-[10px] text-text-secondary-light font-bold">UTR: {kyc.details.paymentDetails.txnId}</span>
-                        </div>
+                        <h4 className="font-bold dark:text-white">{kyc.name}</h4>
+                        <p className="text-[10px] font-black text-text-secondary-light uppercase tracking-widest">{kyc.role} • {kyc.type}</p>
                       </div>
                     </div>
+                    <span className="px-3 py-1 bg-warning/10 text-warning rounded-full text-[10px] font-black uppercase tracking-widest">{kyc.status}</span>
                   </div>
-                  <div className="flex flex-col items-end gap-3">
-                    <span className="text-xs text-text-secondary-light font-bold flex items-center gap-1.5 bg-gray-50 dark:bg-secondary-dark/50 px-3 py-1 rounded-full"><Clock size={12} /> {kyc.date}</span>
-                    <div className="flex gap-2">
+
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between text-xs font-bold">
+                      <span className="text-text-secondary-light">Submitted On</span>
+                      <span className="dark:text-white">{kyc.date}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs font-bold">
+                      <span className="text-text-secondary-light">Documents</span>
+                      <div className="flex gap-1">
+                        {kyc.docs.map((doc, i) => (
+                          <span key={i} className="px-2 py-0.5 bg-gray-100 dark:bg-secondary-dark rounded-lg text-[10px] dark:text-white uppercase">{doc}</span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="pt-4 flex gap-2">
                       <button 
                         onClick={() => setSelectedApplication(kyc)}
                         className="px-5 py-2.5 bg-primary-light/10 text-primary-light rounded-xl font-black text-xs hover:bg-primary-light hover:text-white transition-all flex items-center gap-2"
@@ -924,7 +951,7 @@ const AdminDashboard = () => {
                         <Eye size={14} /> Review Details
                       </button>
                       <button 
-                        onClick={() => alert('KYC Approved')}
+                        onClick={() => handleApproveVerification(kyc.id, kyc.name)}
                         className="px-5 py-2.5 bg-success text-white rounded-xl font-black text-xs shadow-lg shadow-success/20 hover:scale-[1.05] transition-all"
                       >
                         Quick Approve
