@@ -152,6 +152,8 @@ const AdminDashboard = () => {
   const [areaModalType, setAreaModalType] = useState('State'); 
   const [showAreaModal, setShowAreaModal] = useState(false);
   const [selectedArea, setSelectedArea] = useState(null);
+  const [showAreaFilterPanel, setShowAreaFilterPanel] = useState(false);
+
 
   const [showSubAdminFilters, setShowSubAdminFilters] = useState(false);
   const [subAdminStatusFilter, setSubAdminStatusFilter] = useState('All Status');
@@ -3570,14 +3572,44 @@ const AdminDashboard = () => {
                   />
                 </div>
                 <div className="flex gap-2">
-                  <button className="btn-outline px-4 py-2.5 flex items-center gap-2 text-sm">
+                  <button 
+                    onClick={() => setShowAreaFilterPanel(!showAreaFilterPanel)}
+                    className={`btn-outline px-4 py-2.5 flex items-center gap-2 text-sm transition-all ${showAreaFilterPanel ? 'bg-primary-light text-white border-primary-light' : ''}`}
+                  >
                     <Filter size={18} /> Filters
                   </button>
-                  <button className="btn-outline px-4 py-2.5 flex items-center gap-2 text-sm">
+                  <button 
+                    onClick={() => exportToCSV(getAreaData(), `${activeTab.toLowerCase()}s_report`)}
+                    className="btn-outline px-4 py-2.5 flex items-center gap-2 text-sm"
+                  >
                     <Download size={18} /> Export
                   </button>
                 </div>
               </div>
+
+              {showAreaFilterPanel && (
+                <div className="p-6 bg-gray-50/50 dark:bg-secondary-dark/20 border-b dark:border-border-dark flex flex-wrap gap-4 animate-in slide-in-from-top-1 duration-300">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-black uppercase text-text-secondary-light tracking-widest ml-1">Status</label>
+                    <select 
+                      value={areaFilters.status}
+                      onChange={(e) => setAreaFilters({...areaFilters, status: e.target.value})}
+                      className="bg-white dark:bg-secondary-dark px-4 py-2 rounded-xl text-xs font-bold outline-none border-2 border-transparent focus:border-primary-light transition-all"
+                    >
+                      <option>All Status</option>
+                      <option>Active</option>
+                      <option>Inactive</option>
+                    </select>
+                  </div>
+                  <button 
+                    onClick={() => setAreaFilters({...areaFilters, status: 'All Status'})}
+                    className="mt-auto pb-2 text-[10px] font-bold text-error uppercase tracking-wider hover:underline"
+                  >
+                    Clear
+                  </button>
+                </div>
+              )}
+
 
               <div className="overflow-x-auto">
                 <table className="w-full">
