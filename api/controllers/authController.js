@@ -116,4 +116,17 @@ const getUserProfile = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, getUserProfile };
+// @desc    Get all subadmins
+// @route   GET /api/auth/subadmins
+// @access  Private/Admin
+const getSubAdmins = async (req, res) => {
+  try {
+    const subadmins = await User.find({ role: 'Sub-Admin' }).select('-password');
+    res.json(subadmins);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { registerUser, loginUser, getUserProfile, getSubAdmins };
+

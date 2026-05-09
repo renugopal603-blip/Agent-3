@@ -84,41 +84,26 @@ const AdminDashboard = () => {
   const [showShopModal, setShowShopModal] = useState(false);
   const [shopModalType, setShopModalType] = useState(null); // 'view', 'edit', 'approve', 'correction', 'assign'
   
-  const [subAdmins, setSubAdmins] = useState([
-    {
-      id: 1,
-      name: 'Priya Sharma',
-      empId: 'SA-1001',
-      phone: '+91 98765 43210',
-      email: 'priya@adminhub.com',
-      accessLevel: 'District Wise',
-      assignedLocation: 'Chennai District',
-      agentsCount: 15,
-      status: 'Active'
-    },
-    {
-      id: 2,
-      name: 'Rahul Dev',
-      empId: 'SA-1002',
-      phone: '+91 87654 32109',
-      email: 'rahul@adminhub.com',
-      accessLevel: 'Pincode Wise',
-      assignedLocation: '635601',
-      agentsCount: 4,
-      status: 'Active'
-    },
-    {
-      id: 3,
-      name: 'Sanjay Dutt',
-      empId: 'SA-1003',
-      phone: '+91 76543 21098',
-      email: 'sanjay@adminhub.com',
-      accessLevel: 'State Wise',
-      assignedLocation: 'Maharashtra',
-      agentsCount: 42,
-      status: 'Suspended'
+  const [subAdmins, setSubAdmins] = useState([]);
+  
+  const fetchSubAdmins = async () => {
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${JSON.parse(localStorage.getItem('user'))?.token}`
+        }
+      };
+      const { data } = await axios.get('/api/auth/subadmins', config);
+      setSubAdmins(data);
+    } catch (error) {
+      console.error('Error fetching subadmins:', error);
     }
-  ]);
+  };
+
+  useEffect(() => {
+    fetchSubAdmins();
+  }, []);
+
   
   const [states, setStates] = useState([
     { id: 1, name: 'Tamil Nadu', code: 'TN', districts: 38, agents: 450, status: 'Active' },
@@ -3238,15 +3223,15 @@ const AdminDashboard = () => {
                   </thead>
                   <tbody className="divide-y divide-border-light dark:divide-border-dark">
                     {filteredSubAdmins.map((sa) => (
-                      <tr key={sa.id} className="hover:bg-gray-50/50 dark:hover:bg-secondary-dark/20 transition-colors group">
+                      <tr key={sa._id} className="hover:bg-gray-50/50 dark:hover:bg-secondary-dark/20 transition-colors group">
                         <td className="p-4">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-primary-light/10 text-primary-light rounded-xl flex items-center justify-center font-bold shrink-0">
-                              {sa.name[0]}
+                              {sa.name ? sa.name[0] : 'U'}
                             </div>
                             <div className="whitespace-nowrap">
                               <p className="font-bold dark:text-white text-sm">{sa.name}</p>
-                              <p className="text-[10px] font-bold text-text-secondary-light uppercase">ID: {sa.empId}</p>
+                              <p className="text-[10px] font-bold text-text-secondary-light uppercase">ID: {sa.employeeId || 'N/A'}</p>
                             </div>
                           </div>
                         </td>
@@ -3255,15 +3240,15 @@ const AdminDashboard = () => {
                           <p className="text-[10px] text-text-secondary-light">{sa.email}</p>
                         </td>
                         <td className="p-4">
-                          <span className="px-2 py-1 bg-gray-100 dark:bg-secondary-dark rounded text-[10px] font-bold dark:text-white uppercase tracking-widest whitespace-nowrap">{sa.accessLevel}</span>
+                          <span className="px-2 py-1 bg-gray-100 dark:bg-secondary-dark rounded text-[10px] font-bold dark:text-white uppercase tracking-widest whitespace-nowrap">{sa.accessLevel || 'State Wise'}</span>
                         </td>
                         <td className="p-4">
                           <div className="flex items-center gap-1.5 text-xs font-bold dark:text-white">
-                            <Map size={12} className="text-primary-light" /> {sa.assignedLocation}
+                            <Map size={12} className="text-primary-light" /> {sa.assignedLocation || 'All India'}
                           </div>
                         </td>
                         <td className="p-4">
-                          <span className="px-3 py-1 bg-blue-500/10 text-blue-500 rounded-lg text-xs font-black">{sa.agentsCount}</span>
+                          <span className="px-3 py-1 bg-blue-500/10 text-blue-500 rounded-lg text-xs font-black">{sa.agentsCount || 0}</span>
                         </td>
                         <td className="p-4">
                           <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${
@@ -3272,6 +3257,7 @@ const AdminDashboard = () => {
                             {sa.status}
                           </span>
                         </td>
+
                         <td className="p-4 text-right">
                           <div className="flex justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                             <button 
@@ -3332,7 +3318,7 @@ const AdminDashboard = () => {
                             <button 
                               onClick={() => {
                                 const newStatus = sa.status === 'Active' ? 'Suspended' : 'Active';
-                                setSubAdmins(subAdmins.map(s => s.id === sa.id ? { ...s, status: newStatus } : s));
+                                setSubAdmins(subAdmins.map(s => s._id === sa._id ? { ...s, status: newStatus } : s));
                                 addNotification({
                                   title: `Sub Admin ${newStatus}`,
                                   message: `${sa.name} has been ${newStatus.toLowerCase()}.`,
@@ -3349,12 +3335,13 @@ const AdminDashboard = () => {
                               {sa.status === 'Active' ? <XCircle size={14} /> : <CheckCircle size={14} />}
                             </button>
                             <button 
-                              onClick={() => handleDeleteSubAdmin(sa.id)}
+                              onClick={() => handleDeleteSubAdmin(sa._id)}
                               className="p-2 bg-error/10 text-error rounded-xl hover:bg-error hover:text-white transition-all" 
                               title="Delete Sub-Admin"
                             >
                               <Trash2 size={14} />
                             </button>
+
                           </div>
                         </td>
                       </tr>
@@ -3800,8 +3787,10 @@ const AdminDashboard = () => {
             setShowAddSubAdminModal(false);
             setEditingItem(null);
           }}
+          onSuccess={fetchSubAdmins}
           initialData={editingItem}
         />
+
         <CategoryManagementModal 
           isOpen={showAddCategoryModal}
           onClose={() => {
@@ -3983,7 +3972,8 @@ const AdminDashboard = () => {
   );
 };
 
-const AddSubAdminModal = ({ isOpen, onClose, initialData }) => {
+const AddSubAdminModal = ({ isOpen, onClose, onSuccess, initialData }) => {
+
   const [step, setStep] = useState(1);
   const [emailOtp, setEmailOtp] = useState('');
   const [phoneOtp, setPhoneOtp] = useState('');
@@ -4097,8 +4087,10 @@ const AddSubAdminModal = ({ isOpen, onClose, initialData }) => {
         message: 'Credentials have been generated and stored in the database.', 
         type: 'success' 
       });
+      if (onSuccess) onSuccess();
       onClose();
       resetForm();
+
     } catch (error) {
       addNotification({ 
         title: 'Error', 
