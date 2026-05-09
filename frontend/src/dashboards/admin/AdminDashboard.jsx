@@ -4006,14 +4006,19 @@ const AddSubAdminModal = ({ isOpen, onClose, initialData }) => {
 
   if (!isOpen) return null;
 
-  const handleNext = () => {
+  const handleNext = (e) => {
+    if (e) e.preventDefault();
     if (step === 1 && (!isEmailVerified || !isPhoneVerified)) {
       addNotification({ title: 'Verification Required', message: 'Please verify both Email and Phone Number before proceeding.', type: 'warning' });
       return;
     }
     setStep(prev => prev + 1);
   };
-  const handleBack = () => setStep(prev => prev - 1);
+  const handleBack = (e) => {
+    if (e) e.preventDefault();
+    setStep(prev => prev - 1);
+  };
+
 
   const verifyEmail = () => {
     setSendingEmailOtp(true);
@@ -4055,6 +4060,11 @@ const AddSubAdminModal = ({ isOpen, onClose, initialData }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (step < 3) {
+      handleNext(e);
+      return;
+    }
+    
     addNotification({ 
       title: 'Sub Admin Created', 
       message: 'Credentials have been generated and sent via Email/SMS.', 
@@ -4063,6 +4073,7 @@ const AddSubAdminModal = ({ isOpen, onClose, initialData }) => {
     onClose();
     resetForm();
   };
+
 
   const resetForm = () => {
     setStep(1);
