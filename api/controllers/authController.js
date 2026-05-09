@@ -60,12 +60,23 @@ const registerUser = async (req, res) => {
         token: generateToken(user._id)
       });
     } else {
-      res.status(400).json({ message: 'Invalid user data' });
+      res.status(400).json({ message: 'Invalid user data provided' });
     }
   } catch (error) {
+    // Handle Mongoose validation errors
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(val => val.message);
+      return res.status(400).json({ message: messages.join(', ') });
+    }
+    // Handle Duplicate Key errors (e.g. Email/Phone)
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyValue)[0];
+      return res.status(400).json({ message: `The ${field} you entered is already in use` });
+    }
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // @desc    Auth user & get token
 // @route   POST /api/auth/login
