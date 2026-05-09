@@ -1,4 +1,12 @@
 const mongoose = require('mongoose');
+const dns = require('dns');
+
+// Fix for ECONNREFUSED on querySrv in some environments
+try {
+  dns.setServers(['8.8.8.8', '8.8.4.4']);
+} catch (e) {
+  console.warn('Could not set custom DNS servers:', e.message);
+}
 
 const connectDB = async () => {
   try {

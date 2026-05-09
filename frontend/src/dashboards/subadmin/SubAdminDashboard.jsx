@@ -95,8 +95,8 @@ const SubAdminDashboard = () => {
         };
         
         const [agentsRes, shopsRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/agents', config),
-          axios.get('http://localhost:5000/api/shops', config)
+          axios.get('/api/agents', config),
+          axios.get('/api/shops', config)
         ]);
 
         // Transform backend data to frontend format if necessary
@@ -145,7 +145,7 @@ const SubAdminDashboard = () => {
       const config = {
         headers: { Authorization: `Bearer ${user.token}` }
       };
-      const { data } = await axios.put(`http://localhost:5000/api/shops/${id}/verify`, { status: 'Verified' }, config);
+      const { data } = await axios.put(`/api/shops/${id}/verify`, { status: 'Verified' }, config);
       
       setVerifyShops(verifyShops.map(s => s.id === id ? { ...s, status: 'Verified' } : s));
       addNotification({
@@ -383,7 +383,7 @@ const SubAdminDashboard = () => {
                             onClick={async () => {
                               try {
                                 const config = { headers: { Authorization: `Bearer ${user.token}` } };
-                                await axios.delete(`http://localhost:5000/api/agents/${a.id}`, config);
+                                await axios.delete(`/api/agents/${a.id}`, config);
                                 setSystemUsers(systemUsers.filter(u => u.id !== a.id));
                                 addNotification({ title: 'Agent Removed', message: `${a.name} has been removed from your territory.`, type: 'error' });
                               } catch (error) {
@@ -505,7 +505,7 @@ const SubAdminDashboard = () => {
                               onClick={async () => {
                                 try {
                                   const config = { headers: { Authorization: `Bearer ${user.token}` } };
-                                  await axios.delete(`http://localhost:5000/api/shops/${s.id}`, config);
+                                  await axios.delete(`/api/shops/${s.id}`, config);
                                   setVerifyShops(verifyShops.filter(item => item.id !== s.id));
                                   addNotification({ title: 'Record Deleted', message: `Shop request for ${s.name} has been removed.`, type: 'error' });
                                 } catch (error) {
@@ -1722,7 +1722,7 @@ const SubAdminDashboard = () => {
               const config = {
                 headers: { Authorization: `Bearer ${user.token}` }
               };
-              const { data } = await axios.post('http://localhost:5000/api/agents', agentData, config);
+              const { data } = await axios.post('/api/agents', agentData, config);
               
               const newAgent = {
                 id: data._id,

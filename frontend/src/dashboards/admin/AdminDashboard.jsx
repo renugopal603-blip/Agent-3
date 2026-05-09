@@ -416,7 +416,7 @@ const AdminDashboard = () => {
     const fetchData = async () => {
       try {
         const config = { headers: { Authorization: `Bearer ${user.token}` } };
-        const { data } = await axios.get('http://localhost:5000/api/agents', config);
+        const { data } = await axios.get('/api/agents', config);
         
         const formattedAgents = data.map(a => ({
           id: a._id,
@@ -436,7 +436,7 @@ const AdminDashboard = () => {
   const handleAddAgent = async (agentData) => {
     try {
       const config = { headers: { Authorization: `Bearer ${user.token}` } };
-      const { data } = await axios.post('http://localhost:5000/api/agents', agentData, config);
+      const { data } = await axios.post('/api/agents', agentData, config);
       
       const newAgent = {
         id: data._id,
