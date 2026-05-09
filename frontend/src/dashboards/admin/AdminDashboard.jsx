@@ -93,16 +93,33 @@ const AdminDashboard = () => {
           Authorization: `Bearer ${JSON.parse(localStorage.getItem('user'))?.token}`
         }
       };
-      const { data } = await axios.get('/api/auth/subadmins', config);
+      // Use explicit API URL to prevent 404s
+      const API_URL = import.meta.env.VITE_API_URL || '';
+      const { data } = await axios.get(`${API_URL}/api/auth/subadmins`, config);
       setSubAdmins(data);
     } catch (error) {
       console.error('Error fetching subadmins:', error);
     }
   };
 
+  const exportToCSV = (data, filename) => {
+    if (!data || !data.length) return;
+    const headers = Object.keys(data[0]).join(',');
+    const rows = data.map(row => Object.values(row).join(','));
+    const csvContent = "data:text/csv;charset=utf-8," + headers + "\n" + rows.join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `${filename}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   useEffect(() => {
     fetchSubAdmins();
   }, []);
+
 
   
   const [states, setStates] = useState([
@@ -3195,6 +3212,30 @@ const AdminDashboard = () => {
               </div>
             </div>
 
+            {/* Action Bar */}
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary-light" size={18} />
+                <input 
+                  type="text" 
+                  placeholder="Search sub-admins..." 
+                  className="w-full pl-12 pr-4 py-3 bg-white dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none rounded-2xl dark:text-white font-bold transition-all shadow-sm"
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-2">
+                <button className="btn-outline px-6 py-3 flex items-center gap-2 text-sm font-bold bg-white dark:bg-secondary-dark rounded-2xl shadow-sm">
+                  <Filter size={18} /> Filters
+                </button>
+                <button 
+                  onClick={() => exportToCSV(subAdmins, 'sub_admins_report')}
+                  className="btn-outline px-6 py-3 flex items-center gap-2 text-sm font-bold bg-white dark:bg-secondary-dark rounded-2xl shadow-sm"
+                >
+                  <Download size={18} /> Export
+                </button>
+              </div>
+            </div>
+
             {/* Permission Context Note */}
             <div className="p-4 bg-primary-light/5 border border-primary-light/20 rounded-2xl flex items-start gap-4">
               <div className="p-2 bg-primary-light/10 text-primary-light rounded-xl"><Shield size={20}/></div>
@@ -3206,6 +3247,7 @@ const AdminDashboard = () => {
                 </p>
               </div>
             </div>
+
 
             <div className="card-premium p-0 overflow-hidden">
               <div className="overflow-x-auto">
