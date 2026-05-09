@@ -3,11 +3,13 @@
   "version": "1.0.0",
   "scripts": {
     "build": "cd frontend && npm install && npm run build",
+    "start": "node api/index.js",
     "dev": "concurrently \"npm run dev-frontend\" \"npm run dev-backend\"",
     "dev-frontend": "cd frontend && npm run dev",
-    "dev-backend": "node backend/server.js",
-    "start-backend": "node backend/server.js",
-    "seed": "node backend/utils/seedData.js"
+    "dev-backend": "node api/index.js",
+    "start-backend": "node api/index.js",
+    "seed": "node api/utils/seedData.js"
+
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

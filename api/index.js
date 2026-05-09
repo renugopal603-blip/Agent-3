@@ -34,4 +34,15 @@ mainRouter.use('/shops', require('./routes/shopRoutes'));
 app.use('/api', mainRouter);
 app.use('/', mainRouter);
 
+// Serve static files from frontend/dist (for non-Vercel deployments like Render)
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
+// SPA Fallback: serve index.html for any unknown routes (except API)
+app.get('*', (req, res) => {
+  if (!req.path.startsWith('/api')) {
+    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+  }
+});
+
 module.exports = app;
+
