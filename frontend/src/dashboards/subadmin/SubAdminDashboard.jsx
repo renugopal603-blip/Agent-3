@@ -74,11 +74,40 @@ const SubAdminDashboard = () => {
     { id: 'TKT-4805', subject: 'Referral bonus not reflecting', by: 'Vikram Kumar', priority: 'Low', status: 'Resolved', time: '3 days ago' },
   ]);
 
-  const handleDownload = (docName) => {
-    addNotification({ title: 'Download Started', message: `Preparing ${docName} for secure download...`, type: 'info' });
+  const handleDownload = (docName = 'Document', extension = 'pdf') => {
+    addNotification({ 
+      title: 'Preparing Download', 
+      message: `Securing ${docName} for transfer...`, 
+      type: 'info' 
+    });
+    
     setTimeout(() => {
-      addNotification({ title: 'Download Complete', message: `${docName} has been saved to your device.`, type: 'success' });
-    }, 2000);
+      try {
+        const type = extension === 'csv' ? 'text/csv' : 'application/pdf';
+        const content = `Simulated ${extension.toUpperCase()} content for ${docName}\nGenerated on: ${new Date().toLocaleString()}`;
+        const blob = new Blob([content], { type });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${docName.replace(/\s+/g, '_')}.${extension}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        addNotification({ 
+          title: 'Download Ready', 
+          message: `${docName} has been saved successfully.`, 
+          type: 'success' 
+        });
+      } catch (error) {
+        addNotification({ 
+          title: 'Download Failed', 
+          message: 'An error occurred during file generation.', 
+          type: 'error' 
+        });
+      }
+    }, 1500);
   };
 
   const [verifyShops, setVerifyShops] = useState([
@@ -321,10 +350,7 @@ const SubAdminDashboard = () => {
                   <Filter size={14} /> Filters
                 </button>
                 <button 
-                  onClick={() => {
-                    addNotification({ title: 'Exporting Data', message: 'Preparing Agent Ledger (CSV)...', type: 'info' });
-                    setTimeout(() => addNotification({ title: 'Export Ready', message: 'Agent Ledger downloaded successfully.', type: 'success' }), 2000);
-                  }}
+                  onClick={() => handleDownload('Agent_Ledger', 'csv')}
                   className="px-4 py-2 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl text-xs font-black text-text-secondary-light flex items-center gap-2 hover:border-primary-light transition-all"
                 >
                   <Download size={14} /> Export
@@ -422,10 +448,7 @@ const SubAdminDashboard = () => {
                   <Filter size={14} /> Filters
                 </button>
                 <button 
-                  onClick={() => {
-                    addNotification({ title: 'Preparing Data', message: 'Compiling Shop Verification Report...', type: 'info' });
-                    setTimeout(() => addNotification({ title: 'Secure Download', message: 'Verification report secured and saved.', type: 'success' }), 2000);
-                  }}
+                  onClick={() => handleDownload('Shop_Verification_Report', 'pdf')}
                   className="px-4 py-2 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl text-xs font-black text-text-secondary-light flex items-center gap-2 hover:border-primary-light transition-all"
                 >
                   <Download size={14} /> Export
@@ -546,10 +569,7 @@ const SubAdminDashboard = () => {
                   <Filter size={14} /> Filters
                 </button>
                 <button 
-                  onClick={() => {
-                    addNotification({ title: 'Exporting KYC Data', message: 'Preparing identity and business ledger...', type: 'info' });
-                    setTimeout(() => addNotification({ title: 'Export Complete', message: 'KYC Document Ledger saved successfully.', type: 'success' }), 2000);
-                  }}
+                  onClick={() => handleDownload('KYC_Document_Ledger', 'csv')}
                   className="px-4 py-2 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl text-xs font-black text-text-secondary-light flex items-center gap-2 hover:border-primary-light transition-all"
                 >
                   <Download size={14} /> Export
@@ -646,9 +666,9 @@ const SubAdminDashboard = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
-                { label: 'Total Volume', value: '\u20B912.5L', color: 'bg-primary-light', icon: <Briefcase /> },
-                { label: 'This Month', value: '\u20B92.4L', color: 'bg-emerald-500', icon: <TrendingUp /> },
-                { label: 'Pending Settlement', value: '\u20B945K', color: 'bg-orange-500', icon: <Clock /> },
+                { label: 'Total Volume', value: '₹12.5L', color: 'bg-primary-light', icon: <Briefcase /> },
+                { label: 'This Month', value: '₹2.4L', color: 'bg-emerald-500', icon: <TrendingUp /> },
+                { label: 'Pending Settlement', value: '₹45K', color: 'bg-orange-500', icon: <Clock /> },
               ].map((stat, i) => (
                 <div key={i} className="card-premium flex items-center gap-4">
                   <div className={`p-4 ${stat.color} text-white rounded-2xl shadow-lg`}>
@@ -680,9 +700,9 @@ const SubAdminDashboard = () => {
                     </thead>
                     <tbody className="divide-y divide-border-light dark:divide-border-dark">
                       {[
-                        { id: 'TXN-00192', date: 'Today, 10:30 AM', type: 'Shop Onboarding', amount: '\u20B91,200', status: 'Completed' },
-                        { id: 'TXN-00191', date: 'Yesterday', type: 'Sales Commission', amount: '\u20B94,500', status: 'Pending' },
-                        { id: 'TXN-00189', date: 'Oct 24', type: 'Performance Bonus', amount: '\u20B912,400', status: 'Completed' },
+                        { id: 'TXN-00192', date: 'Today, 10:30 AM', type: 'Shop Onboarding', amount: '₹1,200', status: 'Completed' },
+                        { id: 'TXN-00191', date: 'Yesterday', type: 'Sales Commission', amount: '₹4,500', status: 'Pending' },
+                        { id: 'TXN-00189', date: 'Oct 24', type: 'Performance Bonus', amount: '₹12,400', status: 'Completed' },
                       ].map((t, i) => (
                         <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50 group transition-colors">
                           <td className="py-4 font-bold dark:text-white text-sm">{t.id}</td>
@@ -1396,7 +1416,7 @@ const SubAdminDashboard = () => {
               {[
                 { title: 'Agent Performance', value: '42 Active', sub: '+3 this week', color: 'bg-blue-500', icon: <Users size={22} /> },
                 { title: 'Shop Activity', value: '128 Shops', sub: '12 pending review', color: 'bg-emerald-500', icon: <Store size={22} /> },
-                { title: 'Commission Earned', value: '\u20B92.4L', sub: '+8% vs last month', color: 'bg-primary-light', icon: <DollarSign size={22} /> },
+                { title: 'Commission Earned', value: '₹2.4L', sub: '+8% vs last month', color: 'bg-primary-light', icon: <DollarSign size={22} /> },
               ].map((stat) => (
                 <div key={stat.title} className="card-premium flex items-center gap-4">
                   <div className={`p-4 ${stat.color} text-white rounded-2xl shadow-lg shrink-0`}>{stat.icon}</div>
@@ -1497,9 +1517,9 @@ const SubAdminDashboard = () => {
             {/* Commission Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
-                { title: 'Total Commission', value: '\u20B94.8L', icon: <DollarSign size={20} />, color: 'bg-primary-light' },
-                { title: 'Payout Processed', value: '\u20B93.2L', icon: <CheckCircle size={20} />, color: 'bg-emerald-500' },
-                { title: 'Outstanding Balance', value: '\u20B91.6L', icon: <Clock size={20} />, color: 'bg-orange-500' },
+                { title: 'Total Commission', value: '₹4.8L', icon: <DollarSign size={20} />, color: 'bg-primary-light' },
+                { title: 'Payout Processed', value: '₹3.2L', icon: <CheckCircle size={20} />, color: 'bg-emerald-500' },
+                { title: 'Outstanding Balance', value: '₹1.6L', icon: <Clock size={20} />, color: 'bg-orange-500' },
               ].map((stat) => (
                 <div key={stat.title} className="card-premium flex items-center gap-4">
                   <div className={`p-4 ${stat.color} text-white rounded-2xl shadow-lg`}>{stat.icon}</div>
@@ -1525,10 +1545,10 @@ const SubAdminDashboard = () => {
                 </thead>
                 <tbody className="divide-y divide-border-light dark:divide-border-dark">
                   {[
-                    { id: 'TXN-9021', name: 'Amit Singh (Fresh Mart)', amount: '\u20B91,240', date: 'Oct 12, 2023', status: 'Successful' },
-                    { id: 'TXN-9020', name: 'Priya Verma (ElectroHub)', amount: '\u20B9850', date: 'Oct 12, 2023', status: 'Pending' },
-                    { id: 'TXN-9018', name: 'Rahul Dev (Style Studio)', amount: '\u20B92,100', date: 'Oct 11, 2023', status: 'Successful' },
-                    { id: 'TXN-9015', name: 'Vikram Kumar (Gadget Zone)', amount: '\u20B9420', date: 'Oct 11, 2023', status: 'Refunded' },
+                    { id: 'TXN-9021', name: 'Amit Singh (Fresh Mart)', amount: '₹1,240', date: 'Oct 12, 2023', status: 'Successful' },
+                    { id: 'TXN-9020', name: 'Priya Verma (ElectroHub)', amount: '₹850', date: 'Oct 12, 2023', status: 'Pending' },
+                    { id: 'TXN-9018', name: 'Rahul Dev (Style Studio)', amount: '₹2,100', date: 'Oct 11, 2023', status: 'Successful' },
+                    { id: 'TXN-9015', name: 'Vikram Kumar (Gadget Zone)', amount: '₹420', date: 'Oct 11, 2023', status: 'Refunded' },
                   ]
                   .filter(txn => {
                     const matchesFilter = financeFilter === 'All' || txn.status === financeFilter;
@@ -1793,7 +1813,7 @@ const SubAdminDashboard = () => {
           }}
         />
 
-        <TwoFactorModal 
+        <TwoFAModal 
           isOpen={show2FAModal}
           onClose={() => setShow2FAModal(false)}
           onUpdate={(enabled) => {
@@ -1856,11 +1876,11 @@ const CommissionPlanModal = ({ isOpen, onClose }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark">
                 <p className="text-xs font-bold text-text-secondary-light uppercase">New Shop Tie-up</p>
-                <p className="text-2xl font-black dark:text-white mt-1">\u20B9500 <span className="text-xs font-medium text-text-secondary-light">per shop</span></p>
+                <p className="text-2xl font-black dark:text-white mt-1">₹500 <span className="text-xs font-medium text-text-secondary-light">per shop</span></p>
               </div>
               <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark">
                 <p className="text-xs font-bold text-text-secondary-light uppercase">Agent Referral</p>
-                <p className="text-2xl font-black dark:text-white mt-1">\u20B91,000 <span className="text-xs font-medium text-text-secondary-light">per agent</span></p>
+                <p className="text-2xl font-black dark:text-white mt-1">₹1,000 <span className="text-xs font-medium text-text-secondary-light">per agent</span></p>
               </div>
             </div>
           </div>
@@ -1877,15 +1897,15 @@ const CommissionPlanModal = ({ isOpen, onClose }) => {
                 </thead>
                 <tbody className="divide-y divide-border-light dark:divide-border-dark">
                   <tr>
-                    <td className="p-4 text-sm font-bold dark:text-white">Up to \u20B95 Lakhs</td>
+                    <td className="p-4 text-sm font-bold dark:text-white">Up to ₹5 Lakhs</td>
                     <td className="p-4 text-sm font-black text-emerald-500 text-right">3%</td>
                   </tr>
                   <tr>
-                    <td className="p-4 text-sm font-bold dark:text-white">\u20B95 Lakhs - \u20B915 Lakhs</td>
+                    <td className="p-4 text-sm font-bold dark:text-white">₹5 Lakhs - ₹15 Lakhs</td>
                     <td className="p-4 text-sm font-black text-emerald-500 text-right">5%</td>
                   </tr>
                   <tr>
-                    <td className="p-4 text-sm font-bold dark:text-white">Above \u20B915 Lakhs</td>
+                    <td className="p-4 text-sm font-bold dark:text-white">Above ₹15 Lakhs</td>
                     <td className="p-4 text-sm font-black text-emerald-500 text-right">8%</td>
                   </tr>
                 </tbody>
@@ -2303,7 +2323,7 @@ const ReportDetailsModal = ({ isOpen, onClose, reportTitle }) => {
                     <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
                     <span className="text-sm font-bold dark:text-white">Region Zone - {i * 10} Alpha</span>
                   </div>
-                  <span className="text-sm font-black text-primary-light">\u20B9{(i * 12.5).toFixed(1)}L</span>
+                  <span className="text-sm font-black text-primary-light">₹{(i * 12.5).toFixed(1)}L</span>
                 </div>
               ))}
             </div>
@@ -2361,7 +2381,7 @@ const ChangePasswordModal = ({ isOpen, onClose, onSuccess }) => {
   );
 };
 
-const TwoFactorModal = ({ isOpen, onClose, onUpdate }) => {
+const TwoFAModal = ({ isOpen, onClose, onUpdate }) => {
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
