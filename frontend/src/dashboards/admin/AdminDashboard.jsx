@@ -5549,43 +5549,44 @@ const BulkPayoutModal = ({ isOpen, onClose }) => {
                 ))}
               </div>
             </div>
-            
-            {/* Authentication */}
-            <div className="space-y-2 pt-4 border-t border-border-light dark:border-border-dark">
-               <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Admin Authorization Code</label>
-               <div className="relative">
-                 <div className="relative">
-                   <input 
-                     type={showAuthPin ? "text" : "password"} 
-                     placeholder="Enter PIN to authorize release" 
-                     className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold tracking-widest pr-12" 
-                   />
-                   <button
-                     type="button"
-                     onClick={() => setShowAuthPin(!showAuthPin)}
-                     className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary-light hover:text-success transition-colors"
-                   >
-                     {showAuthPin ? <Eye size={18} className="text-success" /> : <EyeOff size={18} />}
-                   </button>
-                 </div>
-                 <Key className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary-light opacity-50" size={18} />
-               </div>
-            </div>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="p-6 border-t dark:border-border-dark bg-gray-50/50 dark:bg-secondary-dark/30 flex gap-4">
-          <button onClick={onClose} className="flex-1 py-4 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl font-black text-sm dark:text-white hover:bg-gray-100 transition-all">Cancel</button>
-          <button 
-            onClick={() => {
-              addNotification({ title: 'Payouts Initiated', message: 'Processing agent payouts...', type: 'success' });
-              onClose();
-            }} 
-            className="flex-[2] py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-          >
-            <Coins size={18} /> Confirm & Release ₹2.1L
-          </button>
+        {/* Authentication & Footer */}
+        <div className="p-6 border-t dark:border-border-dark bg-gray-50/50 dark:bg-secondary-dark/30 space-y-6">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Admin Authorization Code</label>
+            <div className="relative">
+              <div className="relative">
+                <input 
+                  type={showAuthPin ? "text" : "password"} 
+                  placeholder="Enter PIN to authorize release" 
+                  className="w-full px-4 py-4 rounded-2xl bg-white dark:bg-surface-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold tracking-widest pr-12 shadow-sm" 
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowAuthPin(!showAuthPin)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary-light hover:text-success transition-colors"
+                >
+                  {showAuthPin ? <Eye size={18} className="text-success" /> : <EyeOff size={18} />}
+                </button>
+              </div>
+              <Key className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary-light opacity-50 pointer-events-none" size={18} />
+            </div>
+          </div>
+
+          <div className="flex gap-4">
+            <button onClick={onClose} className="flex-1 py-4 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl font-black text-sm dark:text-white hover:bg-gray-100 transition-all">Cancel</button>
+            <button 
+              onClick={() => {
+                addNotification({ title: 'Payouts Initiated', message: 'Processing agent payouts...', type: 'success' });
+                onClose();
+              }} 
+              className="flex-[2] py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            >
+              <Coins size={18} /> Confirm & Release {"₹"}2.1L
+            </button>
+          </div>
         </div>
       </div>
     </div>
