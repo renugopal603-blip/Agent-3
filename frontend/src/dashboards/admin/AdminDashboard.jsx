@@ -60,7 +60,7 @@ const AdminDashboard = () => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [showAuthPin, setShowAuthPin] = useState(false);
+
   const [docFilter, setDocFilter] = useState('Pending');
   const [showTwoFAModal, setShowTwoFAModal] = useState(false);
   const [showSessionsModal, setShowSessionsModal] = useState(false);
@@ -5480,6 +5480,8 @@ const SetTargetModal = ({ isOpen, onClose }) => {
 };
 
 const BulkPayoutModal = ({ isOpen, onClose }) => {
+  const [showAuthPin, setShowAuthPin] = useState(false);
+  const { addNotification } = useNotifications();
   if (!isOpen) return null;
 
   return (
