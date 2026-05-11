@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const path = require('path');
+const connectDB = require('./config/db');
 const User = require('./models/User');
 
 dotenv.config();
@@ -28,10 +29,10 @@ const seedAdmin = async () => {
         applicationStatus: 'Approved'
       },
       {
-        name: 'Demo Agent',
-        email: 'agent@agenticstore.com',
-        phone: '8778942170',
-        password: 'Agent@123',
+        name: 'Demo Agent 2',
+        email: 'agent2@agenticstore.com',
+        phone: '1111111111',
+        password: '123456',
         role: 'Agent',
         status: 'Active',
         applicationStatus: 'Approved'
@@ -90,11 +91,19 @@ app.use('/', mainRouter);
 app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
 // SPA Fallback: serve index.html for any unknown routes (except API)
-app.get('*', (req, res) => {
+app.get('/{*path}', (req, res) => {
   if (!req.path.startsWith('/api')) {
     res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
   }
 });
+
+// Start server if run directly
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
 
 // Explicit export for Vercel serverless environment
 module.exports = (req, res) => {

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { 
   User, Mail, Lock, Phone, ArrowRight, Loader2, Shield, ArrowLeft, 
   CheckCircle, Upload, FileText, MapPin, Building, CreditCard, 
-  AlertCircle, ChevronRight, ChevronLeft, Eye, X
+  AlertCircle, ChevronRight, ChevronLeft, Eye, EyeOff, X
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
@@ -61,6 +61,7 @@ const Register = () => {
   const [otpLoading, setOtpLoading] = useState(false);
   const [otpError, setOtpError] = useState('');
   const [isManualAmount, setIsManualAmount] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const { register } = useAuth();
   const { addNotification } = useNotifications();
@@ -335,7 +336,24 @@ const Register = () => {
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-black uppercase tracking-widest text-text-secondary-light">Password</label>
-                    <input type="password" name="password" value={formData.password} onChange={handleInputChange} className="input-field" placeholder="••••••••" required />
+                    <div className="relative">
+                      <input 
+                        type={showPassword ? "text" : "password"} 
+                        name="password" 
+                        value={formData.password} 
+                        onChange={handleInputChange} 
+                        className="input-field pr-12" 
+                        placeholder="••••••••" 
+                        required 
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary-light hover:text-success transition-colors"
+                      >
+                        {showPassword ? <Eye size={18} className="text-success" /> : <EyeOff size={18} />}
+                      </button>
+                    </div>
                   </div>
                 </div>
 

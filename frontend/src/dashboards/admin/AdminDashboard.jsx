@@ -10,7 +10,7 @@ import {
   Search, Filter, MoreVertical, Edit, Trash2, CheckCircle, XCircle, X,
   Clock, Star, LogOut, ChevronRight, ChevronDown, Lock, BellRing, Palette,
   CreditCard, Percent, Truck, BarChart as BarChartIcon, LifeBuoy, Share2, Key, History,
-  UserCheck, Briefcase, Megaphone, Sun, Moon, Eye, User, FileText, Shield, MapPin, Coins, Wallet, Trophy, Calendar, Zap, Navigation, Download, ArrowUpRight, ArrowDownRight, PieChart, Activity, FileSpreadsheet, Layout, MessageSquare, Send, Smartphone, Mail, Plus, Headset, Ticket, Paperclip, Smile, Link2, Copy, Gift, Camera, Fingerprint, Monitor, Check, Menu,
+  UserCheck, Briefcase, Megaphone, Sun, Moon, Eye, EyeOff, User, FileText, Shield, MapPin, Coins, Wallet, Trophy, Calendar, Zap, Navigation, Download, ArrowUpRight, ArrowDownRight, PieChart, Activity, FileSpreadsheet, Layout, MessageSquare, Send, Smartphone, Mail, Plus, Headset, Ticket, Paperclip, Smile, Link2, Copy, Gift, Camera, Fingerprint, Monitor, Check, Menu, FileSearch,
   Flag, Milestone, Hash, Globe, Settings2, ShieldAlert
 } from 'lucide-react';
 
@@ -57,6 +57,11 @@ const AdminDashboard = () => {
   const [showTrackLinksModal, setShowTrackLinksModal] = useState(false);
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showAuthPin, setShowAuthPin] = useState(false);
+  const [docFilter, setDocFilter] = useState('Pending');
   const [showTwoFAModal, setShowTwoFAModal] = useState(false);
   const [showSessionsModal, setShowSessionsModal] = useState(false);
   const [showCreateRoleModal, setShowCreateRoleModal] = useState(false);
@@ -83,6 +88,14 @@ const AdminDashboard = () => {
   const [selectedCommissionAgent, setSelectedCommissionAgent] = useState(null);
   const [commissionSearch, setCommissionSearch] = useState('');
   const [commissionRoleFilter, setCommissionRoleFilter] = useState('All Agent Roles');
+  const [openMoreMenuId, setOpenMoreMenuId] = useState(null);
+  const [commissionAgents, setCommissionAgents] = useState([
+    { id: 1, name: 'Amit Singh', role: 'State Agent', volume: '\u20B914.5L', rate: '5%', earned: '\u20B972,500', status: 'Pending' },
+    { id: 2, name: 'Priya Verma', role: 'District Agent', volume: '\u20B98.2L', rate: '8%', earned: '\u20B965,600', status: 'Ready for Payout' },
+    { id: 3, name: 'Kiran Deep', role: 'Divisional Agent', volume: '\u20B95.4L', rate: '10%', earned: '\u20B954,000', status: 'Processing' },
+    { id: 4, name: 'Rahul Dev', role: 'Pincode Agent', volume: '\u20B92.4L', rate: '12%', earned: '\u20B928,800', status: 'Paid' },
+    { id: 5, name: 'Sanjay Dutt', role: 'Category Agent', volume: '\u20B95.8L', rate: '10%', earned: '\u20B958,000', status: 'Held' },
+  ]);
   
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [agentModalType, setAgentModalType] = useState(null); // 'view', 'edit', 'map', 'team', 'performance'
@@ -226,6 +239,7 @@ const AdminDashboard = () => {
 
   const [selectedVerification, setSelectedVerification] = useState(null);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [previewDoc, setPreviewDoc] = useState(null);
 
   const [systemUsers, setSystemUsers] = useState([
     { id: 1, name: 'Amit Kumar', role: 'Sub Admin', phone: '+91 98765 43210', email: 'amit@adminhub.com', location: 'Delhi', status: 'Active', lastLogin: '2026-05-04 10:30', riskLevel: 'Low' },
@@ -262,13 +276,6 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleApproveVerification = (id, name) => {
-    setVerificationData(prev => prev.filter(v => v.id !== id));
-    addNotification({ title: 'Application Approved', message: `Successfully verified documentation for ${name}.`, type: 'success' });
-    setSelectedApplication(null);
-  };
-
-
   const handleDeleteShop = (id) => {
     if (window.confirm('Are you sure you want to remove this shop tie-up?')) {
       setShopTieUps(shopTieUps.filter(s => s.id !== id));
@@ -281,6 +288,40 @@ const AdminDashboard = () => {
       setCategories(categories.filter(c => c.id !== id));
       addNotification({ title: 'Category Deleted', message: 'The business category has been removed.', type: 'error' });
     }
+  };
+
+  const handleReleaseCommission = (agent) => {
+    setCommissionAgents(prev => prev.map(a => 
+      a.id === agent.id ? { ...a, status: 'Processing' } : a
+    ));
+    addNotification({ 
+      title: 'Payout Initiated', 
+      message: `Commission of ${agent.earned} for ${agent.name} is now being processed.`, 
+      type: 'success' 
+    });
+    
+    // Simulate successful payout after 3 seconds
+    setTimeout(() => {
+      setCommissionAgents(prev => prev.map(a => 
+        a.id === agent.id ? { ...a, status: 'Paid' } : a
+      ));
+      addNotification({ 
+        title: 'Payout Successful', 
+        message: `\u20B9${agent.earned} has been credited to ${agent.name}'s account.`, 
+        type: 'success' 
+      });
+    }, 3000);
+  };
+
+  const handleHoldPayment = (id) => {
+    setCommissionAgents(prev => prev.map(a => 
+      a.id === id ? { ...a, status: 'Held' } : a
+    ));
+    addNotification({ 
+      title: 'Payment Held', 
+      message: 'The commission payout has been placed on hold.', 
+      type: 'warning' 
+    });
   };
 
   const [systemActivityLogs, setSystemActivityLogs] = useState([
@@ -364,11 +405,11 @@ const AdminDashboard = () => {
   ]);
 
   const [agentPerformanceData] = useState([
-    { name: 'Amit Singh', shops: 52, revenue: '₹4.2L', rating: 4.8, status: 'Top Performer' },
-    { name: 'Priya Verma', shops: 38, revenue: '₹2.8L', rating: 4.5, status: 'Consistent' },
-    { name: 'Vikram Batra', shops: 45, revenue: '₹3.5L', rating: 4.2, status: 'Average' },
-    { name: 'Rajesh Kumar', shops: 28, revenue: '₹2.1L', rating: 4.0, status: 'Needs Support' },
-    { name: 'Sneha Patel', shops: 64, revenue: '₹5.5L', rating: 4.9, status: 'Top Performer' },
+    { name: 'Amit Singh', shops: 52, revenue: '\u20B94.2L', rating: 4.8, status: 'Top Performer' },
+    { name: 'Priya Verma', shops: 38, revenue: '\u20B92.8L', rating: 4.5, status: 'Consistent' },
+    { name: 'Vikram Batra', shops: 45, revenue: '\u20B93.5L', rating: 4.2, status: 'Average' },
+    { name: 'Rajesh Kumar', shops: 28, revenue: '\u20B92.1L', rating: 4.0, status: 'Needs Support' },
+    { name: 'Sneha Patel', shops: 64, revenue: '\u20B95.5L', rating: 4.9, status: 'Top Performer' },
   ]);
 
   const [shopCategoryPerformance] = useState([
@@ -403,13 +444,12 @@ const AdminDashboard = () => {
       role: 'District Agent', 
       location: 'Hyderabad', 
       date: '2 hours ago', 
-      status: 'Pending Review',
+      status: 'Pending',
       details: {
-        agentType: 'District Agent',
         territory: { state: 'Telangana', district: 'Hyderabad', division: 'South', pincode: '500001' },
-        kycDocs: { aadharFront: 'aadhar_f.jpg', aadharBack: 'aadhar_b.jpg', panCard: 'pan.jpg', photo: 'photo.jpg' },
-        bankDetails: { bankName: 'SBI', accNo: 'XXXXXX9901', ifsc: 'SBIN0001' },
-        paymentDetails: { txnId: 'TXN990123', amount: '₹1,00,000', proof: 'receipt.png' }
+        bankDetails: { bankName: 'HDFC Bank', accNo: 'XXXXXX9842', ifsc: 'HDFC0001234' },
+        paymentDetails: { amount: '\u20B915,000', txnId: 'UTR9988776655', date: '2026-05-04' },
+        kycDocs: { aadharFront: true, aadharBack: true, panCard: true, bankPassbook: true }
       }
     },
     { 
@@ -418,13 +458,26 @@ const AdminDashboard = () => {
       role: 'Shop Owner', 
       location: 'Bangalore', 
       date: '5 hours ago', 
-      status: 'Pending Review',
+      status: 'Under Review',
       details: {
-        agentType: 'Pincode Agent',
-        territory: { state: 'Karnataka', district: 'Bangalore', division: 'East', pincode: '560001' },
-        kycDocs: { aadharFront: 'aadhar_f2.jpg', aadharBack: 'aadhar_b2.jpg', panCard: 'pan2.jpg', photo: 'photo2.jpg' },
-        bankDetails: { bankName: 'HDFC', accNo: 'XXXXXX1234', ifsc: 'HDFC0001' },
-        paymentDetails: { txnId: 'TXN880456', amount: '₹50,000', proof: 'receipt2.png' }
+        territory: { state: 'Karnataka', district: 'Bangalore', division: 'Central', pincode: '560001' },
+        bankDetails: { bankName: 'ICICI Bank', accNo: 'XXXXXX5521', ifsc: 'ICIC0005521' },
+        paymentDetails: { amount: '\u20B95,000', txnId: 'UTR5544332211', date: '2026-05-05' },
+        kycDocs: { gstCert: true, tradeLicense: true, panCard: true, shopPhoto: true }
+      }
+    },
+    { 
+      id: 3, 
+      name: 'Vikram Batra', 
+      role: 'State Agent', 
+      location: 'Delhi', 
+      date: 'Yesterday', 
+      status: 'Pending',
+      details: {
+        territory: { state: 'Delhi', district: 'New Delhi', division: 'North', pincode: '110001' },
+        bankDetails: { bankName: 'SBI', accNo: 'XXXXXX2211', ifsc: 'SBIN0000001' },
+        paymentDetails: { amount: '\u20B950,000', txnId: 'UTR1122334455', date: '2026-05-03' },
+        kycDocs: { aadharFront: true, aadharBack: true, panCard: true, businessCert: true }
       }
     }
   ]);
@@ -508,7 +561,7 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleApproveVerification = (entityId, docId = null) => {
+  const handleApproveVerification = (entityId, docId = null, name = 'Entity') => {
     if (docId) {
       // Approve specific document
       setDocumentVerifications(prev => prev.map(v => 
@@ -516,13 +569,40 @@ const AdminDashboard = () => {
           ? { ...v, documents: v.documents.map(d => d.id === docId ? { ...d, status: 'Verified' } : d) }
           : v
       ));
+      
+      // Update selected modal view if it matches
+      if (selectedVerification?.id === entityId) {
+        setSelectedVerification(prev => ({
+          ...prev,
+          documents: prev.documents.map(d => d.id === docId ? { ...d, status: 'Verified' } : d)
+        }));
+      }
       addNotification({ title: 'Document Verified', message: 'Document has been approved.', type: 'success' });
     } else {
       // Approve entire entity
-      setDocumentVerifications(prev => prev.map(v => v.id === entityId ? { ...v, status: 'Approved' } : v));
-      setKycData(prev => prev.map(k => k.id === entityId ? { ...k, status: 'Approved' } : k));
-      addNotification({ title: 'KYC Approved', message: 'The entity has been fully approved.', type: 'success' });
+      setDocumentVerifications(prev => prev.map(v => 
+        v.id === entityId 
+          ? { ...v, status: 'Approved', documents: v.documents.map(d => ({ ...d, status: 'Verified' })) } 
+          : v
+      ));
+      setKycData(prev => prev.filter(k => k.id !== entityId));
+      setVerificationData(prev => prev.filter(v => v.id !== entityId));
+      addNotification({ title: 'KYC Approved', message: `Successfully verified documentation for ${name}.`, type: 'success' });
+      
+      // Update selected modal view if it matches
+      if (selectedVerification?.id === entityId) {
+        setSelectedVerification(prev => ({ 
+          ...prev, 
+          status: 'Approved',
+          documents: prev.documents.map(d => ({ ...d, status: 'Verified' }))
+        }));
+      }
+      setSelectedApplication(null);
     }
+  };
+
+  const handleApproveKYC = (id, name) => {
+    handleApproveVerification(id, null, name);
   };
 
   const handleRejectVerification = (entityId) => {
@@ -812,51 +892,6 @@ const AdminDashboard = () => {
 
       case 'KYC Verification':
       case 'KYC Approvals': {
-        const kycData = [
-          { 
-            id: 1, 
-            name: 'Arjun Reddy', 
-            role: 'District Agent', 
-            location: 'Hyderabad', 
-            date: '2 hours ago', 
-            status: 'Pending',
-            details: {
-              territory: { state: 'Telangana', district: 'Hyderabad', division: 'South', pincode: '500001' },
-              bankDetails: { bankName: 'HDFC Bank', accNo: 'XXXXXX9842', ifsc: 'HDFC0001234' },
-              paymentDetails: { amount: '₹15,000', txnId: 'UTR9988776655', date: '2026-05-04' },
-              kycDocs: { aadharFront: true, aadharBack: true, panCard: true, bankPassbook: true }
-            }
-          },
-          { 
-            id: 2, 
-            name: 'Modern Electronics', 
-            role: 'Shop Owner', 
-            location: 'Bangalore', 
-            date: '5 hours ago', 
-            status: 'Under Review',
-            details: {
-              territory: { state: 'Karnataka', district: 'Bangalore', division: 'Central', pincode: '560001' },
-              bankDetails: { bankName: 'ICICI Bank', accNo: 'XXXXXX5521', ifsc: 'ICIC0005521' },
-              paymentDetails: { amount: '₹5,000', txnId: 'UTR5544332211', date: '2026-05-05' },
-              kycDocs: { gstCert: true, tradeLicense: true, panCard: true, shopPhoto: true }
-            }
-          },
-          { 
-            id: 3, 
-            name: 'Vikram Batra', 
-            role: 'State Agent', 
-            location: 'Delhi', 
-            date: 'Yesterday', 
-            status: 'Pending',
-            details: {
-              territory: { state: 'Delhi', district: 'New Delhi', division: 'North', pincode: '110001' },
-              bankDetails: { bankName: 'SBI', accNo: 'XXXXXX2211', ifsc: 'SBIN0000001' },
-              paymentDetails: { amount: '₹50,000', txnId: 'UTR1122334455', date: '2026-05-03' },
-              kycDocs: { aadharFront: true, aadharBack: true, panCard: true, businessCert: true }
-            }
-          }
-        ];
-
         const toggleKYCSelection = (id) => {
           setSelectedKYC(prev => 
             prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
@@ -865,7 +900,18 @@ const AdminDashboard = () => {
 
         const handleBulkApprove = () => {
           if (selectedKYC.length === 0) return;
-          alert(`Bulk approving ${selectedKYC.length} KYC requests...`);
+          
+          setDocumentVerifications(prev => prev.map(v => 
+            selectedKYC.includes(v.id) 
+              ? { ...v, status: 'Approved', documents: v.documents.map(d => ({ ...d, status: 'Verified' })) } 
+              : v
+          ));
+          
+          addNotification({ 
+            title: 'Bulk Approval Success', 
+            message: `Successfully approved ${selectedKYC.length} KYC requests.`, 
+            type: 'success' 
+          });
           setSelectedKYC([]);
         };
 
@@ -880,7 +926,7 @@ const AdminDashboard = () => {
                 <button 
                   className={`btn-outline px-6 py-2.5 text-sm font-bold transition-all ${selectedKYC.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-light/5 hover:border-primary-light text-primary-light'}`}
                   disabled={selectedKYC.length === 0}
-                  onClick={() => alert('Downloading all documents for selected items...')}
+                  onClick={() => addNotification({ title: 'Download Started', message: `Preparing documents for ${selectedKYC.length} items...`, type: 'info' })}
                 >
                   Download Docs {selectedKYC.length > 0 && `(${selectedKYC.length})`}
                 </button>
@@ -922,11 +968,9 @@ const AdminDashboard = () => {
                         <div className="flex items-center gap-2 mt-2">
                           <span className="px-2 py-0.5 bg-warning/10 text-warning text-[10px] font-black rounded uppercase">{kyc.status}</span>
                           <span className="text-[10px] text-text-secondary-light font-bold">UTR: {kyc.details.paymentDetails.txnId}</span>
-                        <h4 className="font-bold dark:text-white">{kyc.name}</h4>
-                        <p className="text-[10px] font-black text-text-secondary-light uppercase tracking-widest">{kyc.role} • {kyc.type}</p>
+                        </div>
                       </div>
                     </div>
-                    <span className="px-3 py-1 bg-warning/10 text-warning rounded-full text-[10px] font-black uppercase tracking-widest">{kyc.status}</span>
                   </div>
 
                   <div className="space-y-4">
@@ -937,8 +981,8 @@ const AdminDashboard = () => {
                     <div className="flex items-center justify-between text-xs font-bold">
                       <span className="text-text-secondary-light">Documents</span>
                       <div className="flex gap-1">
-                        {kyc.docs.map((doc, i) => (
-                          <span key={i} className="px-2 py-0.5 bg-gray-100 dark:bg-secondary-dark rounded-lg text-[10px] dark:text-white uppercase">{doc}</span>
+                        {Object.keys(kyc.details.kycDocs).map((docKey, i) => (
+                          <span key={i} className="px-2 py-0.5 bg-gray-100 dark:bg-secondary-dark rounded-lg text-[10px] dark:text-white uppercase">{docKey.replace(/([A-Z])/g, ' $1')}</span>
                         ))}
                       </div>
                     </div>
@@ -951,7 +995,7 @@ const AdminDashboard = () => {
                         <Eye size={14} /> Review Details
                       </button>
                       <button 
-                        onClick={() => handleApproveVerification(kyc.id, kyc.name)}
+                        onClick={() => handleApproveKYC(kyc.id, kyc.name)}
                         className="px-5 py-2.5 bg-success text-white rounded-xl font-black text-xs shadow-lg shadow-success/20 hover:scale-[1.05] transition-all"
                       >
                         Quick Approve
@@ -1027,8 +1071,18 @@ const AdminDashboard = () => {
                         {Object.entries(selectedApplication.details.kycDocs).map(([key, val]) => (
                           <div key={key} className="space-y-2">
                             <p className="text-[10px] font-bold text-text-secondary-light uppercase truncate">{key.replace(/([A-Z])/g, ' $1')}</p>
-                            <div className="h-24 bg-gray-50 dark:bg-secondary-dark rounded-xl border border-border-light dark:border-border-dark flex items-center justify-center hover:border-primary-light transition-all cursor-pointer group">
-                              <FileText size={20} className="text-text-secondary-light group-hover:text-primary-light" />
+                            <div 
+                              onClick={() => setPreviewDoc({ 
+                                id: `DOC-${Math.floor(Math.random() * 10000)}`, 
+                                name: key.replace(/([A-Z])/g, ' $1').trim(), 
+                                size: '1.4 MB' 
+                              })}
+                              className="h-24 bg-gray-50 dark:bg-secondary-dark rounded-xl border border-border-light dark:border-border-dark flex items-center justify-center hover:border-primary-light hover:bg-primary-light/5 transition-all cursor-pointer group relative overflow-hidden"
+                            >
+                              <div className="absolute inset-0 flex items-center justify-center bg-primary-light/0 group-hover:bg-primary-light/5 transition-colors">
+                                <Eye size={20} className="text-primary-light opacity-0 group-hover:opacity-100 transition-opacity" />
+                              </div>
+                              <FileText size={20} className="text-text-secondary-light group-hover:scale-110 transition-transform" />
                             </div>
                           </div>
                         ))}
@@ -1038,9 +1092,33 @@ const AdminDashboard = () => {
 
                   <div className="p-6 bg-gray-50/50 dark:bg-secondary-dark/30 border-t dark:border-border-dark flex gap-4">
                     <button onClick={() => setSelectedApplication(null)} className="flex-1 py-4 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl font-black text-sm dark:text-white hover:bg-gray-100 transition-all">Close</button>
-                    <button onClick={() => alert('Requesting correction...')} className="flex-1 py-4 bg-warning/10 text-warning border border-warning/20 rounded-2xl font-black text-sm hover:bg-warning/20 transition-all">Request Correction</button>
-                    <button onClick={() => alert('Application Rejected')} className="flex-1 py-4 bg-error/10 text-error border border-error/20 rounded-2xl font-black text-sm hover:bg-error/20 transition-all">Reject</button>
-                    <button onClick={() => alert('Application Approved! Agent account activated.')} className="flex-[2] py-4 bg-success text-white rounded-2xl font-black text-sm shadow-xl shadow-success/20 hover:scale-[1.02] active:scale-[0.98] transition-all">Approve & Activate Account</button>
+                    <button 
+                      onClick={() => {
+                        addNotification({ title: 'Correction Requested', message: `Notified ${selectedApplication.name} to re-upload documents.`, type: 'info' });
+                        setSelectedApplication(null);
+                      }} 
+                      className="flex-1 py-4 bg-warning/10 text-warning border border-warning/20 rounded-2xl font-black text-sm hover:bg-warning/20 transition-all"
+                    >
+                      Request Correction
+                    </button>
+                    <button 
+                      onClick={() => {
+                        handleRejectVerification(selectedApplication.id);
+                        setSelectedApplication(null);
+                      }} 
+                      className="flex-1 py-4 bg-error/10 text-error border border-error/20 rounded-2xl font-black text-sm hover:bg-error/20 transition-all"
+                    >
+                      Reject
+                    </button>
+                    <button 
+                      onClick={() => {
+                        handleApproveVerification(selectedApplication.id, null, selectedApplication.name);
+                        setSelectedApplication(null);
+                      }} 
+                      className="flex-[2] py-4 bg-success text-white rounded-2xl font-black text-sm shadow-xl shadow-success/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                    >
+                      Approve & Activate Account
+                    </button>
                   </div>
                 </div>
               </div>
@@ -1069,9 +1147,9 @@ const AdminDashboard = () => {
                 <h4 className="font-bold dark:text-white">Active Agent Goals</h4>
                 <div className="space-y-6">
                   {[
-                    { name: 'State Agents', progress: 75, target: '₹50L', current: '₹37.5L' },
-                    { name: 'District Agents', progress: 42, target: '₹20L', current: '₹8.4L' },
-                    { name: 'Category Agents', progress: 88, target: '₹10L', current: '₹8.8L' },
+                    { name: 'State Agents', progress: 75, target: '\u20B950L', current: '\u20B937.5L' },
+                    { name: 'District Agents', progress: 42, target: '\u20B920L', current: '\u20B98.4L' },
+                    { name: 'Category Agents', progress: 88, target: '\u20B910L', current: '\u20B98.8L' },
                   ].map((goal) => (
                     <div key={goal.name} className="space-y-2">
                       <div className="flex justify-between text-sm">
@@ -1091,7 +1169,7 @@ const AdminDashboard = () => {
                 <h4 className="font-bold dark:text-white">Reward Distribution</h4>
                 <div className="flex items-center justify-center h-48">
                   <div className="text-center">
-                    <p className="text-4xl font-bold text-primary-light">₹2.4L</p>
+                    <p className="text-4xl font-bold text-primary-light">\u20B92.4L</p>
                     <p className="text-sm text-text-secondary-light mt-1">Total Incentives Distributed</p>
                     <button className="mt-4 text-xs font-bold text-accent-light hover:underline">View Breakdown</button>
                   </div>
@@ -1326,15 +1404,51 @@ const AdminDashboard = () => {
               </div>
               <div className="flex gap-3">
                 <div className="flex bg-gray-100 dark:bg-secondary-dark p-1 rounded-xl">
-                  <button className="px-4 py-2 text-xs font-black bg-white dark:bg-surface-dark shadow-sm rounded-lg dark:text-white">Pending</button>
-                  <button className="px-4 py-2 text-xs font-black text-text-secondary-light hover:text-primary-light transition-colors">Verified</button>
+                  <button 
+                    onClick={() => setDocFilter('Pending')}
+                    className={`px-4 py-2 text-xs font-black rounded-lg transition-all ${
+                      docFilter === 'Pending' 
+                        ? 'bg-white dark:bg-surface-dark shadow-sm dark:text-white' 
+                        : 'text-text-secondary-light hover:text-primary-light'
+                    }`}
+                  >
+                    Pending
+                  </button>
+                  <button 
+                    onClick={() => setDocFilter('Verified')}
+                    className={`px-4 py-2 text-xs font-black rounded-lg transition-all ${
+                      docFilter === 'Verified' 
+                        ? 'bg-white dark:bg-surface-dark shadow-sm text-success' 
+                        : 'text-success hover:bg-success/5'
+                    }`}
+                  >
+                    Verified
+                  </button>
                 </div>
               </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4">
-              {documentVerifications.map((verify) => (
-                <div key={verify.id} className="card-premium group hover:border-primary-light/30 transition-all duration-300">
+              {documentVerifications
+                .filter(v => {
+                  if (docFilter === 'Pending') return v.documents.some(d => d.status === 'Pending');
+                  return v.documents.every(d => d.status === 'Verified');
+                }).length === 0 ? (
+                  <div className="card-premium p-12 text-center flex flex-col items-center justify-center animate-in fade-in duration-500">
+                    <div className="w-20 h-20 bg-gray-100 dark:bg-secondary-dark rounded-full flex items-center justify-center mb-4 text-text-secondary-light">
+                      <FileSearch size={40} />
+                    </div>
+                    <h4 className="text-xl font-black dark:text-white">No {docFilter} Requests</h4>
+                    <p className="text-sm text-text-secondary-light mt-2 max-w-xs mx-auto">There are currently no document verification requests in the {docFilter.toLowerCase()} queue.</p>
+                  </div>
+                ) : (
+                  documentVerifications
+                    .filter(v => {
+                      if (docFilter === 'Pending') return v.documents.some(d => d.status === 'Pending');
+                      return v.documents.every(d => d.status === 'Verified');
+                    })
+                    .map((verify) => (
+                      <div key={verify.id} className="card-premium group hover:border-primary-light/30 transition-all duration-300">
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                     <div className="flex items-center gap-5">
                       <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-inner ${
@@ -1398,7 +1512,7 @@ const AdminDashboard = () => {
                     </div>
                   </div>
                 </div>
-              ))}
+              )))}
             </div>
           </div>
         );
@@ -1412,8 +1526,11 @@ const AdminDashboard = () => {
                 <p className="text-sm text-text-secondary-light mt-1">Analyze agent productivity and shop category growth.</p>
               </div>
               <div className="flex gap-3">
-                <button className="btn-outline px-4 py-2 text-xs flex items-center gap-2">
-                  <Download size={14} /> Download PDF
+                <button 
+                  onClick={() => addNotification({ title: 'Generating Report', message: 'Preparing the PDF performance report for download...', type: 'info' })}
+                  className="px-6 py-3 bg-success text-white rounded-2xl font-black text-sm shadow-xl shadow-success/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-3"
+                >
+                  <Download size={18} /> Download PDF Report
                 </button>
               </div>
             </div>
@@ -1518,7 +1635,7 @@ const AdminDashboard = () => {
                     <div className="mt-4 pt-4 border-t border-border-light dark:border-border-dark grid grid-cols-2 gap-4">
                       <div>
                         <p className="text-[10px] font-bold text-text-secondary-light uppercase">Revenue</p>
-                        <p className="font-black dark:text-white mt-1">₹{(area.revenue / 100000).toFixed(1)}L</p>
+                        <p className="font-black dark:text-white mt-1">\u20B9{(area.revenue / 100000).toFixed(1)}L</p>
                       </div>
                       <div>
                         <p className="text-[10px] font-bold text-text-secondary-light uppercase">Active Shops</p>
@@ -1555,9 +1672,9 @@ const AdminDashboard = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
-                { label: 'Platform Fees', value: '₹4.2L', trend: '+15%', color: 'text-blue-500' },
-                { label: 'Membership Revenue', value: '₹18.5L', trend: '+22%', color: 'text-emerald-500' },
-                { label: 'Agent Commission', value: '₹2.8L', trend: '-2%', color: 'text-orange-500' },
+                { label: 'Platform Fees', value: '\u20B94.2L', trend: '+15%', color: 'text-blue-500' },
+                { label: 'Membership Revenue', value: '\u20B918.5L', trend: '+22%', color: 'text-emerald-500' },
+                { label: 'Agent Commission', value: '\u20B92.8L', trend: '-2%', color: 'text-orange-500' },
               ].map((stat) => (
                 <div key={stat.label} className="card-premium">
                   <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">{stat.label}</p>
@@ -1616,14 +1733,14 @@ const AdminDashboard = () => {
                   { name: 'Active Sessions', action: () => setShowSessionsModal(true) }
                 ]},
                 { title: 'Notifications', icon: <BellRing />, desc: 'Configure email and system alerts', items: [
-                  { name: 'KYC Alerts', action: () => alert('Configuring KYC Alerts...') },
-                  { name: 'New Shop Registrations', action: () => alert('Configuring Shop Alerts...') },
-                  { name: 'Revenue Milestones', action: () => alert('Configuring Revenue Alerts...') }
+                  { name: 'KYC Alerts', action: () => addNotification({ title: 'Alert Config', message: 'Configuring KYC Alerts...', type: 'info' }) },
+                  { name: 'New Shop Registrations', action: () => addNotification({ title: 'Alert Config', message: 'Configuring Shop Alerts...', type: 'info' }) },
+                  { name: 'Revenue Milestones', action: () => addNotification({ title: 'Alert Config', message: 'Configuring Revenue Alerts...', type: 'info' }) }
                 ]},
                 { title: 'System Appearance', icon: <Palette />, desc: 'Customize dashboard look and feel', items: [
-                  { name: 'Dark Mode Toggle', action: () => alert('Use the toggle in the top bar to switch modes.') },
-                  { name: 'Primary Brand Color', action: () => alert('Brand color customization coming soon.') },
-                  { name: 'Sidebar Layout', action: () => alert('Sidebar layout presets coming soon.') }
+                  { name: 'Dark Mode Toggle', action: () => addNotification({ title: 'Theme Settings', message: 'Use the moon icon in the header to toggle dark mode.', type: 'info' }) },
+                  { name: 'Primary Brand Color', action: () => addNotification({ title: 'Theme Settings', message: 'Brand color customization coming soon.', type: 'info' }) },
+                  { name: 'Sidebar Layout', action: () => addNotification({ title: 'Theme Settings', message: 'Sidebar layout presets coming soon.', type: 'info' }) }
                 ]},
               ].map((group) => (
                 <div key={group.title} className="card-premium space-y-4">
@@ -1679,7 +1796,7 @@ const AdminDashboard = () => {
                   <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary-light group-hover:text-primary-light transition-colors" />
                 </div>
                 <button 
-                  onClick={() => alert('Preparing financial ledger for export... CSV/PDF formats will be ready in a moment.')}
+                  onClick={() => addNotification({ title: 'Exporting Ledger', message: 'Preparing financial ledger for export... CSV/PDF formats will be ready in a moment.', type: 'info' })}
                   className="btn-primary px-6 py-2.5 text-sm font-bold flex items-center gap-2 shadow-lg shadow-primary-light/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
                 >
                   <CreditCard size={18} /> Export Ledger
@@ -1691,7 +1808,7 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="card-premium border-l-4 border-l-blue-500">
                 <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">Processing Volume (MTD)</p>
-                <h3 className="text-3xl font-bold dark:text-white mt-2">₹48.2L</h3>
+                <h3 className="text-3xl font-bold dark:text-white mt-2">\u20B948.2L</h3>
                 <p className="text-xs font-semibold text-success mt-1">+12.4% vs last month</p>
               </div>
               <div className="card-premium border-l-4 border-l-emerald-500">
@@ -1740,11 +1857,11 @@ const AdminDashboard = () => {
                   </thead>
                   <tbody className="divide-y divide-border-light dark:divide-border-dark">
                     {[
-                      { id: 'TXN-990812', date: 'Today, 10:45 AM', name: 'Fresh Grocery Mart', type: 'Shop Settlement', method: 'Bank Transfer', amount: '+ ₹12,450.00', status: 'Completed' },
-                      { id: 'TXN-990813', date: 'Today, 09:15 AM', name: 'Arjun Reddy', type: 'Membership Upgrade', method: 'UPI', amount: '+ ₹4,999.00', status: 'Completed' },
-                      { id: 'TXN-990814', date: 'Yesterday, 04:30 PM', name: 'State Agent Commission', type: 'Payout', method: 'NEFT', amount: '- ₹45,000.00', status: 'Processing' },
-                      { id: 'TXN-990815', date: 'Yesterday, 02:10 PM', name: 'Modern Electronics', type: 'Platform Fee', method: 'Credit Card', amount: '+ ₹1,250.00', status: 'Failed' },
-                      { id: 'TXN-990816', date: 'Oct 24, 11:20 AM', name: 'Customer Refund', type: 'Order Cancellation', method: 'Original Source', amount: '- ₹850.00', status: 'Refunded' },
+                      { id: 'TXN-990812', date: 'Today, 10:45 AM', name: 'Fresh Grocery Mart', type: 'Shop Settlement', method: 'Bank Transfer', amount: '+ \u20B912,450.00', status: 'Completed' },
+                      { id: 'TXN-990813', date: 'Today, 09:15 AM', name: 'Arjun Reddy', type: 'Membership Upgrade', method: 'UPI', amount: '+ \u20B94,999.00', status: 'Completed' },
+                      { id: 'TXN-990814', date: 'Yesterday, 04:30 PM', name: 'State Agent Commission', type: 'Payout', method: 'NEFT', amount: '- \u20B945,000.00', status: 'Processing' },
+                      { id: 'TXN-990815', date: 'Yesterday, 02:10 PM', name: 'Modern Electronics', type: 'Platform Fee', method: 'Credit Card', amount: '+ \u20B91,250.00', status: 'Failed' },
+                      { id: 'TXN-990816', date: 'Oct 24, 11:20 AM', name: 'Customer Refund', type: 'Order Cancellation', method: 'Original Source', amount: '- \u20B9850.00', status: 'Refunded' },
                     ].map((txn) => (
                       <tr key={txn.id} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50 transition-colors">
                         <td className="py-3">
@@ -1771,7 +1888,12 @@ const AdminDashboard = () => {
                           </span>
                         </td>
                         <td className="py-3 text-right">
-                          <button className="text-xs font-bold text-primary-light hover:underline px-2 py-1 bg-primary-light/10 rounded-lg">Download</button>
+                          <button 
+                            onClick={() => addNotification({ title: 'Download', message: 'Downloading referral summary report...', type: 'info' })}
+                            className="text-xs font-bold text-primary-light hover:underline px-2 py-1 bg-primary-light/10 rounded-lg"
+                          >
+                            Download
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -1806,17 +1928,17 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="card-premium">
                 <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">Pending Commissions</p>
-                <h3 className="text-3xl font-bold text-orange-500 mt-2">₹4.8L</h3>
+                <h3 className="text-3xl font-bold text-orange-500 mt-2">\u20B94.8L</h3>
                 <p className="text-xs font-semibold text-warning mt-1">Awaiting next cycle</p>
               </div>
               <div className="card-premium">
                 <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">Paid This Month</p>
-                <h3 className="text-3xl font-bold text-emerald-500 mt-2">₹12.2L</h3>
+                <h3 className="text-3xl font-bold text-emerald-500 mt-2">\u20B912.2L</h3>
                 <p className="text-xs font-semibold text-success mt-1">Distributed successfully</p>
               </div>
               <div className="card-premium">
                 <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">Average Agent Earning</p>
-                <h3 className="text-3xl font-bold text-blue-500 mt-2">₹18,450</h3>
+                <h3 className="text-3xl font-bold text-blue-500 mt-2">\u20B918,450</h3>
                 <p className="text-xs font-semibold text-text-secondary-light mt-1">Per active agent (MTD)</p>
               </div>
             </div>
@@ -1863,13 +1985,7 @@ const AdminDashboard = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border-light dark:divide-border-dark">
-                    {[
-                      { id: 1, name: 'Amit Singh', role: 'State Agent', volume: '₹14.5L', rate: '5%', earned: '₹72,500', status: 'Pending' },
-                      { id: 2, name: 'Priya Verma', role: 'District Agent', volume: '₹8.2L', rate: '8%', earned: '₹65,600', status: 'Ready for Payout' },
-                      { id: 3, name: 'Kiran Deep', role: 'Divisional Agent', volume: '₹5.4L', rate: '10%', earned: '₹54,000', status: 'Processing' },
-                      { id: 4, name: 'Rahul Dev', role: 'Pincode Agent', volume: '₹2.4L', rate: '12%', earned: '₹28,800', status: 'Paid' },
-                      { id: 5, name: 'Sanjay Dutt', role: 'Category Agent', volume: '₹5.8L', rate: '10%', earned: '₹58,000', status: 'Held' },
-                    ].filter(agent => {
+                    {commissionAgents.filter(agent => {
                       const roleMatch = commissionRoleFilter === 'All Agent Roles' || agent.role === commissionRoleFilter;
                       const searchMatch = agent.name.toLowerCase().includes(commissionSearch.toLowerCase());
                       return roleMatch && searchMatch;
@@ -1914,7 +2030,7 @@ const AdminDashboard = () => {
                             {/* Release Button */}
                             <button 
                               disabled={agent.status === 'Processing' || agent.status === 'Paid'}
-                              onClick={() => addNotification({ title: 'Payout Released', message: `Initiated ₹${agent.earned} payout for ${agent.name}`, type: 'success' })}
+                              onClick={() => handleReleaseCommission(agent)}
                               className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all shadow-lg group/release relative ${
                                 agent.status === 'Processing' || agent.status === 'Paid'
                                 ? 'bg-gray-100 dark:bg-secondary-dark opacity-50 cursor-not-allowed'
@@ -1930,38 +2046,87 @@ const AdminDashboard = () => {
                             </button>
 
                             {/* More Options */}
-                            <div className="relative group/more">
+                            <div className="relative">
                               <button 
-                                className="w-10 h-10 flex items-center justify-center bg-gray-100 dark:bg-secondary-dark/50 backdrop-blur-md rounded-xl text-gray-500 hover:bg-gray-200 dark:hover:bg-secondary-dark transition-all border border-transparent hover:border-gray-200 shadow-sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenMoreMenuId(openMoreMenuId === agent.id ? null : agent.id);
+                                }}
+                                className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all border shadow-sm ${
+                                  openMoreMenuId === agent.id 
+                                  ? 'bg-primary-light text-white border-primary-light' 
+                                  : 'bg-gray-100 dark:bg-secondary-dark/50 text-gray-500 hover:bg-gray-200 dark:hover:bg-secondary-dark border-transparent'
+                                }`}
                               >
                                 <MoreVertical size={18} />
                               </button>
                               
-                              <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl shadow-2xl py-2 opacity-0 invisible group-hover/more:opacity-100 group-hover/more:visible transition-all z-50 translate-y-2 group-hover/more:translate-y-0">
-                                <div className="px-4 py-2 border-b border-border-light dark:border-border-dark mb-2">
-                                  <p className="text-[10px] font-black text-text-secondary-light uppercase tracking-widest">Options</p>
-                                </div>
-                                <button className="w-full px-4 py-2 text-left text-xs font-bold hover:bg-gray-50 dark:hover:bg-secondary-dark flex items-center gap-2 transition-colors">
-                                  <FileText size={14} className="text-blue-500" /> Download Invoice
-                                </button>
-                                <button className="w-full px-4 py-2 text-left text-xs font-bold hover:bg-gray-50 dark:hover:bg-secondary-dark flex items-center gap-2 transition-colors">
-                                  <History size={14} className="text-purple-500" /> View Logs
-                                </button>
-                                <button className="w-full px-4 py-2 text-left text-xs font-bold hover:bg-gray-50 dark:hover:bg-secondary-dark flex items-center gap-2 transition-colors">
-                                  <Bell size={14} className="text-orange-500" /> Send Notification
-                                </button>
-                                <button className="w-full px-4 py-2 text-left text-xs font-bold hover:bg-gray-50 dark:hover:bg-secondary-dark flex items-center gap-2 transition-colors">
-                                  <Edit size={14} className="text-emerald-500" /> Edit Commission
-                                </button>
-                                {agent.status === 'Paid' && (
-                                  <button className="w-full px-4 py-2 text-left text-xs font-bold hover:bg-gray-50 dark:hover:bg-secondary-dark flex items-center gap-2 transition-colors">
-                                    <CheckCircle size={14} className="text-success" /> View Receipt
-                                  </button>
-                                )}
-                                <button className="w-full px-4 py-2 text-left text-xs font-bold hover:bg-gray-50 dark:hover:bg-secondary-dark flex items-center gap-2 text-error transition-colors mt-2 border-t border-border-light dark:border-border-dark pt-2">
-                                  <AlertCircle size={14} /> Hold Payment
-                                </button>
-                              </div>
+                              {openMoreMenuId === agent.id && (
+                                <>
+                                  <div className="fixed inset-0 z-40" onClick={() => setOpenMoreMenuId(null)}></div>
+                                  <div className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in zoom-in-95 duration-200">
+                                    <div className="px-4 py-2 border-b border-border-light dark:border-border-dark mb-2">
+                                      <p className="text-[10px] font-black text-text-secondary-light uppercase tracking-widest">Options</p>
+                                    </div>
+                                    <button 
+                                      onClick={() => {
+                                        addNotification({ title: 'Download Started', message: `Downloading invoice for ${agent.name}`, type: 'info' });
+                                        setOpenMoreMenuId(null);
+                                      }}
+                                      className="w-full px-4 py-2 text-left text-xs font-bold hover:bg-gray-50 dark:hover:bg-secondary-dark flex items-center gap-2 transition-colors"
+                                    >
+                                      <FileText size={14} className="text-blue-500" /> Download Invoice
+                                    </button>
+                                    <button 
+                                      onClick={() => {
+                                        addNotification({ title: 'System Logs', message: `Displaying financial logs for ${agent.name}`, type: 'info' });
+                                        setOpenMoreMenuId(null);
+                                      }}
+                                      className="w-full px-4 py-2 text-left text-xs font-bold hover:bg-gray-50 dark:hover:bg-secondary-dark flex items-center gap-2 transition-colors"
+                                    >
+                                      <History size={14} className="text-purple-500" /> Financial Logs
+                                    </button>
+                                    <button 
+                                      onClick={() => {
+                                        addNotification({ title: 'Notification Sent', message: `Payout alert sent to ${agent.name}`, type: 'success' });
+                                        setOpenMoreMenuId(null);
+                                      }}
+                                      className="w-full px-4 py-2 text-left text-xs font-bold hover:bg-gray-50 dark:hover:bg-secondary-dark flex items-center gap-2 transition-colors"
+                                    >
+                                      <Bell size={14} className="text-orange-500" /> Payout Alert
+                                    </button>
+                                    <button 
+                                      onClick={() => {
+                                        addNotification({ title: 'Edit Mode', message: 'Commission rate adjustment requested.', type: 'info' });
+                                        setOpenMoreMenuId(null);
+                                      }}
+                                      className="w-full px-4 py-2 text-left text-xs font-bold hover:bg-gray-50 dark:hover:bg-secondary-dark flex items-center gap-2 transition-colors"
+                                    >
+                                      <Edit size={14} className="text-emerald-500" /> Update Commission Rate
+                                    </button>
+                                    {agent.status === 'Paid' && (
+                                      <button 
+                                        onClick={() => {
+                                          addNotification({ title: 'Receipt Generated', message: 'Transaction ID: TXN-44998822', type: 'info' });
+                                          setOpenMoreMenuId(null);
+                                        }}
+                                        className="w-full px-4 py-2 text-left text-xs font-bold hover:bg-gray-50 dark:hover:bg-secondary-dark flex items-center gap-2 transition-colors"
+                                      >
+                                        <CheckCircle size={14} className="text-success" /> View Receipt
+                                      </button>
+                                    )}
+                                    <button 
+                                      onClick={() => {
+                                        handleHoldPayment(agent.id);
+                                        setOpenMoreMenuId(null);
+                                      }}
+                                      className="w-full px-4 py-2 text-left text-xs font-bold hover:bg-gray-50 dark:hover:bg-secondary-dark flex items-center gap-2 text-error transition-colors mt-2 border-t border-border-light dark:border-border-dark pt-2"
+                                    >
+                                      <AlertCircle size={14} /> Hold Payment Flow
+                                    </button>
+                                  </div>
+                                </>
+                              )}
                             </div>
                           </div>
                         </td>
@@ -2467,7 +2632,7 @@ const AdminDashboard = () => {
               </div>
               <div className="card-premium">
                 <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">Rewards Distributed</p>
-                <h3 className="text-3xl font-bold text-purple-500 mt-2">₹4.2L</h3>
+                <h3 className="text-3xl font-bold text-purple-500 mt-2">\u20B94.2L</h3>
                 <p className="text-xs font-semibold text-text-secondary-light mt-1">Total cash bonuses paid</p>
               </div>
               <div className="card-premium">
@@ -2512,10 +2677,10 @@ const AdminDashboard = () => {
                   </thead>
                   <tbody className="divide-y divide-border-light dark:divide-border-dark">
                     {[
-                      { referrer: 'Arjun Reddy', code: 'ARJUN500', referred: 'Sneha Patil', reward: '₹500.00', status: 'Paid', date: 'Today' },
-                      { referrer: 'Modern Electronics', code: 'MODERNX', referred: 'Tech World Shop', reward: '₹2,000.00', status: 'Pending Verification', date: 'Yesterday' },
-                      { referrer: 'Vikram Batra', code: 'VIKRAM01', referred: 'Amit Singh', reward: '₹500.00', status: 'Paid', date: 'Oct 24' },
-                      { referrer: 'Zoya Khan', code: 'ZOYA99', referred: 'Rahul Dev', reward: '₹0.00', status: 'Rejected / Fraud', date: 'Oct 20' },
+                      { referrer: 'Arjun Reddy', code: 'ARJUN500', referred: 'Sneha Patil', reward: '\u20B9500.00', status: 'Paid', date: 'Today' },
+                      { referrer: 'Modern Electronics', code: 'MODERNX', referred: 'Tech World Shop', reward: '\u20B92,000.00', status: 'Pending Verification', date: 'Yesterday' },
+                      { referrer: 'Vikram Batra', code: 'VIKRAM01', referred: 'Amit Singh', reward: '\u20B9500.00', status: 'Paid', date: 'Oct 24' },
+                      { referrer: 'Zoya Khan', code: 'ZOYA99', referred: 'Rahul Dev', reward: '\u20B90.00', status: 'Rejected / Fraud', date: 'Oct 20' },
                     ].map((ref, i) => (
                       <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50 transition-colors">
                         <td className="py-4">
@@ -2656,7 +2821,16 @@ const AdminDashboard = () => {
                         <td className="p-4 text-xs dark:text-white font-medium">{u.lastLogin}</td>
                         <td className="p-4 text-right">
                           <div className="flex justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                            <button className="p-2 bg-gray-100 dark:bg-secondary-dark rounded-xl hover:bg-gray-200 text-text-secondary-light" title="View"><Eye size={14} /></button>
+                            <button 
+                              onClick={() => {
+                                setSelectedSystemUser(u);
+                                setShowEditProfileModal(true);
+                              }}
+                              className="p-2 bg-gray-100 dark:bg-secondary-dark rounded-xl hover:bg-gray-200 text-text-secondary-light" 
+                              title="View Profile"
+                            >
+                              <Eye size={14} />
+                            </button>
                             <button className="p-2 bg-primary-light/10 text-primary-light rounded-xl hover:bg-primary-light hover:text-white" title="Edit Role"><Edit size={14} /></button>
                             <button 
                               onClick={() => {
@@ -3233,8 +3407,18 @@ const AdminDashboard = () => {
                         <p className="text-[10px] text-text-secondary-light font-bold mt-0.5">{item.type} • {item.size} • {item.date}</p>
                       </div>
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button className="p-2 text-text-secondary-light hover:text-primary-light"><Eye size={16} /></button>
-                        <button className="p-2 text-text-secondary-light hover:text-primary-light"><Download size={16} /></button>
+                        <button 
+                          onClick={() => addNotification({ title: 'Previewing Asset', message: `Opening ${item.title}...`, type: 'info' })}
+                          className="p-2 text-text-secondary-light hover:text-primary-light"
+                        >
+                          <Eye size={16} />
+                        </button>
+                        <button 
+                          onClick={() => addNotification({ title: 'Asset Download', message: 'Downloading brand asset package...', type: 'info' })}
+                          className="p-2 text-text-secondary-light hover:text-primary-light rounded-lg hover:bg-gray-100 transition-all"
+                        >
+                          <Download size={16} />
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -3992,6 +4176,90 @@ const AdminDashboard = () => {
           onAdd={handleAddAgent}
           initialData={editingItem}
         />
+
+        {/* Document Preview Overlay */}
+        {previewDoc && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-8">
+            <div className="absolute inset-0 bg-background-dark/95 backdrop-blur-xl animate-in fade-in duration-300" onClick={() => setPreviewDoc(null)}></div>
+            <div className="relative w-full max-w-5xl aspect-[16/10] bg-white dark:bg-surface-dark rounded-[2.5rem] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col">
+              <div className="p-6 border-b dark:border-border-dark flex justify-between items-center">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-primary-light/10 text-primary-light rounded-xl flex items-center justify-center">
+                    <FileText size={20} />
+                  </div>
+                  <div>
+                    <h4 className="font-black dark:text-white uppercase tracking-tight">{previewDoc.name}</h4>
+                    <p className="text-[10px] font-black text-text-secondary-light uppercase tracking-widest">Document ID: {previewDoc.id} • {previewDoc.size}</p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => window.print()} className="p-3 hover:bg-gray-100 dark:hover:bg-secondary-dark rounded-xl transition-all"><Download size={20} className="dark:text-white" /></button>
+                  <button onClick={() => setPreviewDoc(null)} className="p-3 hover:bg-gray-100 dark:hover:bg-secondary-dark rounded-xl transition-all"><X size={24} className="dark:text-white" /></button>
+                </div>
+              </div>
+              <div className="flex-1 bg-gray-100 dark:bg-secondary-dark/50 p-12 flex items-center justify-center relative overflow-hidden">
+                <div className="absolute inset-0 opacity-10 pointer-events-none">
+                  <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#3B82F6_1px,transparent_1px)] [background-size:20px_20px]"></div>
+                </div>
+                <div className="w-full h-full max-w-3xl bg-white dark:bg-surface-dark rounded-2xl shadow-inner border border-border-light dark:border-border-dark p-12 overflow-y-auto custom-scrollbar">
+                  <div className="space-y-8 opacity-50">
+                    <div className="flex justify-between items-start">
+                      <div className="w-32 h-8 bg-gray-200 dark:bg-secondary-dark rounded-lg"></div>
+                      <div className="text-right space-y-2">
+                        <div className="w-24 h-4 bg-gray-200 dark:bg-secondary-dark rounded ml-auto"></div>
+                        <div className="w-32 h-4 bg-gray-200 dark:bg-secondary-dark rounded ml-auto"></div>
+                      </div>
+                    </div>
+                    <div className="h-0.5 bg-gray-100 dark:bg-secondary-dark"></div>
+                    <div className="space-y-4">
+                      <div className="w-1/2 h-6 bg-gray-200 dark:bg-secondary-dark rounded"></div>
+                      <div className="grid grid-cols-2 gap-8">
+                        <div className="space-y-3">
+                          <div className="w-full h-4 bg-gray-100 dark:bg-secondary-dark rounded"></div>
+                          <div className="w-full h-4 bg-gray-100 dark:bg-secondary-dark rounded"></div>
+                          <div className="w-2/3 h-4 bg-gray-100 dark:bg-secondary-dark rounded"></div>
+                        </div>
+                        <div className="space-y-3">
+                          <div className="w-full h-4 bg-gray-100 dark:bg-secondary-dark rounded"></div>
+                          <div className="w-full h-4 bg-gray-100 dark:bg-secondary-dark rounded"></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-20 flex justify-center">
+                      <div className="w-48 h-48 border-8 border-gray-100 dark:border-secondary-dark rounded-full flex items-center justify-center opacity-20">
+                        <ShieldCheck size={80} />
+                      </div>
+                    </div>
+                    <div className="pt-20 flex justify-between items-end">
+                      <div className="space-y-2">
+                        <div className="w-32 h-0.5 bg-gray-300 dark:bg-secondary-dark"></div>
+                        <div className="w-24 h-4 bg-gray-200 dark:bg-secondary-dark rounded"></div>
+                      </div>
+                      <div className="w-32 h-32 bg-gray-100 dark:bg-secondary-dark rounded-2xl flex items-center justify-center">
+                        <div className="w-24 h-24 bg-gray-200 dark:bg-secondary-dark rounded-xl opacity-50"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center bg-white/10 backdrop-blur-[2px]">
+                    <div className="text-center p-8 bg-white dark:bg-surface-dark rounded-3xl shadow-2xl border border-primary-light/20 scale-110">
+                      <div className="w-20 h-20 bg-primary-light/10 text-primary-light rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                        <FileSearch size={40} />
+                      </div>
+                      <h3 className="text-xl font-black dark:text-white mb-2 uppercase tracking-tight">Authentic Document</h3>
+                      <p className="text-sm text-text-secondary-light font-medium max-w-[250px]">This is a verified digital copy of the {previewDoc.name} submitted for review.</p>
+                      <button 
+                        onClick={() => setPreviewDoc(null)}
+                        className="mt-6 px-8 py-3 bg-primary-light text-white rounded-xl font-black text-sm hover:scale-105 transition-all shadow-lg shadow-primary-light/20"
+                      >
+                        Close Preview
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         <AddSubAdminModal 
           isOpen={showAddSubAdminModal}
           onClose={() => {
@@ -4040,36 +4308,34 @@ const AdminDashboard = () => {
           user={selectedSystemUser}
           reason={deactivateReason}
           setReason={setDeactivateReason}
-          onConfirm={handleDeactivateConfirm}
+          notes={deactivateNotes}
+          setNotes={setDeactivateNotes}
+          onConfirm={() => {
+            if (selectedSystemUser) {
+              setSystemUsers(systemUsers.map(u => u.id === selectedSystemUser.id ? { ...u, status: 'Blocked' } : u));
+              setSystemActivityLogs([{
+                id: Date.now(),
+                user: 'Admin',
+                action: `Deactivated User: ${selectedSystemUser.name}`,
+                module: 'Security',
+                timestamp: new Date().toLocaleString(),
+                status: 'Success',
+                ip: '192.168.1.1'
+              }, ...systemActivityLogs]);
+              addNotification({
+                title: 'Account Deactivated',
+                message: `User ${selectedSystemUser.name} has been blocked for: ${deactivateReason}`,
+                type: 'error'
+              });
+            }
+            setShowDeactivateModal(false);
+          }}
         />
 
         <CommissionInsightModal 
           isOpen={showCommissionModal}
           onClose={() => setShowCommissionModal(false)}
           agent={selectedCommissionAgent}
-        />
-
-          setReason={setDeactivateReason}
-          notes={deactivateNotes}
-          setNotes={setDeactivateNotes}
-          onConfirm={() => {
-            setSystemUsers(systemUsers.map(u => u.id === selectedSystemUser.id ? { ...u, status: 'Blocked' } : u));
-            setSystemActivityLogs([{
-              id: Date.now(),
-              user: 'Admin',
-              action: `Deactivated User: ${selectedSystemUser.name}`,
-              module: 'Security',
-              timestamp: new Date().toLocaleString(),
-              status: 'Success',
-              ip: '192.168.1.1'
-            }, ...systemActivityLogs]);
-            addNotification({
-              title: 'Account Deactivated',
-              message: `User ${selectedSystemUser.name} has been blocked for: ${deactivateReason}`,
-              type: 'error'
-            });
-            setShowDeactivateModal(false);
-          }}
         />
         <AddServicePartnerModal 
           isOpen={showAddServicePartnerModal}
@@ -4105,6 +4371,7 @@ const AdminDashboard = () => {
         <ReportModal 
           isOpen={showReportModal}
           onClose={() => setShowReportModal(false)}
+          setActiveTab={setActiveTab}
         />
         <ForecastModal 
           isOpen={showForecastModal}
@@ -4882,7 +5149,7 @@ const SubAdminActionModal = ({ isOpen, onClose, subAdmin, type }) => {
               <div className="grid grid-cols-3 gap-4">
                 <div className="p-4 bg-success/5 rounded-2xl border border-success/10 text-center">
                   <p className="text-[10px] font-black text-success uppercase tracking-widest">Revenue</p>
-                  <p className="text-xl font-black dark:text-white">₹4.2L</p>
+                  <p className="text-xl font-black dark:text-white">\u20B94.2L</p>
                 </div>
                 <div className="p-4 bg-primary-light/5 rounded-2xl border border-primary-light/10 text-center">
                   <p className="text-[10px] font-black text-primary-light uppercase tracking-widest">Growth</p>
@@ -5130,11 +5397,11 @@ const SetTargetModal = ({ isOpen, onClose }) => {
               <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1 flex items-center gap-1"><Trophy size={12} className="text-orange-500" /> Incentive / Reward</label>
               <div className="relative">
                 <select className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold appearance-none">
-                  <option>₹1,000 Bonus</option>
-                  <option>₹2,000 Bonus</option>
-                  <option>₹5,000 Bonus</option>
-                  <option>₹7,500 Bonus</option>
-                  <option>₹10,000 Bonus</option>
+                  <option>\u20B91,000 Bonus</option>
+                  <option>\u20B92,000 Bonus</option>
+                  <option>\u20B95,000 Bonus</option>
+                  <option>\u20B97,500 Bonus</option>
+                  <option>\u20B910,000 Bonus</option>
                 </select>
                 <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary-light pointer-events-none" size={16} />
               </div>
@@ -5196,12 +5463,12 @@ const BulkPayoutModal = ({ isOpen, onClose }) => {
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark">
                 <p className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light mb-1">Total Pending</p>
-                <h4 className="text-2xl font-black text-orange-500">₹4.8L</h4>
+                <h4 className="text-2xl font-black text-orange-500">\u20B94.8L</h4>
                 <p className="text-xs font-bold text-text-secondary-light mt-1">Across 145 Agents</p>
               </div>
               <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark">
                 <p className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light mb-1">Ready to Release</p>
-                <h4 className="text-2xl font-black text-primary-light">₹2.1L</h4>
+                <h4 className="text-2xl font-black text-primary-light">\u20B92.1L</h4>
                 <p className="text-xs font-bold text-text-secondary-light mt-1">Verified & Approved (64 Agents)</p>
               </div>
             </div>
@@ -5214,10 +5481,10 @@ const BulkPayoutModal = ({ isOpen, onClose }) => {
               </div>
               <div className="space-y-2">
                 {[
-                  { name: 'Amit Singh', role: 'State Agent', amount: '₹72,500', bank: 'HDFC Bank •••• 9842' },
-                  { name: 'Priya Verma', role: 'District Agent', amount: '₹65,600', bank: 'ICICI Bank •••• 5521' },
-                  { name: 'Ravi Kumar', role: 'Divisional Agent', amount: '₹34,200', bank: 'SBI •••• 1122' },
-                  { name: 'Anjali Desai', role: 'Pincode Agent', amount: '₹12,400', bank: 'Axis Bank •••• 8844' }
+                  { name: 'Amit Singh', role: 'State Agent', amount: '\u20B972,500', bank: 'HDFC Bank •••• 9842' },
+                  { name: 'Priya Verma', role: 'District Agent', amount: '\u20B965,600', bank: 'ICICI Bank •••• 5521' },
+                  { name: 'Ravi Kumar', role: 'Divisional Agent', amount: '\u20B934,200', bank: 'SBI •••• 1122' },
+                  { name: 'Anjali Desai', role: 'Pincode Agent', amount: '\u20B912,400', bank: 'Axis Bank •••• 8844' }
                 ].map((agent, i) => (
                   <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-secondary-dark/50 rounded-xl hover:bg-gray-100 dark:hover:bg-secondary-dark transition-colors">
                     <div className="flex items-center gap-4">
@@ -5239,7 +5506,20 @@ const BulkPayoutModal = ({ isOpen, onClose }) => {
             <div className="space-y-2 pt-4 border-t border-border-light dark:border-border-dark">
                <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Admin Authorization Code</label>
                <div className="relative">
-                 <input type="password" placeholder="Enter PIN to authorize release" className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold tracking-widest" />
+                 <div className="relative">
+                   <input 
+                     type={showAuthPin ? "text" : "password"} 
+                     placeholder="Enter PIN to authorize release" 
+                     className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold tracking-widest pr-12" 
+                   />
+                   <button
+                     type="button"
+                     onClick={() => setShowAuthPin(!showAuthPin)}
+                     className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary-light hover:text-success transition-colors"
+                   >
+                     {showAuthPin ? <Eye size={18} className="text-success" /> : <EyeOff size={18} />}
+                   </button>
+                 </div>
                  <Key className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary-light opacity-50" size={18} />
                </div>
             </div>
@@ -5251,12 +5531,12 @@ const BulkPayoutModal = ({ isOpen, onClose }) => {
           <button onClick={onClose} className="flex-1 py-4 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl font-black text-sm dark:text-white hover:bg-gray-100 transition-all">Cancel</button>
           <button 
             onClick={() => {
-              alert('Processing payouts...');
+              addNotification({ title: 'Payouts Initiated', message: 'Processing agent payouts...', type: 'success' });
               onClose();
             }} 
             className="flex-[2] py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
           >
-            <Coins size={18} /> Confirm & Release ₹2.1L
+            <Coins size={18} /> Confirm & Release \u20B92.1L
           </button>
         </div>
       </div>
@@ -5387,7 +5667,8 @@ const MapTerritoryModal = ({ isOpen, onClose }) => {
   );
 };
 
-const ReportModal = ({ isOpen, onClose }) => {
+const ReportModal = ({ isOpen, onClose, setActiveTab }) => {
+  const { addNotification } = useNotifications();
   if (!isOpen) return null;
 
   return (
@@ -5407,7 +5688,16 @@ const ReportModal = ({ isOpen, onClose }) => {
             </div>
           </div>
           <div className="flex gap-2">
-            <button className="p-3 bg-white dark:bg-secondary-dark hover:bg-gray-50 rounded-2xl transition-all shadow-sm border border-border-light dark:border-border-dark">
+            <button 
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({ title: 'Monthly Revenue Report', text: 'Check out the financial performance for April 2026.', url: window.location.href });
+                } else {
+                  addNotification({ title: 'Link Copied', message: 'Report link copied to clipboard.', type: 'success' });
+                }
+              }}
+              className="p-3 bg-white dark:bg-secondary-dark hover:bg-gray-50 rounded-2xl transition-all shadow-sm border border-border-light dark:border-border-dark"
+            >
               <Share2 size={20} className="text-text-secondary-light" />
             </button>
             <button onClick={onClose} className="p-3 hover:bg-white dark:hover:bg-secondary-dark rounded-2xl transition-all shadow-sm">
@@ -5422,7 +5712,7 @@ const ReportModal = ({ isOpen, onClose }) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="p-6 bg-emerald-500/10 rounded-3xl border border-emerald-500/20">
               <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-1">Total Revenue</p>
-              <h4 className="text-3xl font-black text-emerald-600">₹25.5L</h4>
+              <h4 className="text-3xl font-black text-emerald-600">\u20B925.5L</h4>
               <div className="flex items-center gap-1 text-emerald-600 mt-2 text-xs font-bold">
                 <ArrowUpRight size={14} /> +18.4% vs last month
               </div>
@@ -5436,7 +5726,7 @@ const ReportModal = ({ isOpen, onClose }) => {
             </div>
             <div className="p-6 bg-purple-500/10 rounded-3xl border border-purple-500/20">
               <p className="text-[10px] font-black uppercase tracking-widest text-purple-600 mb-1">Avg. Transaction</p>
-              <h4 className="text-3xl font-black text-purple-600">₹12,450</h4>
+              <h4 className="text-3xl font-black text-purple-600">\u20B912,450</h4>
               <div className="flex items-center gap-1 text-purple-600 mt-2 text-xs font-bold">
                 <ArrowDownRight size={14} /> -2.1% vs last month
               </div>
@@ -5458,10 +5748,10 @@ const ReportModal = ({ isOpen, onClose }) => {
                 </thead>
                 <tbody className="divide-y dark:divide-border-dark">
                   {[
-                    { name: 'Membership Fees', value: '₹15.2L', share: '59%', status: 'Stable' },
-                    { name: 'Onboarding Charges', value: '₹4.8L', share: '19%', status: 'Growing' },
-                    { name: 'Platform Service Tax', value: '₹3.2L', share: '13%', status: 'Stable' },
-                    { name: 'Agent Target Overheads', value: '₹2.3L', share: '9%', status: 'At Risk' }
+                    { name: 'Membership Fees', value: '\u20B915.2L', share: '59%', status: 'Stable' },
+                    { name: 'Onboarding Charges', value: '\u20B94.8L', share: '19%', status: 'Growing' },
+                    { name: 'Platform Service Tax', value: '\u20B93.2L', share: '13%', status: 'Stable' },
+                    { name: 'Agent Target Overheads', value: '\u20B92.3L', share: '9%', status: 'At Risk' }
                   ].map((row, i) => (
                     <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/30 transition-colors">
                       <td className="px-6 py-4 font-bold dark:text-white text-sm">{row.name}</td>
@@ -5492,10 +5782,24 @@ const ReportModal = ({ isOpen, onClose }) => {
 
         {/* Footer */}
         <div className="p-8 border-t dark:border-border-dark bg-gray-50/50 dark:bg-secondary-dark/30 flex gap-4">
-          <button className="flex-1 py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+          <button 
+            onClick={() => {
+              addNotification({ title: 'Download Started', message: 'Generating your monthly revenue report PDF...', type: 'info' });
+              setTimeout(() => {
+                addNotification({ title: 'Download Complete', message: 'April_Revenue_Report.pdf is ready.', type: 'success' });
+              }, 2000);
+            }}
+            className="flex-1 py-4 bg-[#10B981] text-white rounded-2xl font-black text-sm shadow-xl shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+          >
             <Download size={18} /> Download PDF Report
           </button>
-          <button className="flex-1 py-4 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl font-black text-sm dark:text-white hover:bg-gray-100 transition-all flex items-center justify-center gap-2">
+          <button 
+            onClick={() => {
+              setActiveTab('Revenue Analytics');
+              onClose();
+            }}
+            className="flex-1 py-4 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl font-black text-sm dark:text-white hover:bg-gray-100 transition-all flex items-center justify-center gap-2"
+          >
             <PieChart size={18} /> View Analytics Dashboard
           </button>
         </div>
@@ -5505,6 +5809,7 @@ const ReportModal = ({ isOpen, onClose }) => {
 };
 
 const ForecastModal = ({ isOpen, onClose }) => {
+  const { addNotification } = useNotifications();
   if (!isOpen) return null;
 
   return (
@@ -5537,7 +5842,7 @@ const ForecastModal = ({ isOpen, onClose }) => {
                 <TrendingUp size={120} />
               </div>
               <p className="text-[10px] font-black uppercase tracking-widest opacity-80">Projected Annual Revenue</p>
-              <h4 className="text-5xl font-black mt-2">₹3.2Cr</h4>
+              <h4 className="text-5xl font-black mt-2">\u20B93.2Cr</h4>
               <p className="text-xs mt-4 font-bold opacity-90 flex items-center gap-2">
                 <ArrowUpRight size={14} /> Estimated 35% YoY Growth
               </p>
@@ -5546,10 +5851,10 @@ const ForecastModal = ({ isOpen, onClose }) => {
               <p className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light mb-4">Quarterly Projections</p>
               <div className="space-y-4">
                 {[
-                  { label: 'Q1 (Apr-Jun)', value: '₹65L', progress: '20%' },
-                  { label: 'Q2 (Jul-Sep)', value: '₹78L', progress: '24%' },
-                  { label: 'Q3 (Oct-Dec)', value: '₹85L', progress: '27%' },
-                  { label: 'Q4 (Jan-Mar)', value: '₹92L', progress: '29%' }
+                  { label: 'Q1 (Apr-Jun)', value: '\u20B965L', progress: '20%' },
+                  { label: 'Q2 (Jul-Sep)', value: '\u20B978L', progress: '24%' },
+                  { label: 'Q3 (Oct-Dec)', value: '\u20B985L', progress: '27%' },
+                  { label: 'Q4 (Jan-Mar)', value: '\u20B992L', progress: '29%' }
                 ].map((q, i) => (
                   <div key={i} className="space-y-1.5">
                     <div className="flex justify-between items-center text-xs font-bold">
@@ -5587,7 +5892,12 @@ const ForecastModal = ({ isOpen, onClose }) => {
 
         {/* Footer */}
         <div className="p-8 border-t dark:border-border-dark bg-gray-50/50 dark:bg-secondary-dark/30 flex gap-4">
-          <button className="flex-1 py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] active:scale-[0.98] transition-all">Update Projection Model</button>
+          <button 
+            onClick={() => addNotification({ title: 'Model Updated', message: 'The annual forecast projection model has been recalibrated.', type: 'success' })}
+            className="flex-1 py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+          >
+            Update Projection Model
+          </button>
           <button onClick={onClose} className="flex-1 py-4 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl font-black text-sm dark:text-white hover:bg-gray-100 transition-all">Close</button>
         </div>
       </div>
@@ -6094,14 +6404,14 @@ const CampaignSettingsModal = ({ isOpen, onClose }) => {
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Referrer Reward (Agent)</label>
                 <div className="relative">
-                  <input type="text" defaultValue="₹500" className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
+                  <input type="text" defaultValue="\u20B9500" className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
                   <Coins className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary-light opacity-50" size={18} />
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Referee Bonus (Shop)</label>
                 <div className="relative">
-                  <input type="text" defaultValue="₹200" className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
+                  <input type="text" defaultValue="\u20B9200" className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
                   <Gift className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary-light opacity-50" size={18} />
                 </div>
               </div>
@@ -6298,19 +6608,58 @@ const PasswordModal = ({ isOpen, onClose }) => {
         <div className="p-8 space-y-6">
           <div className="space-y-2">
             <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Current Password</label>
-            <input type="password" placeholder="••••••••••••" className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
+            <div className="relative">
+              <input 
+                type={showCurrentPassword ? "text" : "password"} 
+                placeholder="••••••••••••" 
+                className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" 
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary-light hover:text-success transition-colors"
+              >
+                {showCurrentPassword ? <Eye size={18} className="text-success" /> : <EyeOff size={18} />}
+              </button>
+            </div>
           </div>
           
           <div className="h-px bg-border-light dark:border-border-dark mx-4"></div>
 
           <div className="space-y-2">
             <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">New Password</label>
-            <input type="password" placeholder="Enter new password" className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
+            <div className="relative">
+              <input 
+                type={showNewPassword ? "text" : "password"} 
+                placeholder="Enter new password" 
+                className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" 
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary-light hover:text-success transition-colors"
+              >
+                {showNewPassword ? <Eye size={18} className="text-success" /> : <EyeOff size={18} />}
+              </button>
+            </div>
           </div>
 
           <div className="space-y-2">
             <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Confirm New Password</label>
-            <input type="password" placeholder="Repeat new password" className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
+            <div className="relative">
+              <input 
+                type={showConfirmPassword ? "text" : "password"} 
+                placeholder="Repeat new password" 
+                className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" 
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary-light hover:text-success transition-colors"
+              >
+                {showConfirmPassword ? <Eye size={18} className="text-success" /> : <EyeOff size={18} />}
+              </button>
+            </div>
           </div>
 
           <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark">
@@ -7266,8 +7615,8 @@ const AgentActionsModal = ({ isOpen, onClose, agent, type, setAgents, agents, ad
                      <div className="h-full bg-orange-500 w-[85%]"></div>
                   </div>
                   <div className="flex justify-between text-[10px] font-black text-text-secondary-light uppercase">
-                     <span>₹8.5L Achieved</span>
-                     <span>₹10L Target</span>
+                     <span>\u20B98.5L Achieved</span>
+                     <span>\u20B910L Target</span>
                   </div>
                </div>
             </div>
@@ -7631,6 +7980,7 @@ const AreaHierarchyModal = ({
 };
 
 const VerificationDetailModal = ({ isOpen, onClose, verification, onApprove, onReject }) => {
+  const { addNotification } = useNotifications();
   if (!isOpen || !verification) return null;
 
   return (
@@ -7701,8 +8051,20 @@ const VerificationDetailModal = ({ isOpen, onClose, verification, onApprove, onR
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <button className="p-2 hover:bg-primary-light/10 text-primary-light rounded-lg transition-all" title="View Document"><Eye size={16} /></button>
-                      <button className="p-2 hover:bg-blue-500/10 text-blue-500 rounded-lg transition-all" title="Download"><Download size={16} /></button>
+                      <button 
+                        onClick={() => setPreviewDoc(doc)}
+                        className="p-2 hover:bg-success/10 text-success rounded-lg transition-all group" 
+                        title="View Document"
+                      >
+                        <Eye size={16} className="group-hover:scale-110 transition-transform" />
+                      </button>
+                      <button 
+                        onClick={() => addNotification({ title: 'Download Started', message: `Fetching ${doc.name} (${doc.size}) from cloud storage...`, type: 'info' })}
+                        className="p-2 hover:bg-blue-500/10 text-blue-500 rounded-lg transition-all" 
+                        title="Download"
+                      >
+                        <Download size={16} />
+                      </button>
                       {doc.status === 'Verified' ? (
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-success/10 text-success rounded-lg text-[10px] font-black uppercase">
                           <Check size={12} /> Verified
@@ -7725,7 +8087,15 @@ const VerificationDetailModal = ({ isOpen, onClose, verification, onApprove, onR
 
         {/* Footer */}
         <div className="p-6 border-t border-border-light dark:border-border-dark bg-gray-50/50 dark:bg-secondary-dark/30 flex gap-4">
-          <button onClick={onReject} className="flex-1 py-4 rounded-2xl font-black text-sm border-2 border-error/20 text-error hover:bg-error/5 transition-all">Reject All Documents</button>
+          <button 
+            onClick={() => {
+              onReject(verification.id);
+              onClose();
+            }} 
+            className="flex-1 py-4 rounded-2xl font-black text-sm border-2 border-error/20 text-error hover:bg-error/5 transition-all"
+          >
+            Reject All Documents
+          </button>
           <button 
             onClick={() => {
               onApprove(verification.id);

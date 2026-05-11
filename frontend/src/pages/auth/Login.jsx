@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Phone, Lock, ArrowRight, Loader2, ArrowLeft } from 'lucide-react';
+import { Phone, Lock, ArrowRight, Loader2, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const Login = () => {
@@ -8,6 +8,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -41,7 +42,8 @@ const Login = () => {
       }
     } catch (err) {
       console.error('Login: Error occurred:', err);
-      setError(err.message || 'Login failed. Please try again.');
+      const message = err.response?.data?.message || err.message || 'Login failed. Please try again.';
+      setError(message);
     } finally {
 
       setLoading(false);
@@ -108,13 +110,20 @@ const Login = () => {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary-light w-5 h-5" />
                 <input
-                  type="password"
-                  className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl focus:ring-2 focus:ring-primary-light outline-none transition-all dark:text-white"
+                  type={showPassword ? "text" : "password"}
+                  className="w-full pl-10 pr-12 py-3 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl focus:ring-2 focus:ring-primary-light outline-none transition-all dark:text-white"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary-light hover:text-success transition-colors"
+                >
+                  {showPassword ? <Eye size={18} className="text-success" /> : <EyeOff size={18} />}
+                </button>
               </div>
             </div>
 

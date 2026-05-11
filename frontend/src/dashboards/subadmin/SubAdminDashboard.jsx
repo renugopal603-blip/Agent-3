@@ -646,9 +646,9 @@ const SubAdminDashboard = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
-                { label: 'Total Volume', value: '₹12.5L', color: 'bg-primary-light', icon: <Briefcase /> },
-                { label: 'This Month', value: '₹2.4L', color: 'bg-emerald-500', icon: <TrendingUp /> },
-                { label: 'Pending Settlement', value: '₹45K', color: 'bg-orange-500', icon: <Clock /> },
+                { label: 'Total Volume', value: '\u20B912.5L', color: 'bg-primary-light', icon: <Briefcase /> },
+                { label: 'This Month', value: '\u20B92.4L', color: 'bg-emerald-500', icon: <TrendingUp /> },
+                { label: 'Pending Settlement', value: '\u20B945K', color: 'bg-orange-500', icon: <Clock /> },
               ].map((stat, i) => (
                 <div key={i} className="card-premium flex items-center gap-4">
                   <div className={`p-4 ${stat.color} text-white rounded-2xl shadow-lg`}>
@@ -680,9 +680,9 @@ const SubAdminDashboard = () => {
                     </thead>
                     <tbody className="divide-y divide-border-light dark:divide-border-dark">
                       {[
-                        { id: 'TXN-00192', date: 'Today, 10:30 AM', type: 'Shop Onboarding', amount: '₹1,200', status: 'Completed' },
-                        { id: 'TXN-00191', date: 'Yesterday', type: 'Sales Commission', amount: '₹4,500', status: 'Pending' },
-                        { id: 'TXN-00189', date: 'Oct 24', type: 'Performance Bonus', amount: '₹12,400', status: 'Completed' },
+                        { id: 'TXN-00192', date: 'Today, 10:30 AM', type: 'Shop Onboarding', amount: '\u20B91,200', status: 'Completed' },
+                        { id: 'TXN-00191', date: 'Yesterday', type: 'Sales Commission', amount: '\u20B94,500', status: 'Pending' },
+                        { id: 'TXN-00189', date: 'Oct 24', type: 'Performance Bonus', amount: '\u20B912,400', status: 'Completed' },
                       ].map((t, i) => (
                         <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50 group transition-colors">
                           <td className="py-4 font-bold dark:text-white text-sm">{t.id}</td>
@@ -713,7 +713,11 @@ const SubAdminDashboard = () => {
                     { title: 'Reward Milestone Guide', size: '2.5 MB', icon: <Trophy className="text-yellow-500" /> },
                     { title: 'Payout Cycle Schedule', size: '0.8 MB', icon: <Clock className="text-emerald-500" /> },
                   ].map((item, i) => (
-                    <div key={i} className="p-4 bg-gray-50 dark:bg-secondary-dark/30 rounded-2xl border border-border-light dark:border-border-dark flex items-center gap-4 group cursor-pointer hover:border-primary-light/50 transition-all">
+                    <div 
+                      key={i} 
+                      onClick={() => handleDownload(item.title)}
+                      className="p-4 bg-gray-50 dark:bg-secondary-dark/30 rounded-2xl border border-border-light dark:border-border-dark flex items-center gap-4 group cursor-pointer hover:border-primary-light/50 transition-all"
+                    >
                       <div className="w-10 h-10 bg-white dark:bg-surface-dark rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                         {item.icon}
                       </div>
@@ -1392,7 +1396,7 @@ const SubAdminDashboard = () => {
               {[
                 { title: 'Agent Performance', value: '42 Active', sub: '+3 this week', color: 'bg-blue-500', icon: <Users size={22} /> },
                 { title: 'Shop Activity', value: '128 Shops', sub: '12 pending review', color: 'bg-emerald-500', icon: <Store size={22} /> },
-                { title: 'Commission Earned', value: '₹2.4L', sub: '+8% vs last month', color: 'bg-primary-light', icon: <DollarSign size={22} /> },
+                { title: 'Commission Earned', value: '\u20B92.4L', sub: '+8% vs last month', color: 'bg-primary-light', icon: <DollarSign size={22} /> },
               ].map((stat) => (
                 <div key={stat.title} className="card-premium flex items-center gap-4">
                   <div className={`p-4 ${stat.color} text-white rounded-2xl shadow-lg shrink-0`}>{stat.icon}</div>
@@ -1493,9 +1497,9 @@ const SubAdminDashboard = () => {
             {/* Commission Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
-                { title: 'Total Commission', value: '₹4.8L', icon: <DollarSign size={20} />, color: 'bg-primary-light' },
-                { title: 'Payout Processed', value: '₹3.2L', icon: <CheckCircle size={20} />, color: 'bg-emerald-500' },
-                { title: 'Outstanding Balance', value: '₹1.6L', icon: <Clock size={20} />, color: 'bg-orange-500' },
+                { title: 'Total Commission', value: '\u20B94.8L', icon: <DollarSign size={20} />, color: 'bg-primary-light' },
+                { title: 'Payout Processed', value: '\u20B93.2L', icon: <CheckCircle size={20} />, color: 'bg-emerald-500' },
+                { title: 'Outstanding Balance', value: '\u20B91.6L', icon: <Clock size={20} />, color: 'bg-orange-500' },
               ].map((stat) => (
                 <div key={stat.title} className="card-premium flex items-center gap-4">
                   <div className={`p-4 ${stat.color} text-white rounded-2xl shadow-lg`}>{stat.icon}</div>
@@ -1521,10 +1525,10 @@ const SubAdminDashboard = () => {
                 </thead>
                 <tbody className="divide-y divide-border-light dark:divide-border-dark">
                   {[
-                    { id: 'TXN-9021', name: 'Amit Singh (Fresh Mart)', amount: '₹1,240', date: 'Oct 12, 2023', status: 'Successful' },
-                    { id: 'TXN-9020', name: 'Priya Verma (ElectroHub)', amount: '₹850', date: 'Oct 12, 2023', status: 'Pending' },
-                    { id: 'TXN-9018', name: 'Rahul Dev (Style Studio)', amount: '₹2,100', date: 'Oct 11, 2023', status: 'Successful' },
-                    { id: 'TXN-9015', name: 'Vikram Kumar (Gadget Zone)', amount: '₹420', date: 'Oct 11, 2023', status: 'Refunded' },
+                    { id: 'TXN-9021', name: 'Amit Singh (Fresh Mart)', amount: '\u20B91,240', date: 'Oct 12, 2023', status: 'Successful' },
+                    { id: 'TXN-9020', name: 'Priya Verma (ElectroHub)', amount: '\u20B9850', date: 'Oct 12, 2023', status: 'Pending' },
+                    { id: 'TXN-9018', name: 'Rahul Dev (Style Studio)', amount: '\u20B92,100', date: 'Oct 11, 2023', status: 'Successful' },
+                    { id: 'TXN-9015', name: 'Vikram Kumar (Gadget Zone)', amount: '\u20B9420', date: 'Oct 11, 2023', status: 'Refunded' },
                   ]
                   .filter(txn => {
                     const matchesFilter = financeFilter === 'All' || txn.status === financeFilter;
@@ -1852,11 +1856,11 @@ const CommissionPlanModal = ({ isOpen, onClose }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark">
                 <p className="text-xs font-bold text-text-secondary-light uppercase">New Shop Tie-up</p>
-                <p className="text-2xl font-black dark:text-white mt-1">₹500 <span className="text-xs font-medium text-text-secondary-light">per shop</span></p>
+                <p className="text-2xl font-black dark:text-white mt-1">\u20B9500 <span className="text-xs font-medium text-text-secondary-light">per shop</span></p>
               </div>
               <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark">
                 <p className="text-xs font-bold text-text-secondary-light uppercase">Agent Referral</p>
-                <p className="text-2xl font-black dark:text-white mt-1">₹1,000 <span className="text-xs font-medium text-text-secondary-light">per agent</span></p>
+                <p className="text-2xl font-black dark:text-white mt-1">\u20B91,000 <span className="text-xs font-medium text-text-secondary-light">per agent</span></p>
               </div>
             </div>
           </div>
@@ -1873,15 +1877,15 @@ const CommissionPlanModal = ({ isOpen, onClose }) => {
                 </thead>
                 <tbody className="divide-y divide-border-light dark:divide-border-dark">
                   <tr>
-                    <td className="p-4 text-sm font-bold dark:text-white">Up to ₹5 Lakhs</td>
+                    <td className="p-4 text-sm font-bold dark:text-white">Up to \u20B95 Lakhs</td>
                     <td className="p-4 text-sm font-black text-emerald-500 text-right">3%</td>
                   </tr>
                   <tr>
-                    <td className="p-4 text-sm font-bold dark:text-white">₹5 Lakhs - ₹15 Lakhs</td>
+                    <td className="p-4 text-sm font-bold dark:text-white">\u20B95 Lakhs - \u20B915 Lakhs</td>
                     <td className="p-4 text-sm font-black text-emerald-500 text-right">5%</td>
                   </tr>
                   <tr>
-                    <td className="p-4 text-sm font-bold dark:text-white">Above ₹15 Lakhs</td>
+                    <td className="p-4 text-sm font-bold dark:text-white">Above \u20B915 Lakhs</td>
                     <td className="p-4 text-sm font-black text-emerald-500 text-right">8%</td>
                   </tr>
                 </tbody>
@@ -2299,7 +2303,7 @@ const ReportDetailsModal = ({ isOpen, onClose, reportTitle }) => {
                     <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
                     <span className="text-sm font-bold dark:text-white">Region Zone - {i * 10} Alpha</span>
                   </div>
-                  <span className="text-sm font-black text-primary-light">₹{(i * 12.5).toFixed(1)}L</span>
+                  <span className="text-sm font-black text-primary-light">\u20B9{(i * 12.5).toFixed(1)}L</span>
                 </div>
               ))}
             </div>

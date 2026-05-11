@@ -83,12 +83,12 @@ const AgentDashboard = () => {
       console.error('Failed to load shops from localStorage', e);
     }
     return [
-      { id: 1, name: 'Fresh Mart Grocery', category: 'Grocery', owner: 'Ramesh K.', sales: '₹1.2L', status: 'Active', rating: '4.8', date: 'May 01, 2026' },
-      { id: 2, name: 'Electro World', category: 'Electronics', owner: 'Vijay M.', sales: '₹4.5L', status: 'Active', rating: '4.5', date: 'May 02, 2026' },
-      { id: 3, name: 'Style Studio', category: 'Fashion', owner: 'Anjali S.', sales: '₹85K', status: 'Pending Admin', rating: 'N/A', date: 'May 03, 2026' },
-      { id: 4, name: 'Raj Electronics', category: 'Electronics', owner: 'Rajesh P.', sales: '₹0', status: 'Pending Review', rating: 'N/A', date: 'May 04, 2026' },
-      { id: 5, name: 'Gourmet Kitchen', category: 'Restaurant', owner: 'Suresh R.', sales: '₹2.1L', status: 'Active', rating: '4.9', date: 'May 05, 2026' },
-      { id: 6, name: 'City Inn Hotel', category: 'Hotel', owner: 'Priya X.', sales: '₹6.2L', status: 'Active', rating: '4.7', date: 'May 06, 2026' },
+      { id: 1, name: 'Fresh Mart Grocery', category: 'Grocery', owner: 'Ramesh K.', sales: '\u20B91.2L', status: 'Active', rating: '4.8', date: 'May 01, 2026' },
+      { id: 2, name: 'Electro World', category: 'Electronics', owner: 'Vijay M.', sales: '\u20B94.5L', status: 'Active', rating: '4.5', date: 'May 02, 2026' },
+      { id: 3, name: 'Style Studio', category: 'Fashion', owner: 'Anjali S.', sales: '\u20B985K', status: 'Pending Admin', rating: 'N/A', date: 'May 03, 2026' },
+      { id: 4, name: 'Raj Electronics', category: 'Electronics', owner: 'Rajesh P.', sales: '\u20B90', status: 'Pending Review', rating: 'N/A', date: 'May 04, 2026' },
+      { id: 5, name: 'Gourmet Kitchen', category: 'Restaurant', owner: 'Suresh R.', sales: '\u20B92.1L', status: 'Active', rating: '4.9', date: 'May 05, 2026' },
+      { id: 6, name: 'City Inn Hotel', category: 'Hotel', owner: 'Priya X.', sales: '\u20B96.2L', status: 'Active', rating: '4.7', date: 'May 06, 2026' },
     ];
   });
 
@@ -143,7 +143,7 @@ const AgentDashboard = () => {
         category: shopForm.category || 'Grocery', 
         owner: ownerName, 
         location: shopLoc,
-        sales: '₹0', 
+        sales: '\u20B90', 
         status: 'Pending Review', 
         rating: 'N/A',
         date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
@@ -185,7 +185,7 @@ const AgentDashboard = () => {
   ];
 
   const stats = [
-    { title: 'Total Earnings', value: '₹42,850', icon: <Wallet />, color: 'bg-emerald-500', trend: '+12.5%' },
+    { title: 'Total Earnings', value: '\u20B942,850', icon: <Wallet />, color: 'bg-emerald-500', trend: '+12.5%' },
     { title: 'Shop Onboarded', value: '12', icon: <Store />, color: 'bg-orange-500', trend: '+2 this week' },
     { title: 'Current Target', value: '85%', icon: <Target />, color: 'bg-purple-500', trend: 'In Progress' },
   ];
@@ -354,7 +354,7 @@ const AgentDashboard = () => {
                     </div>
                     <div className="p-4 bg-primary-light/5 rounded-2xl border border-primary-light/10">
                       <p className="text-[10px] font-black text-primary-light uppercase tracking-widest mb-1">Security Deposit</p>
-                      <p className="text-sm font-bold dark:text-white">₹1,00,000 (Fully Paid)</p>
+                      <p className="text-sm font-bold dark:text-white">\u20B91,00,000 (Fully Paid)</p>
                     </div>
                   </div>
                 </div>
@@ -543,7 +543,7 @@ const AgentDashboard = () => {
                 <div className="p-6 bg-gradient-to-br from-primary-light/10 to-transparent rounded-2xl border border-primary-light/20 relative overflow-hidden">
                   <div className="relative z-10">
                     <p className="text-sm font-bold text-primary-light uppercase tracking-wider">Total Deposit Held</p>
-                    <h3 className="text-4xl font-black dark:text-white mt-2">₹1,00,000</h3>
+                    <h3 className="text-4xl font-black dark:text-white mt-2">\u20B91,00,000</h3>
                     <p className="text-xs text-text-secondary-light mt-4 flex items-center gap-1">
                       <CheckCircle size={14} className="text-success" /> Fully Paid on Jan 15, 2024
                     </p>
@@ -631,10 +631,10 @@ const AgentDashboard = () => {
                   </thead>
                   <tbody className="divide-y divide-border-light dark:divide-border-dark">
                     {[
-                      { name: 'Karan Sharma', id: 'MBR-101', plan: 'Diamond', date: 'Oct 12, 2023', earning: '₹12,450', status: 'Active' },
-                      { name: 'Meera Rajput', id: 'MBR-102', plan: 'Gold', date: 'Oct 15, 2023', earning: '₹8,200', status: 'Active' },
-                      { name: 'Sameer Khan', id: 'MBR-103', plan: 'Silver', date: 'Nov 02, 2023', earning: '₹4,500', status: 'Pending' },
-                      { name: 'Anjali Gupta', id: 'MBR-104', plan: 'Diamond', date: 'Dec 05, 2023', earning: '₹15,000', status: 'Active' },
+                      { name: 'Karan Sharma', id: 'MBR-101', plan: 'Diamond', date: 'Oct 12, 2023', earning: '\u20B912,450', status: 'Active' },
+                      { name: 'Meera Rajput', id: 'MBR-102', plan: 'Gold', date: 'Oct 15, 2023', earning: '\u20B98,200', status: 'Active' },
+                      { name: 'Sameer Khan', id: 'MBR-103', plan: 'Silver', date: 'Nov 02, 2023', earning: '\u20B94,500', status: 'Pending' },
+                      { name: 'Anjali Gupta', id: 'MBR-104', plan: 'Diamond', date: 'Dec 05, 2023', earning: '\u20B915,000', status: 'Active' },
                     ].map((member) => (
                       <tr key={member.id} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50 transition-colors">
                         <td className="py-4 flex items-center gap-3">
@@ -712,7 +712,7 @@ const AgentDashboard = () => {
                 {[
                   { label: 'Total Clicks', value: '1,240', sub: 'Last 30 days' },
                   { label: 'Conversions', value: '156', sub: '12.5% rate' },
-                  { label: 'Bonus Earned', value: '₹12,500', sub: 'MTD Earning' },
+                  { label: 'Bonus Earned', value: '\u20B912,500', sub: 'MTD Earning' },
                 ].map((stat, i) => (
                   <div key={i} className="p-6 bg-primary-light/5 rounded-[24px] border border-primary-light/10 text-center hover:bg-primary-light/10 transition-colors">
                     <p className="text-[10px] font-black text-primary-light uppercase tracking-widest mb-1">{stat.label}</p>
@@ -742,14 +742,14 @@ const AgentDashboard = () => {
                     },
                     { 
                       title: 'Onboarding Bonus', 
-                      reward: '₹500 / SHOP', 
+                      reward: '\u20B9500 / SHOP', 
                       desc: 'Get a fixed reward for every shop partner that successfully completes KYC.',
                       icon: <Store className="text-blue-500" size={20} />,
                       color: 'bg-blue-500/10'
                     },
                     { 
                       title: 'Member Network Growth', 
-                      reward: '₹200 / AGENT', 
+                      reward: '\u20B9200 / AGENT', 
                       desc: 'Fixed bonus for every new agent joining under your network.',
                       icon: <Users className="text-purple-500" size={20} />,
                       color: 'bg-purple-500/10'
@@ -820,10 +820,10 @@ const AgentDashboard = () => {
                       </thead>
                       <tbody className="divide-y divide-border-light dark:divide-border-dark">
                         {[
-                          { name: 'John Doe', type: 'Customer', date: 'May 02, 2026', reward: '₹120.00', status: 'Commission' },
-                          { name: 'Organic Foods Store', type: 'Shop Partner', date: 'Apr 28, 2026', reward: '₹500.00', status: 'Onboarding' },
-                          { name: 'Sarah Miller', type: 'Agent', date: 'Apr 25, 2026', reward: '₹200.00', status: 'Network Growth' },
-                          { name: 'Mike Johnson', type: 'Customer', date: 'Apr 20, 2026', reward: '₹85.50', status: 'Commission' },
+                          { name: 'John Doe', type: 'Customer', date: 'May 02, 2026', reward: '\u20B9120.00', status: 'Commission' },
+                          { name: 'Organic Foods Store', type: 'Shop Partner', date: 'Apr 28, 2026', reward: '\u20B9500.00', status: 'Onboarding' },
+                          { name: 'Sarah Miller', type: 'Agent', date: 'Apr 25, 2026', reward: '\u20B9200.00', status: 'Network Growth' },
+                          { name: 'Mike Johnson', type: 'Customer', date: 'Apr 20, 2026', reward: '\u20B985.50', status: 'Commission' },
                         ].map((ref, i) => (
                           <tr key={i} className="hover:bg-gray-50/50 dark:hover:bg-secondary-dark/20 transition-colors">
                             <td className="p-5">
@@ -1122,7 +1122,7 @@ const AgentDashboard = () => {
             <div className="flex justify-between items-center">
               <div>
                 <h3 className="text-2xl font-bold dark:text-white">Sales Performance</h3>
-                <p className="text-sm text-text-secondary-light">Monthly Target: ₹5,00,000</p>
+                <p className="text-sm text-text-secondary-light">Monthly Target: \u20B95,00,000</p>
               </div>
               <div 
                 onClick={() => setShowCommissionModal(true)}
@@ -1150,11 +1150,11 @@ const AgentDashboard = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-xl">
                     <p className="text-[10px] font-bold text-text-secondary-light uppercase">Achieved</p>
-                    <p className="text-lg font-black dark:text-white">₹4,25,000</p>
+                    <p className="text-lg font-black dark:text-white">\u20B94,25,000</p>
                   </div>
                   <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-xl">
                     <p className="text-[10px] font-bold text-text-secondary-light uppercase">Pending</p>
-                    <p className="text-lg font-black text-warning">₹75,000</p>
+                    <p className="text-lg font-black text-warning">\u20B975,000</p>
                   </div>
                 </div>
               </div>
@@ -1163,9 +1163,9 @@ const AgentDashboard = () => {
                 <div className="card-premium space-y-4">
                   <h4 className="font-bold dark:text-white">Target Breakdown</h4>
                   {[
-                    { label: 'Membership Sales', target: '₹2.0L', current: '₹1.8L', color: 'bg-blue-500' },
-                    { label: 'Shop Sales Share', target: '₹2.0L', current: '₹1.7L', color: 'bg-emerald-500' },
-                    { label: 'Renewal Targets', target: '₹1.0L', current: '₹75K', color: 'bg-orange-500' },
+                    { label: 'Membership Sales', target: '\u20B92.0L', current: '\u20B91.8L', color: 'bg-blue-500' },
+                    { label: 'Shop Sales Share', target: '\u20B92.0L', current: '\u20B91.7L', color: 'bg-emerald-500' },
+                    { label: 'Renewal Targets', target: '\u20B91.0L', current: '\u20B975K', color: 'bg-orange-500' },
                   ].map((t, i) => (
                     <div key={i} className="space-y-2">
                       <div className="flex justify-between text-xs font-bold">
@@ -1182,7 +1182,7 @@ const AgentDashboard = () => {
                 <div className="card-premium bg-gradient-to-br from-purple-500/20 to-transparent border-purple-500/20">
                   <h4 className="font-bold dark:text-white text-sm">Next Tier Bonus</h4>
                   <p className="text-xs text-text-secondary-light mt-2 leading-relaxed">
-                    Achieve 100% target by end of month to unlock **₹15,000 Milestone Bonus** and upgrade to **Diamond Agent** level!
+                    Achieve 100% target by end of month to unlock **\u20B915,000 Milestone Bonus** and upgrade to **Diamond Agent** level!
                   </p>
                   <button 
                     onClick={() => setShowCommissionModal(true)}
@@ -1234,9 +1234,9 @@ const AgentDashboard = () => {
                 <h4 className="font-bold dark:text-white">Recent Sales</h4>
                 <div className="space-y-4">
                   {[
-                    { name: 'Sameer Khan', plan: 'Silver', date: '2h ago', price: '₹1,999', comm: '₹199' },
-                    { name: 'Anjali Gupta', plan: 'Diamond', date: '5h ago', price: '₹9,999', comm: '₹999' },
-                    { name: 'Rahul Sharma', plan: 'Gold', date: 'Yesterday', price: '₹4,999', comm: '₹499' },
+                    { name: 'Sameer Khan', plan: 'Silver', date: '2h ago', price: '\u20B91,999', comm: '\u20B9199' },
+                    { name: 'Anjali Gupta', plan: 'Diamond', date: '5h ago', price: '\u20B99,999', comm: '\u20B9999' },
+                    { name: 'Rahul Sharma', plan: 'Gold', date: 'Yesterday', price: '\u20B94,999', comm: '\u20B9499' },
                   ].map((sale, i) => (
                     <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-secondary-dark rounded-xl">
                       <div>
@@ -1273,7 +1273,7 @@ const AgentDashboard = () => {
               <div className="card-premium bg-gradient-to-br from-emerald-500 to-emerald-700 text-white border-none relative overflow-hidden">
                 <div className="relative z-10">
                   <p className="text-xs font-bold opacity-80 uppercase tracking-wider">Total Balance</p>
-                  <h3 className="text-4xl font-black mt-2">₹42,850</h3>
+                  <h3 className="text-4xl font-black mt-2">\u20B942,850</h3>
                   <div className="mt-8 flex items-center gap-2">
                     <span className="px-2 py-1 bg-white/20 rounded-lg text-[10px] font-bold">Safe to Withdraw</span>
                   </div>
@@ -1283,7 +1283,7 @@ const AgentDashboard = () => {
 
               <div className="card-premium space-y-4">
                 <p className="text-xs font-bold text-text-secondary-light uppercase tracking-wider">Today's Earnings</p>
-                <h3 className="text-3xl font-black dark:text-white">₹1,240</h3>
+                <h3 className="text-3xl font-black dark:text-white">\u20B91,240</h3>
                 <div className="flex items-center gap-1 text-success text-xs font-bold">
                   <TrendingUp size={14} /> +15% from yesterday
                 </div>
@@ -1291,7 +1291,7 @@ const AgentDashboard = () => {
 
               <div className="card-premium space-y-4">
                 <p className="text-xs font-bold text-text-secondary-light uppercase tracking-wider">Pending Clearance</p>
-                <h3 className="text-3xl font-black dark:text-white">₹8,500</h3>
+                <h3 className="text-3xl font-black dark:text-white">\u20B98,500</h3>
                 <div className="flex items-center gap-1 text-warning text-xs font-bold">
                   <Clock size={14} /> Scheduled for May 05
                 </div>
@@ -1324,9 +1324,9 @@ const AgentDashboard = () => {
                 <h4 className="font-bold dark:text-white">Revenue Sources</h4>
                 <div className="space-y-4">
                   {[
-                    { label: 'Shop Commission', value: '₹28,450', percentage: 65, color: 'bg-emerald-500' },
-                    { label: 'Membership Referral', value: '₹12,400', percentage: 25, color: 'bg-blue-500' },
-                    { label: 'Incentive Bonuses', value: '₹2,000', percentage: 10, color: 'bg-orange-500' },
+                    { label: 'Shop Commission', value: '\u20B928,450', percentage: 65, color: 'bg-emerald-500' },
+                    { label: 'Membership Referral', value: '\u20B912,400', percentage: 25, color: 'bg-blue-500' },
+                    { label: 'Incentive Bonuses', value: '\u20B92,000', percentage: 10, color: 'bg-orange-500' },
                   ].map((source, i) => (
                     <div key={i} className="space-y-2">
                       <div className="flex justify-between text-sm font-bold">
@@ -1359,11 +1359,11 @@ const AgentDashboard = () => {
                 onClick={() => {
                   const csvContent = "data:text/csv;charset=utf-8," 
                     + "Source,Type,Date,Order Value,Rate,Earning\n"
-                    + "Fresh Mart,Shop Sale,May 02 2026,₹1250,5%,₹62.50\n"
-                    + "Anjali G.,Membership,May 02 2026,₹9999,10%,₹999.90\n"
-                    + "Electro World,Shop Sale,May 01 2026,₹45000,5%,₹2250.00\n"
-                    + "Gourmet Kitchen,Shop Sale,Apr 30 2026,₹2800,5%,₹140.00\n"
-                    + "System,Referral Bonus,Apr 28 2026,N/A,Flat,₹500.00";
+                    + "Fresh Mart,Shop Sale,May 02 2026,\u20B91250,5%,\u20B962.50\n"
+                    + "Anjali G.,Membership,May 02 2026,\u20B99999,10%,\u20B9999.90\n"
+                    + "Electro World,Shop Sale,May 01 2026,\u20B945000,5%,\u20B92250.00\n"
+                    + "Gourmet Kitchen,Shop Sale,Apr 30 2026,\u20B92800,5%,\u20B9140.00\n"
+                    + "System,Referral Bonus,Apr 28 2026,N/A,Flat,\u20B9500.00";
                   const encodedUri = encodeURI(csvContent);
                   const link = document.createElement("a");
                   link.setAttribute("href", encodedUri);
@@ -1394,11 +1394,11 @@ const AgentDashboard = () => {
                   </thead>
                   <tbody className="divide-y divide-border-light dark:divide-border-dark">
                     {[
-                      { source: 'Fresh Mart', type: 'Shop Sale', date: 'May 02, 2026', val: '₹1,250', rate: '5%', earn: '₹62.50' },
-                      { source: 'Anjali G.', type: 'Membership', date: 'May 02, 2026', val: '₹9,999', rate: '10%', earn: '₹999.90' },
-                      { source: 'Electro World', type: 'Shop Sale', date: 'May 01, 2026', val: '₹45,000', rate: '5%', earn: '₹2,250.00' },
-                      { source: 'Gourmet Kitchen', type: 'Shop Sale', date: 'Apr 30, 2026', val: '₹2,800', rate: '5%', earn: '₹140.00' },
-                      { source: 'System', type: 'Referral Bonus', date: 'Apr 28, 2026', val: 'N/A', rate: 'Flat', earn: '₹500.00' },
+                      { source: 'Fresh Mart', type: 'Shop Sale', date: 'May 02, 2026', val: '\u20B91,250', rate: '5%', earn: '\u20B962.50' },
+                      { source: 'Anjali G.', type: 'Membership', date: 'May 02, 2026', val: '\u20B99,999', rate: '10%', earn: '\u20B9999.90' },
+                      { source: 'Electro World', type: 'Shop Sale', date: 'May 01, 2026', val: '\u20B945,000', rate: '5%', earn: '\u20B92,250.00' },
+                      { source: 'Gourmet Kitchen', type: 'Shop Sale', date: 'Apr 30, 2026', val: '\u20B92,800', rate: '5%', earn: '\u20B9140.00' },
+                      { source: 'System', type: 'Referral Bonus', date: 'Apr 28, 2026', val: 'N/A', rate: 'Flat', earn: '\u20B9500.00' },
                     ].map((row, i) => (
                       <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50 transition-colors">
                         <td className="py-4 font-bold dark:text-white text-sm">{row.source}</td>
@@ -1431,7 +1431,7 @@ const AgentDashboard = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
-                { title: 'Top District Agent', goal: '100 Members', progress: 85, reward: '₹10,000 Cash Bonus', icon: <TrendingUp /> },
+                { title: 'Top District Agent', goal: '100 Members', progress: 85, reward: '\u20B910,000 Cash Bonus', icon: <TrendingUp /> },
                 { title: 'Shop Networker', goal: '20 Shops', progress: 60, reward: 'Premium Tablet', icon: <Store /> },
                 { title: 'Customer Favorite', goal: '4.8+ Rating', progress: 95, reward: 'VIP Club Entry', icon: <Star size={18} /> },
               ].map((reward, i) => (
@@ -1496,7 +1496,7 @@ const AgentDashboard = () => {
                 <div className="space-y-6">
                   <div className="p-6 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark">
                     <p className="text-xs font-bold text-text-secondary-light uppercase tracking-widest">Available for Payout</p>
-                    <h3 className="text-4xl font-black dark:text-white mt-2">₹12,450</h3>
+                    <h3 className="text-4xl font-black dark:text-white mt-2">\u20B912,450</h3>
                     <div className="mt-6 space-y-3">
                       <div className="flex justify-between text-sm">
                         <span className="text-text-secondary-light">Linked Bank</span>
@@ -1512,7 +1512,7 @@ const AgentDashboard = () => {
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-text-secondary-light uppercase">Withdrawal Amount</label>
                     <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold dark:text-white">₹</span>
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold dark:text-white">\u20B9</span>
                       <input 
                         type="number" 
                         placeholder="0.00" 
@@ -1552,7 +1552,7 @@ const AgentDashboard = () => {
                         setWithdrawAmount('');
                         addNotification({ 
                           title: 'Withdrawal Successful', 
-                          message: `₹${withdrawAmount} has been initiated to your HDFC bank account.`, 
+                          message: `\u20B9${withdrawAmount} has been initiated to your HDFC bank account.`, 
                           type: 'success' 
                         });
                       }, 2000);
@@ -1573,9 +1573,9 @@ const AgentDashboard = () => {
                   <h4 className="font-bold dark:text-white">Recent Payouts</h4>
                   <div className="space-y-4">
                     {[
-                      { date: 'Apr 25, 2026', amount: '₹15,000', status: 'Completed' },
-                      { date: 'Apr 12, 2026', amount: '₹8,400', status: 'Completed' },
-                      { date: 'Mar 30, 2026', amount: '₹22,000', status: 'Completed' },
+                      { date: 'Apr 25, 2026', amount: '\u20B915,000', status: 'Completed' },
+                      { date: 'Apr 12, 2026', amount: '\u20B98,400', status: 'Completed' },
+                      { date: 'Mar 30, 2026', amount: '\u20B922,000', status: 'Completed' },
                     ].map((p, i) => (
                       <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-secondary-dark rounded-xl">
                         <div>
@@ -1590,9 +1590,9 @@ const AgentDashboard = () => {
                     onClick={() => {
                       const csvContent = "data:text/csv;charset=utf-8," 
                         + "Date,Amount,Status\n"
-                        + "Apr 25 2026,₹15000,Completed\n"
-                        + "Apr 12 2026,₹8400,Completed\n"
-                        + "Mar 30 2026,₹22000,Completed";
+                        + "Apr 25 2026,\u20B915000,Completed\n"
+                        + "Apr 12 2026,\u20B98400,Completed\n"
+                        + "Mar 30 2026,\u20B922000,Completed";
                       const encodedUri = encodeURI(csvContent);
                       const link = document.createElement("a");
                       link.setAttribute("href", encodedUri);
@@ -2055,7 +2055,7 @@ const AgentDashboard = () => {
 
             <div className="space-y-4">
               {[
-                { title: 'New Commission Earned', desc: 'You received ₹2,450 from Metro Supermarket sales.', time: '2 hours ago', type: 'success', icon: <Wallet size={20}/> },
+                { title: 'New Commission Earned', desc: 'You received \u20B92,450 from Metro Supermarket sales.', time: '2 hours ago', type: 'success', icon: <Wallet size={20}/> },
                 { title: 'Shop Approval Update', desc: 'Fresh Mart Grocery has been approved by the Admin.', time: '5 hours ago', type: 'info', icon: <CheckCircle size={20}/> },
                 { title: 'Security Alert', desc: 'New login detected from a Chrome browser on Windows.', time: '1 day ago', type: 'warning', icon: <ShieldCheck size={20}/> },
                 { title: 'System Maintenance', desc: 'AgentHub will be down for scheduled maintenance on Sunday.', time: '2 days ago', type: 'error', icon: <AlertCircle size={20}/> },
@@ -2908,7 +2908,7 @@ const CommissionPlanModal = ({ isOpen, onClose }) => {
                   </tr>
                   <tr>
                     <td className="p-4 text-sm font-bold dark:text-white">Subscription Services</td>
-                    <td className="p-4 text-sm font-black text-emerald-500">₹200 Monthly</td>
+                    <td className="p-4 text-sm font-black text-emerald-500">\u20B9200 Monthly</td>
                   </tr>
                 </tbody>
               </table>
@@ -2924,12 +2924,12 @@ const CommissionPlanModal = ({ isOpen, onClose }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-5 bg-blue-500/5 rounded-2xl border border-blue-500/10 space-y-2">
                 <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Shop Onboarding</p>
-                <p className="text-xl font-black dark:text-white">₹500.00</p>
+                <p className="text-xl font-black dark:text-white">\u20B9500.00</p>
                 <p className="text-[10px] text-text-secondary-light font-medium leading-relaxed">Paid once the shop completes KYC and lists at least 10 products/services.</p>
               </div>
               <div className="p-5 bg-purple-500/5 rounded-2xl border border-purple-500/10 space-y-2">
                 <p className="text-[10px] font-black text-purple-500 uppercase tracking-widest">Agent Recruitment</p>
-                <p className="text-xl font-black dark:text-white">₹200.00</p>
+                <p className="text-xl font-black dark:text-white">\u20B9200.00</p>
                 <p className="text-[10px] text-text-secondary-light font-medium leading-relaxed">Paid after the referred agent successfully completes their first 5 shop tie-ups.</p>
               </div>
             </div>
@@ -2966,7 +2966,15 @@ const CommissionPlanModal = ({ isOpen, onClose }) => {
         
         <div className="p-8 bg-gray-50 dark:bg-secondary-dark/30 border-t dark:border-border-dark flex gap-4">
           <button onClick={onClose} className="flex-1 py-4 bg-white dark:bg-surface-dark border-2 border-border-light dark:border-border-dark rounded-2xl font-black text-sm dark:text-white hover:bg-gray-100 transition-all">Close</button>
-          <button className="flex-1 py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 flex items-center justify-center gap-2">
+          <button 
+            onClick={() => {
+              addNotification({ title: 'Report Generation', message: 'Generating your compensation plan PDF...', type: 'info' });
+              setTimeout(() => {
+                addNotification({ title: 'Download Complete', message: 'Compensation_Plan_May_2026.pdf is ready.', type: 'success' });
+              }, 2000);
+            }}
+            className="flex-1 py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 flex items-center justify-center gap-2"
+          >
             <Download size={18} /> Download PDF
           </button>
         </div>
