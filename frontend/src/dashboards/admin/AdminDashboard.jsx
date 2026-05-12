@@ -168,17 +168,50 @@ const AdminDashboard = () => {
   };
 
   const exportToCSV = (data, filename) => {
-    if (!data || !data.length) return;
-    const headers = Object.keys(data[0]).join(',');
-    const rows = data.map(row => Object.values(row).join(','));
-    const csvContent = "data:text/csv;charset=utf-8," + headers + "\n" + rows.join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `${filename}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if (!data || !data.length) {
+      if (addNotification) {
+        addNotification({ title: 'Export Failed', message: 'No data available to export.', type: 'error' });
+      } else {
+        alert('No data available to export.');
+      }
+      return;
+    }
+    
+    if (addNotification) {
+      addNotification({ title: 'Exporting...', message: `Preparing ${filename} for download...`, type: 'info' });
+    }
+    
+    setTimeout(() => {
+      try {
+        const headers = Object.keys(data[0]).join(',');
+        const rows = data.map(row => {
+          return Object.values(row).map(val => {
+            if (val === null || val === undefined) return '""';
+            const str = typeof val === 'object' ? JSON.stringify(val) : String(val);
+            return `"${str.replace(/"/g, '""')}"`;
+          }).join(',');
+        });
+        const csvContent = headers + "\\n" + rows.join("\\n");
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `${filename}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        if (addNotification) {
+          addNotification({ title: 'Export Successful', message: 'The file has been downloaded.', type: 'success' });
+        }
+      } catch (error) {
+        console.error('Export Error:', error);
+        if (addNotification) {
+          addNotification({ title: 'Export Failed', message: 'An error occurred during export.', type: 'error' });
+        }
+      }
+    }, 500);
   };
 
   useEffect(() => {
@@ -1838,7 +1871,7 @@ const AdminDashboard = () => {
                     <option>This Quarter</option>
                     <option>Custom Range</option>
                   </select>
-                  <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary-light group-hover:text-primary-light transition-colors" />
+                  <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary-light group-hover:text-primary-light transition-colors pointer-events-none" />
                 </div>
                 <button 
                   onClick={() => addNotification({ title: 'Exporting Ledger', message: 'Preparing financial ledger for export... CSV/PDF formats will be ready in a moment.', type: 'info' })}

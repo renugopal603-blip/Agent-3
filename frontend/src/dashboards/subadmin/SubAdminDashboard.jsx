@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -48,6 +48,9 @@ const SubAdminDashboard = () => {
   const [escalateNotes, setEscalateNotes] = useState('');
   const [showAddAgentModal, setShowAddAgentModal] = useState(false);
   const [showAddZoneModal, setShowAddZoneModal] = useState(false);
+  const [selectedAgent, setSelectedAgent] = useState(null);
+  const [showAgentDetailModal, setShowAgentDetailModal] = useState(false);
+  const [agentDetailModalType, setAgentDetailModalType] = useState('view'); // 'view' | 'edit' | 'history'
   const [showShopDetailModal, setShowShopDetailModal] = useState(false);
   const [selectedShopDetail, setSelectedShopDetail] = useState(null);
   const [reportSubmitted, setReportSubmitted] = useState(false);
@@ -65,6 +68,13 @@ const SubAdminDashboard = () => {
   const [showTimeDropdown, setShowTimeDropdown] = useState(false);
   const [financeFilter, setFinanceFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showAgentFilters, setShowAgentFilters] = useState(false);
+  const [showShopFilters, setShowShopFilters] = useState(false);
+  const [showKYCFilters, setShowKYCFilters] = useState(false);
+  const [agentRoleFilter, setAgentRoleFilter] = useState('All');
+  const [agentStatusFilter, setAgentStatusFilter] = useState('All');
+  const [shopStatusFilter, setShopStatusFilter] = useState('All');
+  const [kycStatusFilter, setKycStatusFilter] = useState('All');
   const [supportTickets, setSupportTickets] = useState([
     { id: 'TKT-4821', subject: 'Agent unable to login', by: 'Amit Singh', priority: 'High', status: 'Open', time: '10 min ago' },
     { id: 'TKT-4820', subject: 'Shop KYC document rejected incorrectly', by: 'Fresh Mart', priority: 'High', status: 'In Progress', time: '1h ago' },
@@ -74,6 +84,38 @@ const SubAdminDashboard = () => {
     { id: 'TKT-4805', subject: 'Referral bonus not reflecting', by: 'Vikram Kumar', priority: 'Low', status: 'Resolved', time: '3 days ago' },
   ]);
 
+  const exportToCSV = (data, filename) => {
+    if (!data || !data.length) {
+      addNotification({ title: 'Export Failed', message: 'No data available to export.', type: 'error' });
+      return;
+    }
+
+    try {
+      addNotification({ title: 'Exporting...', message: 'Preparing your CSV file for download.', type: 'info' });
+      
+      const headers = Object.keys(data[0]).join(',');
+      const rows = data.map(obj => {
+        return Object.values(obj).map(val => {
+          const str = String(val).replace(/"/g, '""');
+          return str.includes(',') ? `"${str}"` : str;
+        }).join(',');
+      });
+
+      const csvContent = [headers, ...rows].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `${filename}_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      addNotification({ title: 'Export Success', message: 'CSV file downloaded successfully.', type: 'success' });
+    } catch (err) {
+      addNotification({ title: 'Export Error', message: 'Failed to generate CSV file.', type: 'error' });
+    }
+  };
   const handleDownload = (docName = 'Document', extension = 'pdf') => {
     addNotification({ 
       title: 'Preparing Download', 
@@ -344,13 +386,13 @@ const SubAdminDashboard = () => {
               <h3 className="text-2xl font-bold dark:text-white">Assigned Agents</h3>
               <div className="flex gap-2">
                 <button 
-                  onClick={() => addNotification({ title: 'System Filter', message: 'Opening advanced agent filters...', type: 'info' })}
+                  onClick={() => setShowAgentFilters(!showAgentFilters)}
                   className="px-4 py-2 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl text-xs font-black text-text-secondary-light flex items-center gap-2 hover:border-primary-light transition-all"
                 >
                   <Filter size={14} /> Filters
                 </button>
                 <button 
-                  onClick={() => handleDownload('Agent_Ledger', 'csv')}
+                  onClick={() => exportToCSV(systemUsers.filter(u => u.role === 'Agent'), 'assigned_agents')}
                   className="px-4 py-2 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl text-xs font-black text-text-secondary-light flex items-center gap-2 hover:border-primary-light transition-all"
                 >
                   <Download size={14} /> Export
@@ -358,6 +400,35 @@ const SubAdminDashboard = () => {
                 <button onClick={() => setShowAddAgentModal(true)} className="btn-primary px-4 py-2 text-sm font-black flex items-center gap-2 shadow-lg shadow-primary-light/20"><Plus size={16}/> Add Agent</button>
               </div>
             </div>
+
+            {showAgentFilters && (
+              <div className="p-6 bg-white dark:bg-secondary-dark rounded-2xl shadow-sm border border-border-light dark:border-border-dark flex flex-wrap gap-4 animate-in slide-in-from-top-2 duration-300">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-text-secondary-light">Role Filter</label>
+                  <select 
+                    value={agentRoleFilter}
+                    onChange={(e) => setAgentRoleFilter(e.target.value)}
+                    className="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-background-dark border-none outline-none dark:text-white text-xs font-bold">
+                    <option>All</option>
+                    <option>District Agent</option>
+                    <option>Divisional Agent</option>
+                    <option>Pincode Agent</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-text-secondary-light">Status Filter</label>
+                  <select 
+                    value={agentStatusFilter}
+                    onChange={(e) => setAgentStatusFilter(e.target.value)}
+                    className="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-background-dark border-none outline-none dark:text-white text-xs font-bold">
+                    <option>All</option>
+                    <option>Active</option>
+                    <option>Suspended</option>
+                  </select>
+                </div>
+              </div>
+            )}
+
             <div className="card-premium">
               <table className="w-full text-left">
                 <thead>
@@ -370,7 +441,7 @@ const SubAdminDashboard = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border-light dark:divide-border-dark">
-                  {systemUsers.filter(u => u.role === 'Agent').map((a, i) => (
+                  {systemUsers.filter(u => { const isAgent = u.role?.toLowerCase().includes('agent') || u.role === 'Agent'; const roleMatch = agentRoleFilter === 'All' || u.role === agentRoleFilter; const statusMatch = agentStatusFilter === 'All' || u.status === agentStatusFilter; return isAgent && roleMatch && statusMatch; }).map((a, i) => (
                     <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50">
                       <td className="py-4 font-bold dark:text-white flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-primary-light/20 flex items-center justify-center text-primary-light text-xs font-black">{a.name[0]}</div>
@@ -387,33 +458,32 @@ const SubAdminDashboard = () => {
                       <td className="py-4"><span className={`px-2 py-1 text-[10px] rounded-lg font-bold uppercase ${a.status === 'Active' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}`}>{a.status}</span></td>
                       <td className="py-4 text-right">
                         <div className="flex justify-end gap-1.5">
-                          <button 
-                            onClick={() => addNotification({ title: 'Agent View', message: `Viewing profile for ${a.name}`, type: 'info' })}
-                            className="p-2 bg-gray-100 dark:bg-secondary-dark rounded-xl hover:bg-gray-200 text-text-secondary-light" title="View Profile"
+                          <button
+                            onClick={() => { setSelectedAgent(a); setAgentDetailModalType('view'); setShowAgentDetailModal(true); }}
+                            className="p-2 bg-gray-100 dark:bg-secondary-dark rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 text-text-secondary-light transition-all"
+                            title="View Profile"
                           >
                             <Eye size={14} />
                           </button>
-                          <button 
-                            onClick={() => addNotification({ title: 'Edit Agent', message: `Opening editor for ${a.name}`, type: 'info' })}
-                            className="p-2 bg-emerald-500/10 text-emerald-500 rounded-xl hover:bg-emerald-500 hover:text-white" title="Edit Info"
+                          <button
+                            onClick={() => { setSelectedAgent(a); setAgentDetailModalType('edit'); setShowAgentDetailModal(true); }}
+                            className="p-2 bg-emerald-500/10 text-emerald-500 rounded-xl hover:bg-emerald-500 hover:text-white transition-all"
+                            title="Edit Info"
                           >
                             <Edit size={14} />
                           </button>
-                          <button 
-                            onClick={() => addNotification({ title: 'Agent History', message: `Retrieving activity log for ${a.name}...`, type: 'info' })}
-                            className="p-2 bg-orange-500/10 text-orange-500 rounded-xl hover:bg-orange-500 hover:text-white" title="History"
+                          <button
+                            onClick={() => { setSelectedAgent(a); setAgentDetailModalType('history'); setShowAgentDetailModal(true); }}
+                            className="p-2 bg-orange-500/10 text-orange-500 rounded-xl hover:bg-orange-500 hover:text-white transition-all"
+                            title="Activity History"
                           >
                             <History size={14} />
                           </button>
-                          <button 
-                            onClick={async () => {
-                              try {
-                                const config = { headers: { Authorization: `Bearer ${user.token}` } };
-                                await axios.delete(`/api/agents/${a.id}`, config);
+                          <button
+                            onClick={() => {
+                              if (window.confirm(`Remove ${a.name} from your territory?`)) {
                                 setSystemUsers(systemUsers.filter(u => u.id !== a.id));
                                 addNotification({ title: 'Agent Removed', message: `${a.name} has been removed from your territory.`, type: 'error' });
-                              } catch (error) {
-                                addNotification({ title: 'Delete Error', message: error.message, type: 'error' });
                               }
                             }}
                             className="p-2 bg-error/10 text-error rounded-xl hover:bg-error hover:text-white transition-colors"
@@ -442,7 +512,7 @@ const SubAdminDashboard = () => {
               </div>
               <div className="flex gap-2">
                 <button 
-                  onClick={() => addNotification({ title: 'System Filter', message: 'Opening shop verification filters...', type: 'info' })}
+                  onClick={() => setShowShopFilters(!showShopFilters)}
                   className="px-4 py-2 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl text-xs font-black text-text-secondary-light flex items-center gap-2 hover:border-primary-light transition-all"
                 >
                   <Filter size={14} /> Filters
@@ -563,7 +633,7 @@ const SubAdminDashboard = () => {
               </div>
               <div className="flex gap-2 items-center">
                 <button 
-                  onClick={() => addNotification({ title: 'System Filter', message: 'Opening advanced KYC filters...', type: 'info' })}
+                  onClick={() => setShowKYCFilters(!showKYCFilters)}
                   className="px-4 py-2 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl text-xs font-black text-text-secondary-light flex items-center gap-2 hover:border-primary-light transition-all"
                 >
                   <Filter size={14} /> Filters
@@ -590,7 +660,7 @@ const SubAdminDashboard = () => {
                       </div>
                       <div>
                         <h4 className="font-black dark:text-white text-lg tracking-tight">{k.name}</h4>
-                        <p className="text-xs font-bold text-text-secondary-light uppercase tracking-widest">{k.role} · {k.location}</p>
+                        <p className="text-xs font-bold text-text-secondary-light uppercase tracking-widest">{k.role} Ã‚Â· {k.location}</p>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2">
@@ -666,9 +736,9 @@ const SubAdminDashboard = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
-                { label: 'Total Volume', value: '₹12.5L', color: 'bg-primary-light', icon: <Briefcase /> },
-                { label: 'This Month', value: '₹2.4L', color: 'bg-emerald-500', icon: <TrendingUp /> },
-                { label: 'Pending Settlement', value: '₹45K', color: 'bg-orange-500', icon: <Clock /> },
+                { label: 'Total Volume', value: 'Ã¢â€šÂ¹12.5L', color: 'bg-primary-light', icon: <Briefcase /> },
+                { label: 'This Month', value: 'Ã¢â€šÂ¹2.4L', color: 'bg-emerald-500', icon: <TrendingUp /> },
+                { label: 'Pending Settlement', value: 'Ã¢â€šÂ¹45K', color: 'bg-orange-500', icon: <Clock /> },
               ].map((stat, i) => (
                 <div key={i} className="card-premium flex items-center gap-4">
                   <div className={`p-4 ${stat.color} text-white rounded-2xl shadow-lg`}>
@@ -700,9 +770,9 @@ const SubAdminDashboard = () => {
                     </thead>
                     <tbody className="divide-y divide-border-light dark:divide-border-dark">
                       {[
-                        { id: 'TXN-00192', date: 'Today, 10:30 AM', type: 'Shop Onboarding', amount: '₹1,200', status: 'Completed' },
-                        { id: 'TXN-00191', date: 'Yesterday', type: 'Sales Commission', amount: '₹4,500', status: 'Pending' },
-                        { id: 'TXN-00189', date: 'Oct 24', type: 'Performance Bonus', amount: '₹12,400', status: 'Completed' },
+                        { id: 'TXN-00192', date: 'Today, 10:30 AM', type: 'Shop Onboarding', amount: 'Ã¢â€šÂ¹1,200', status: 'Completed' },
+                        { id: 'TXN-00191', date: 'Yesterday', type: 'Sales Commission', amount: 'Ã¢â€šÂ¹4,500', status: 'Pending' },
+                        { id: 'TXN-00189', date: 'Oct 24', type: 'Performance Bonus', amount: 'Ã¢â€šÂ¹12,400', status: 'Completed' },
                       ].map((t, i) => (
                         <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50 group transition-colors">
                           <td className="py-4 font-bold dark:text-white text-sm">{t.id}</td>
@@ -743,7 +813,7 @@ const SubAdminDashboard = () => {
                       </div>
                       <div className="flex-1">
                         <p className="text-xs font-black dark:text-white">{item.title}</p>
-                        <p className="text-[10px] font-bold text-text-secondary-light uppercase mt-0.5">{item.size} · PDF</p>
+                        <p className="text-[10px] font-bold text-text-secondary-light uppercase mt-0.5">{item.size} Ã‚Â· PDF</p>
                       </div>
                       <Download size={14} className="text-text-secondary-light group-hover:text-primary-light" />
                     </div>
@@ -1122,7 +1192,7 @@ const SubAdminDashboard = () => {
 
             {/* Quick Submit Form */}
             <div className="card-premium space-y-5">
-              <h4 className="font-bold dark:text-white text-lg border-b border-border-light dark:border-border-dark pb-3">📝 Today's Field Update</h4>
+              <h4 className="font-bold dark:text-white text-lg border-b border-border-light dark:border-border-dark pb-3">Ã°Å¸â€œÂ Today's Field Update</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Zone / Area Covered</label>
@@ -1151,17 +1221,17 @@ const SubAdminDashboard = () => {
                 disabled={reportSubmitted}
                 className={`w-full py-3 text-white rounded-2xl font-black text-sm shadow-xl transition-all ${reportSubmitted ? 'bg-success shadow-success/20 scale-[0.98]' : 'bg-primary-light shadow-primary-light/20 hover:scale-[1.01] active:scale-[0.99]'}`}
               >
-                {reportSubmitted ? '✓ Report Submitted' : 'Submit Field Report'}
+                {reportSubmitted ? 'Ã¢Å“â€œ Report Submitted' : 'Submit Field Report'}
               </button>
             </div>
 
             {/* Recent Team Updates */}
             <div className="card-premium space-y-4">
-              <h4 className="font-bold dark:text-white text-lg border-b border-border-light dark:border-border-dark pb-3">🕐 Recent Team Updates</h4>
+              <h4 className="font-bold dark:text-white text-lg border-b border-border-light dark:border-border-dark pb-3">Ã°Å¸â€¢Â Recent Team Updates</h4>
               {[
                 { name: 'Amit Singh', zone: 'Pune South', time: '10:30 AM', note: 'Visited 6 shops, 1 new KYC submitted.', status: 'Submitted' },
                 { name: 'Priya Verma', zone: 'Pincode 411001', time: '11:15 AM', note: 'Agent follow-up done, updates collected.', status: 'Submitted' },
-                { name: 'Rahul Dev', zone: 'Mumbai South', time: '—', note: 'No update yet for today.', status: 'Pending' },
+                { name: 'Rahul Dev', zone: 'Mumbai South', time: 'Ã¢â‚¬â€', note: 'No update yet for today.', status: 'Pending' },
                 { name: 'Sneha Patel', zone: 'Delhi NCR A', time: '09:00 AM', note: 'Morning route complete, 4 shops verified.', status: 'Submitted' },
               ].map((update, i) => (
                 <div key={i} className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark">
@@ -1170,7 +1240,7 @@ const SubAdminDashboard = () => {
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="font-bold dark:text-white text-sm">{update.name}</p>
-                        <p className="text-[10px] text-text-secondary-light font-bold">{update.zone} · {update.time}</p>
+                        <p className="text-[10px] text-text-secondary-light font-bold">{update.zone} Ã‚Â· {update.time}</p>
                       </div>
                       <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
                         update.status === 'Submitted' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'
@@ -1301,7 +1371,7 @@ const SubAdminDashboard = () => {
 
             {/* Raise New Ticket Form */}
             <div className="card-premium space-y-5">
-              <h4 className="font-bold dark:text-white text-lg border-b border-border-light dark:border-border-dark pb-3">🎫 Raise a New Ticket</h4>
+              <h4 className="font-bold dark:text-white text-lg border-b border-border-light dark:border-border-dark pb-3">Ã°Å¸Å½Â« Raise a New Ticket</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Issue Category</label>
@@ -1416,7 +1486,7 @@ const SubAdminDashboard = () => {
               {[
                 { title: 'Agent Performance', value: '42 Active', sub: '+3 this week', color: 'bg-blue-500', icon: <Users size={22} /> },
                 { title: 'Shop Activity', value: '128 Shops', sub: '12 pending review', color: 'bg-emerald-500', icon: <Store size={22} /> },
-                { title: 'Commission Earned', value: '₹2.4L', sub: '+8% vs last month', color: 'bg-primary-light', icon: <DollarSign size={22} /> },
+                { title: 'Commission Earned', value: 'Ã¢â€šÂ¹2.4L', sub: '+8% vs last month', color: 'bg-primary-light', icon: <DollarSign size={22} /> },
               ].map((stat) => (
                 <div key={stat.title} className="card-premium flex items-center gap-4">
                   <div className={`p-4 ${stat.color} text-white rounded-2xl shadow-lg shrink-0`}>{stat.icon}</div>
@@ -1449,7 +1519,7 @@ const SubAdminDashboard = () => {
                         className="flex items-center justify-between p-3 bg-gray-50 dark:bg-secondary-dark rounded-xl group hover:bg-primary-light/5 cursor-pointer transition-all"
                       >
                         <span className="text-sm font-medium dark:text-white">{item}</span>
-                        <button className="text-[10px] font-black text-primary-light px-3 py-1 bg-primary-light/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">View →</button>
+                        <button className="text-[10px] font-black text-primary-light px-3 py-1 bg-primary-light/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">View Ã¢â€ â€™</button>
                       </div>
                     ))}
                   </div>
@@ -1517,9 +1587,9 @@ const SubAdminDashboard = () => {
             {/* Commission Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
-                { title: 'Total Commission', value: '₹4.8L', icon: <DollarSign size={20} />, color: 'bg-primary-light' },
-                { title: 'Payout Processed', value: '₹3.2L', icon: <CheckCircle size={20} />, color: 'bg-emerald-500' },
-                { title: 'Outstanding Balance', value: '₹1.6L', icon: <Clock size={20} />, color: 'bg-orange-500' },
+                { title: 'Total Commission', value: 'Ã¢â€šÂ¹4.8L', icon: <DollarSign size={20} />, color: 'bg-primary-light' },
+                { title: 'Payout Processed', value: 'Ã¢â€šÂ¹3.2L', icon: <CheckCircle size={20} />, color: 'bg-emerald-500' },
+                { title: 'Outstanding Balance', value: 'Ã¢â€šÂ¹1.6L', icon: <Clock size={20} />, color: 'bg-orange-500' },
               ].map((stat) => (
                 <div key={stat.title} className="card-premium flex items-center gap-4">
                   <div className={`p-4 ${stat.color} text-white rounded-2xl shadow-lg`}>{stat.icon}</div>
@@ -1545,10 +1615,10 @@ const SubAdminDashboard = () => {
                 </thead>
                 <tbody className="divide-y divide-border-light dark:divide-border-dark">
                   {[
-                    { id: 'TXN-9021', name: 'Amit Singh (Fresh Mart)', amount: '₹1,240', date: 'Oct 12, 2023', status: 'Successful' },
-                    { id: 'TXN-9020', name: 'Priya Verma (ElectroHub)', amount: '₹850', date: 'Oct 12, 2023', status: 'Pending' },
-                    { id: 'TXN-9018', name: 'Rahul Dev (Style Studio)', amount: '₹2,100', date: 'Oct 11, 2023', status: 'Successful' },
-                    { id: 'TXN-9015', name: 'Vikram Kumar (Gadget Zone)', amount: '₹420', date: 'Oct 11, 2023', status: 'Refunded' },
+                    { id: 'TXN-9021', name: 'Amit Singh (Fresh Mart)', amount: 'Ã¢â€šÂ¹1,240', date: 'Oct 12, 2023', status: 'Successful' },
+                    { id: 'TXN-9020', name: 'Priya Verma (ElectroHub)', amount: 'Ã¢â€šÂ¹850', date: 'Oct 12, 2023', status: 'Pending' },
+                    { id: 'TXN-9018', name: 'Rahul Dev (Style Studio)', amount: 'Ã¢â€šÂ¹2,100', date: 'Oct 11, 2023', status: 'Successful' },
+                    { id: 'TXN-9015', name: 'Vikram Kumar (Gadget Zone)', amount: 'Ã¢â€šÂ¹420', date: 'Oct 11, 2023', status: 'Refunded' },
                   ]
                   .filter(txn => {
                     const matchesFilter = financeFilter === 'All' || txn.status === financeFilter;
@@ -1681,7 +1751,7 @@ const SubAdminDashboard = () => {
         <header className="h-20 bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md border-b border-border-light dark:border-border-dark flex items-center justify-between px-8 sticky top-0 z-10 shadow-sm">
           <div>
             <h2 className="text-2xl font-bold dark:text-white tracking-tight">{activeTab}</h2>
-            <p className="text-xs text-text-secondary-light font-medium">Sub-Admin ID: SA-10294 — Welcome back, {user?.name?.split(' ')[0] || 'State'}!</p>
+            <p className="text-xs text-text-secondary-light font-medium">Sub-Admin ID: SA-10294 Ã¢â‚¬â€ Welcome back, {user?.name?.split(' ')[0] || 'State'}!</p>
           </div>
           <div className="flex items-center space-x-6">
             <button 
@@ -1735,6 +1805,18 @@ const SubAdminDashboard = () => {
               type: 'warning'
             });
             setShowEscalateModal(false);
+          }}
+        />
+
+        <AgentDetailModal
+          isOpen={showAgentDetailModal}
+          onClose={() => { setShowAgentDetailModal(false); setSelectedAgent(null); }}
+          agent={selectedAgent}
+          type={agentDetailModalType}
+          onSave={(updated) => {
+            setSystemUsers(systemUsers.map(u => u.id === updated.id ? { ...u, ...updated } : u));
+            addNotification({ title: 'Agent Updated', message: `${updated.name}'s profile has been updated.`, type: 'success' });
+            setShowAgentDetailModal(false);
           }}
         />
 
@@ -1876,11 +1958,11 @@ const CommissionPlanModal = ({ isOpen, onClose }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark">
                 <p className="text-xs font-bold text-text-secondary-light uppercase">New Shop Tie-up</p>
-                <p className="text-2xl font-black dark:text-white mt-1">₹500 <span className="text-xs font-medium text-text-secondary-light">per shop</span></p>
+                <p className="text-2xl font-black dark:text-white mt-1">Ã¢â€šÂ¹500 <span className="text-xs font-medium text-text-secondary-light">per shop</span></p>
               </div>
               <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark">
                 <p className="text-xs font-bold text-text-secondary-light uppercase">Agent Referral</p>
-                <p className="text-2xl font-black dark:text-white mt-1">₹1,000 <span className="text-xs font-medium text-text-secondary-light">per agent</span></p>
+                <p className="text-2xl font-black dark:text-white mt-1">Ã¢â€šÂ¹1,000 <span className="text-xs font-medium text-text-secondary-light">per agent</span></p>
               </div>
             </div>
           </div>
@@ -1897,15 +1979,15 @@ const CommissionPlanModal = ({ isOpen, onClose }) => {
                 </thead>
                 <tbody className="divide-y divide-border-light dark:divide-border-dark">
                   <tr>
-                    <td className="p-4 text-sm font-bold dark:text-white">Up to ₹5 Lakhs</td>
+                    <td className="p-4 text-sm font-bold dark:text-white">Up to Ã¢â€šÂ¹5 Lakhs</td>
                     <td className="p-4 text-sm font-black text-emerald-500 text-right">3%</td>
                   </tr>
                   <tr>
-                    <td className="p-4 text-sm font-bold dark:text-white">₹5 Lakhs - ₹15 Lakhs</td>
+                    <td className="p-4 text-sm font-bold dark:text-white">Ã¢â€šÂ¹5 Lakhs - Ã¢â€šÂ¹15 Lakhs</td>
                     <td className="p-4 text-sm font-black text-emerald-500 text-right">5%</td>
                   </tr>
                   <tr>
-                    <td className="p-4 text-sm font-bold dark:text-white">Above ₹15 Lakhs</td>
+                    <td className="p-4 text-sm font-bold dark:text-white">Above Ã¢â€šÂ¹15 Lakhs</td>
                     <td className="p-4 text-sm font-black text-emerald-500 text-right">8%</td>
                   </tr>
                 </tbody>
@@ -1939,6 +2021,7 @@ const AddAgentModal = ({ isOpen, onClose, onAdd }) => {
     role: 'District Agent',
     territory: 'Pune Central'
   });
+  const [documents, setDocuments] = useState({});
 
   if (!isOpen) return null;
 
@@ -1949,12 +2032,14 @@ const AddAgentModal = ({ isOpen, onClose, onAdd }) => {
     }
     onAdd({
       ...formData,
+      documents,
       id: Date.now(),
       status: 'Active',
       lastLogin: 'Never',
       riskLevel: 'Low'
     });
     setFormData({ name: '', phone: '', email: '', role: 'District Agent', territory: 'Pune Central' });
+    setDocuments({});
   };
 
   return (
@@ -2034,10 +2119,19 @@ const AddAgentModal = ({ isOpen, onClose, onAdd }) => {
             <h4 className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light">Document Verification</h4>
             <div className="grid grid-cols-2 gap-3">
               {['Aadhar Card', 'PAN Card', 'Address Proof', 'Profile Photo'].map(doc => (
-                <div key={doc} className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border-2 border-dashed border-border-light dark:border-border-dark flex flex-col items-center gap-2 cursor-pointer hover:border-primary-light transition-all">
-                  <div className="p-2 bg-primary-light/10 text-primary-light rounded-xl"><Plus size={20}/></div>
-                  <span className="text-[10px] font-black dark:text-white">{doc}</span>
-                </div>
+                <label key={doc} className={`p-4 rounded-2xl border-2 border-dashed flex flex-col items-center gap-2 cursor-pointer transition-all ${documents[doc] ? 'bg-success/5 border-success/30' : 'bg-gray-50 dark:bg-secondary-dark border-border-light dark:border-border-dark hover:border-primary-light'}`}>
+                  <input type="file" className="hidden" onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      setDocuments(prev => ({...prev, [doc]: e.target.files[0]}));
+                    }
+                  }} />
+                  <div className={`p-2 rounded-xl ${documents[doc] ? 'bg-success/10 text-success' : 'bg-primary-light/10 text-primary-light'}`}>
+                    {documents[doc] ? <CheckCircle size={20}/> : <Plus size={20}/>}
+                  </div>
+                  <span className="text-[10px] font-black dark:text-white text-center w-full truncate">
+                    {documents[doc] ? documents[doc].name : doc}
+                  </span>
+                </label>
               ))}
             </div>
           </div>
@@ -2091,7 +2185,7 @@ const ShopDetailModal = ({ isOpen, onClose, shop }) => {
             <div className="w-14 h-14 bg-primary-light rounded-2xl flex items-center justify-center text-white text-xl font-black">{shop.name[0]}</div>
             <div>
               <h3 className="text-xl font-black dark:text-white">{shop.name}</h3>
-              <p className="text-xs font-bold text-text-secondary-light uppercase tracking-widest">{shop.cat} · {shop.loc}</p>
+              <p className="text-xs font-bold text-text-secondary-light uppercase tracking-widest">{shop.cat} Ã‚Â· {shop.loc}</p>
             </div>
           </div>
           <button onClick={onClose} className="p-3 hover:bg-gray-100 dark:hover:bg-secondary-dark rounded-2xl transition-all"><X size={24} className="dark:text-white"/></button>
@@ -2323,7 +2417,7 @@ const ReportDetailsModal = ({ isOpen, onClose, reportTitle }) => {
                     <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
                     <span className="text-sm font-bold dark:text-white">Region Zone - {i * 10} Alpha</span>
                   </div>
-                  <span className="text-sm font-black text-primary-light">₹{(i * 12.5).toFixed(1)}L</span>
+                  <span className="text-sm font-black text-primary-light">Ã¢â€šÂ¹{(i * 12.5).toFixed(1)}L</span>
                 </div>
               ))}
             </div>
@@ -2368,7 +2462,7 @@ const ChangePasswordModal = ({ isOpen, onClose, onSuccess }) => {
               <div key={label} className="space-y-2">
                 <label className="text-[10px] font-black uppercase text-text-secondary-light">{label}</label>
                 <div className="relative">
-                  <input type="password" placeholder="••••••••" className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
+                  <input type="password" placeholder="Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢" className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
                   <Key className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary-light" size={18} />
                 </div>
               </div>
@@ -2434,9 +2528,9 @@ const SessionsModal = ({ isOpen, onClose }) => {
         </div>
         <div className="p-8 space-y-4">
           {[
-            { device: 'Windows PC · Chrome', location: 'Delhi, India (Current)', status: 'Online', icon: <History /> },
-            { device: 'iPhone 15 · Safari', location: 'Mumbai, India', status: '2h ago', icon: <History /> },
-            { device: 'macOS · Firefox', location: 'Pune, India', status: 'Yesterday', icon: <History /> },
+            { device: 'Windows PC Ã‚Â· Chrome', location: 'Delhi, India (Current)', status: 'Online', icon: <History /> },
+            { device: 'iPhone 15 Ã‚Â· Safari', location: 'Mumbai, India', status: '2h ago', icon: <History /> },
+            { device: 'macOS Ã‚Â· Firefox', location: 'Pune, India', status: 'Yesterday', icon: <History /> },
           ].map((s, i) => (
             <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-secondary-dark/50 rounded-2xl border border-border-light dark:border-border-dark group">
               <div className="flex items-center gap-4">
@@ -2533,4 +2627,138 @@ const AppearanceSettingsModal = ({ isOpen, onClose, onSave }) => {
 };
 
 
+
+const AgentDetailModal = ({ isOpen, onClose, agent, type, onSave }) => {
+  const [editForm, setEditForm] = React.useState({});
+
+  React.useEffect(() => {
+    if (agent) setEditForm({ ...agent });
+  }, [agent]);
+
+  if (!isOpen || !agent) return null;
+
+  const headerColor =
+    type === 'edit' ? 'bg-emerald-500' :
+    type === 'history' ? 'bg-orange-500' :
+    'bg-gray-800 dark:bg-gray-700';
+
+  const title =
+    type === 'edit' ? 'Edit Agent' :
+    type === 'history' ? 'Activity History' :
+    'Agent Profile';
+
+  const activityLog = [
+    { action: 'Login', time: '2026-05-12 09:30', status: 'Success', ip: '192.168.1.10' },
+    { action: 'KYC Upload', time: '2026-05-11 14:20', status: 'Success', ip: '192.168.1.10' },
+    { action: 'Password Change', time: '2026-05-10 11:05', status: 'Success', ip: '192.168.1.15' },
+    { action: 'Login Attempt', time: '2026-05-09 22:14', status: 'Failed', ip: '203.0.113.42' },
+    { action: 'Profile Update', time: '2026-05-08 16:40', status: 'Success', ip: '192.168.1.10' },
+  ];
+
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-2xl bg-surface-light dark:bg-surface-dark rounded-3xl shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
+        <div className={`${headerColor} p-6 flex items-center justify-between`}>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center font-black text-xl text-white">
+              {agent.name?.[0] ?? '?'}
+            </div>
+            <div>
+              <h3 className="text-xl font-black text-white">{title}: {agent.name}</h3>
+              <p className="text-xs text-white/70 font-bold uppercase tracking-widest">{agent.role}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-full transition-all text-white">
+            <X size={20} />
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-8 space-y-6">
+          {type === 'view' && (
+            <div className="grid grid-cols-2 gap-6">
+              {[
+                { label: 'Full Name', value: agent.name },
+                { label: 'Role', value: agent.role },
+                { label: 'Phone', value: agent.phone || 'N/A' },
+                { label: 'Email', value: agent.email || 'N/A' },
+                { label: 'Territory', value: agent.territory || agent.location || 'N/A' },
+                { label: 'Status', value: agent.status },
+                { label: 'Last Login', value: agent.lastLogin || 'N/A' },
+                { label: 'Risk Level', value: agent.riskLevel || 'N/A' },
+              ].map((item, i) => (
+                <div key={i} className="space-y-1">
+                  <p className="text-[10px] font-black text-text-secondary-light uppercase tracking-widest">{item.label}</p>
+                  <p className="font-bold dark:text-white text-sm">{item.value}</p>
+                </div>
+              ))}
+            </div>
+          )}
+          {type === 'edit' && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { label: 'Full Name', key: 'name', inputType: 'text' },
+                  { label: 'Phone', key: 'phone', inputType: 'tel' },
+                  { label: 'Email', key: 'email', inputType: 'email' },
+                  { label: 'Location', key: 'location', inputType: 'text' },
+                ].map(({ label, key, inputType }) => (
+                  <div key={key} className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">{label}</label>
+                    <input
+                      type={inputType}
+                      value={editForm[key] || ''}
+                      onChange={e => setEditForm({ ...editForm, [key]: e.target.value })}
+                      className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-medium transition-all"
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Status</label>
+                <select
+                  value={editForm.status || 'Active'}
+                  onChange={e => setEditForm({ ...editForm, status: e.target.value })}
+                  className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-medium appearance-none"
+                >
+                  <option>Active</option>
+                  <option>Inactive</option>
+                  <option>Suspended</option>
+                </select>
+              </div>
+              <button
+                onClick={() => onSave(editForm)}
+                className="w-full py-4 bg-emerald-500 text-white rounded-2xl font-black text-sm shadow-xl shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+              >
+                Save Changes
+              </button>
+            </div>
+          )}
+          {type === 'history' && (
+            <div className="space-y-3">
+              <h4 className="text-xs font-black uppercase tracking-widest text-text-secondary-light border-b dark:border-border-dark pb-3">Recent Activity Log</h4>
+              {activityLog.map((log, i) => (
+                <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-2 h-2 rounded-full ${log.status === 'Success' ? 'bg-success' : 'bg-error'}`} />
+                    <div>
+                      <p className="text-sm font-bold dark:text-white">{log.action}</p>
+                      <p className="text-[10px] text-text-secondary-light">{log.time} - IP: {log.ip}</p>
+                    </div>
+                  </div>
+                  <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase ${log.status === 'Success' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}`}>
+                    {log.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 export default SubAdminDashboard;
+
+
+
+
