@@ -3356,9 +3356,14 @@ const AdminDashboard = () => {
                       </div>
                       <div className="flex-1">
                         <p className="text-xs font-black dark:text-white">{item.title}</p>
-                        <p className="text-[10px] font-bold text-text-secondary-light uppercase mt-0.5">{item.size} Â· PDF</p>
+                        <p className="text-[10px] font-bold text-text-secondary-light uppercase mt-0.5">{item.size} · PDF</p>
                       </div>
-                      <Download size={14} className="text-text-secondary-light group-hover:text-primary-light" />
+                      <div 
+                        onClick={() => handleDownloadReport(item.title)}
+                        className="p-2 hover:bg-primary-light/10 text-text-secondary-light hover:text-primary-light rounded-lg transition-all"
+                      >
+                        <Download size={14} />
+                      </div>
                     </div>
                   ))}
                 </div>
