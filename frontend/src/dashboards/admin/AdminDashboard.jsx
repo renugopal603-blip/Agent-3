@@ -14,6 +14,7 @@ import {
   Flag, Milestone, Hash, Globe, Settings2, ShieldAlert,
   Utensils, ShoppingBag, HeartPulse, Pill, Shirt, Scissors, GraduationCap, Wrench, MoreHorizontal, Upload
 } from 'lucide-react';
+import { jsPDF } from 'jspdf';
 
 
 import { useNotifications } from '../../context/NotificationContext';
@@ -138,47 +139,76 @@ const AdminDashboard = () => {
     try {
       const isExcel = reportName.toLowerCase().includes('excel') || reportName.toLowerCase().includes('xls');
       const isCsv = reportName.toLowerCase().includes('csv');
-      const extension = isExcel ? 'xlsx' : isCsv ? 'csv' : 'pdf';
-      const type = isExcel ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : isCsv ? 'text/csv' : 'application/pdf';
       
-      let content = `==================================================\n`;
-      content += `         ADMIN DASHBOARD: ${reportName.toUpperCase()}\n`;
-      content += `==================================================\n`;
-      content += `Generated on: ${new Date().toLocaleString()}\n\n`;
-
-      if (reportName === 'Performance_Report') {
-        content += `TOP PERFORMING AGENTS\n`;
-        content += `---------------------\n`;
-        content += `1. Sneha Patel  | 64 Shops | ₹5.5L Revenue | 4.9 ⭐\n`;
-        content += `2. Amit Singh   | 52 Shops | ₹4.2L Revenue | 4.8 ⭐\n`;
-        content += `3. Priya Verma  | 38 Shops | ₹2.8L Revenue | 4.5 ⭐\n`;
-        content += `4. Vikram Batra | 45 Shops | ₹3.5L Revenue | 4.2 ⭐\n`;
-        content += `5. Rajesh Kumar | 28 Shops | ₹2.1L Revenue | 4.0 ⭐\n\n`;
-        content += `SHOP CATEGORY DISTRIBUTION\n`;
-        content += `--------------------------\n`;
-        content += `- Grocery:     42%\n`;
-        content += `- Electronics: 26%\n`;
-        content += `- Fashion:     18%\n`;
-        content += `- Services:    10%\n`;
-        content += `- Others:      4%\n\n`;
-        content += `SYSTEM AUDIT: VERIFIED\n`;
+      if (!isExcel && !isCsv) {
+        // PDF Generation using jsPDF
+        const doc = new jsPDF();
+        const timestamp = new Date().toLocaleString();
+        
+        // Add Header
+        doc.setFontSize(22);
+        doc.setTextColor(16, 185, 129); // emerald-500
+        doc.text("ADMINHUB: " + reportName.toUpperCase(), 20, 20);
+        
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text("Generated on: " + timestamp, 20, 30);
+        doc.line(20, 35, 190, 35);
+        
+        doc.setFontSize(14);
+        doc.setTextColor(0);
+        
+        if (reportName === 'Performance_Report') {
+          doc.text("TOP PERFORMING AGENTS", 20, 50);
+          let yPos = 60;
+          [
+            "1. Sneha Patel  | 64 Shops | 5.5L Revenue | 4.9 Rating",
+            "2. Amit Singh   | 52 Shops | 4.2L Revenue | 4.8 Rating",
+            "3. Priya Verma  | 38 Shops | 2.8L Revenue | 4.5 Rating",
+            "4. Vikram Batra | 45 Shops | 3.5L Revenue | 4.2 Rating",
+            "5. Rajesh Kumar | 28 Shops | 2.1L Revenue | 4.0 Rating"
+          ].forEach(line => {
+            doc.setFontSize(10);
+            doc.text(line, 25, yPos);
+            yPos += 10;
+          });
+          
+          yPos += 10;
+          doc.setFontSize(14);
+          doc.text("SHOP CATEGORY DISTRIBUTION", 20, yPos);
+          yPos += 10;
+          doc.setFontSize(10);
+          doc.text("- Grocery: 42%", 25, yPos); yPos += 8;
+          doc.text("- Electronics: 26%", 25, yPos); yPos += 8;
+          doc.text("- Fashion: 18%", 25, yPos); yPos += 8;
+          
+          doc.text("SYSTEM AUDIT: VERIFIED", 20, yPos + 10);
+        } else {
+          doc.text("Data Summary:", 20, 50);
+          doc.setFontSize(10);
+          doc.text("- Operational Status: Active", 25, 60);
+          doc.text("- System Integrity: SECURE", 25, 70);
+          doc.text("- Reference ID: " + new Date().getTime(), 25, 80);
+          doc.text("This document is an official administrative report.", 20, 100);
+        }
+        
+        doc.save(`${reportName.replace(/\s+/g, '_')}_${new Date().getTime()}.pdf`);
       } else {
-        content += `This is a generated ${extension.toUpperCase()} report from the Admin Dashboard.\n\n`;
-        content += `Data Summary:\n`;
-        content += `- Operational Status: Active\n`;
-        content += `- System Integrity: SECURE\n`;
-        content += `- Unique Reference: ${new Date().getTime()}\n`;
+        // Fallback for CSV/Excel
+        let content = `ADMIN DASHBOARD: ${reportName.toUpperCase()}\n`;
+        content += `Generated on: ${new Date().toLocaleString()}\n\n`;
+        content += `Data Summary: Operational SECURE Reference ${new Date().getTime()}`;
+        
+        const blob = new Blob([content], { type: isCsv ? 'text/csv' : 'application/vnd.ms-excel' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${reportName.replace(/\s+/g, '_')}_${new Date().getTime()}.${isCsv ? 'csv' : 'xlsx'}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
       }
-
-      const blob = new Blob([content], { type });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${reportName.replace(/\s+/g, '_')}_${new Date().getTime()}.${extension}`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
       
       addNotification({ 
         title: 'Download Complete', 
@@ -1336,7 +1366,7 @@ const AdminDashboard = () => {
                 <h4 className="font-bold dark:text-white">Reward Distribution</h4>
                 <div className="flex items-center justify-center h-48">
                   <div className="text-center">
-                    <p className="text-4xl font-bold text-primary-light">₹2.4L</p>
+                    <p className="text-4xl font-bold text-primary-light">{"₹"}2.4L</p>
                     <p className="text-sm text-text-secondary-light mt-1">Total Incentives Distributed</p>
                     <button className="mt-4 text-xs font-bold text-accent-light hover:underline">View Breakdown</button>
                   </div>
@@ -1802,7 +1832,7 @@ const AdminDashboard = () => {
                     <div className="mt-4 pt-4 border-t border-border-light dark:border-border-dark grid grid-cols-2 gap-4">
                       <div>
                         <p className="text-[10px] font-bold text-text-secondary-light uppercase">Revenue</p>
-                        <p className="font-black dark:text-white mt-1">₹{(area.revenue / 100000).toFixed(1)}L</p>
+                        <p className="font-black dark:text-white mt-1">{"₹"}{(area.revenue / 100000).toFixed(1)}L</p>
                       </div>
                       <div>
                         <p className="text-[10px] font-bold text-text-secondary-light uppercase">Active Shops</p>
@@ -1845,7 +1875,7 @@ const AdminDashboard = () => {
               ].map((stat) => (
                 <div key={stat.label} className="card-premium">
                   <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">{stat.label}</p>
-                  <h3 className={`text-3xl font-bold mt-2 ${stat.color}`}>{stat.value}</h3>
+                  <h3 className={`text-3xl font-bold mt-2 ${stat.color}`}>{"₹"}{stat.value.replace('₹', '')}</h3>
                   <p className="text-xs font-semibold mt-1 text-success">{stat.trend} vs last month</p>
                 </div>
               ))}
@@ -1981,7 +2011,7 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="card-premium border-l-4 border-l-blue-500">
                 <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">Processing Volume (MTD)</p>
-                <h3 className="text-3xl font-bold dark:text-white mt-2">₹48.2L</h3>
+                <h3 className="text-3xl font-bold dark:text-white mt-2">{"₹"}48.2L</h3>
                 <p className="text-xs font-semibold text-success mt-1">+12.4% vs last month</p>
               </div>
               <div className="card-premium border-l-4 border-l-emerald-500">
@@ -2799,7 +2829,7 @@ const AdminDashboard = () => {
               </div>
               <div className="card-premium">
                 <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">Rewards Distributed</p>
-                <h3 className="text-3xl font-bold text-purple-500 mt-2">₹4.2L</h3>
+                <h3 className="text-3xl font-bold text-purple-500 mt-2">{"₹"}4.2L</h3>
                 <p className="text-xs font-semibold text-text-secondary-light mt-1">Total cash bonuses paid</p>
               </div>
               <div className="card-premium">
@@ -5924,7 +5954,7 @@ const SubAdminActionModal = ({ isOpen, onClose, subAdmin, type, agents = [], add
               <div className="grid grid-cols-3 gap-4">
                 <div className="p-4 bg-success/5 rounded-2xl border border-success/10 text-center">
                   <p className="text-[10px] font-black text-success uppercase tracking-widest">Revenue</p>
-                  <p className="text-xl font-black dark:text-white">₹4.2L</p>
+                  <p className="text-xl font-black dark:text-white">{"₹"}4.2L</p>
                 </div>
                 <div className="p-4 bg-primary-light/5 rounded-2xl border border-primary-light/10 text-center">
                   <p className="text-[10px] font-black text-primary-light uppercase tracking-widest">Growth</p>
@@ -6245,7 +6275,7 @@ const BulkPayoutModal = ({ isOpen, onClose }) => {
               </div>
               <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark">
                 <p className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light mb-1">Ready to Release</p>
-                <h4 className="text-2xl font-black text-primary-light">₹2.1L</h4>
+                <h4 className="text-2xl font-black text-primary-light">{"₹"}2.1L</h4>
                 <p className="text-xs font-bold text-text-secondary-light mt-1">Verified & Approved (64 Agents)</p>
               </div>
             </div>
