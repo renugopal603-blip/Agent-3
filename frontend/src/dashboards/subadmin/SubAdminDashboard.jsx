@@ -1039,7 +1039,17 @@ const SubAdminDashboard = () => {
                         </td>
                         <td className="p-4 text-right">
                           <div className="flex justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button className="p-2 bg-gray-100 dark:bg-secondary-dark rounded-xl hover:bg-gray-200 text-text-secondary-light" title="View Details"><User size={14} /></button>
+                            <button 
+                              onClick={() => {
+                                setSelectedAgent(u);
+                                setAgentDetailModalType('view');
+                                setShowAgentDetailModal(true);
+                              }}
+                              className="p-2 bg-gray-100 dark:bg-secondary-dark rounded-xl hover:bg-gray-200 text-text-secondary-light" 
+                              title="View Details"
+                            >
+                              <User size={14} />
+                            </button>
                             <button 
                               onClick={() => {
                                 setSelectedSystemUser(u);
@@ -1400,7 +1410,10 @@ const SubAdminDashboard = () => {
                       <td className="p-4 text-xs text-text-secondary-light font-medium">{ticket.time}</td>
                       <td className="p-4 text-right">
                         <div className="flex justify-end gap-2">
-                          <button className="p-2 bg-gray-100 dark:bg-secondary-dark rounded-xl hover:bg-primary-light hover:text-white transition-all">
+                          <button 
+                            onClick={() => addNotification({ title: 'Ticket Details', message: `Opening ticket ${ticket.id} for review...`, type: 'info' })}
+                            className="p-2 bg-gray-100 dark:bg-secondary-dark rounded-xl hover:bg-primary-light hover:text-white transition-all"
+                          >
                             <Eye size={14} />
                           </button>
                           <button 

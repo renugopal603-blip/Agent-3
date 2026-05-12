@@ -11,7 +11,8 @@ import {
   Clock, Star, LogOut, ChevronRight, ChevronDown, Lock, BellRing, Palette,
   CreditCard, Percent, Truck, BarChart as BarChartIcon, LifeBuoy, Share2, Key, History,
   UserCheck, Briefcase, Megaphone, Sun, Moon, Eye, EyeOff, User, FileText, Shield, MapPin, Coins, Wallet, Trophy, Calendar, Zap, Navigation, Download, ArrowUpRight, ArrowDownRight, PieChart, Activity, FileSpreadsheet, Layout, MessageSquare, Send, Smartphone, Mail, Plus, Headset, Ticket, Paperclip, Smile, Link2, Copy, Gift, Camera, Fingerprint, Monitor, Check, Menu, FileSearch,
-  Flag, Milestone, Hash, Globe, Settings2, ShieldAlert
+  Flag, Milestone, Hash, Globe, Settings2, ShieldAlert,
+  Utensils, ShoppingBag, HeartPulse, Pill, Shirt, Scissors, GraduationCap, Wrench, MoreHorizontal, Upload
 } from 'lucide-react';
 
 
@@ -20,6 +21,23 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, Cell
 } from 'recharts';
+
+const CategoryIcon = ({ iconName, size = 20, className = "" }) => {
+  const icons = {
+    Utensils: <Utensils size={size} className={className} />,
+    ShoppingBag: <ShoppingBag size={size} className={className} />,
+    HeartPulse: <HeartPulse size={size} className={className} />,
+    Pill: <Pill size={size} className={className} />,
+    Shirt: <Shirt size={size} className={className} />,
+    Zap: <Zap size={size} className={className} />,
+    Scissors: <Scissors size={size} className={className} />,
+    GraduationCap: <GraduationCap size={size} className={className} />,
+    Wrench: <Wrench size={size} className={className} />,
+    MoreHorizontal: <MoreHorizontal size={size} className={className} />,
+    Layout: <Layout size={size} className={className} />
+  };
+  return icons[iconName] || <Layout size={size} className={className} />;
+};
 
 const AdminDashboard = () => {
   const { user, logout } = useAuth();
@@ -84,6 +102,7 @@ const AdminDashboard = () => {
     { id: 10, name: 'Others', icon: 'MoreHorizontal', count: 10, status: 'Active', color: 'bg-slate-500/10 text-slate-500' }
   ]);
   const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
+  const [showUploadMaterialModal, setShowUploadMaterialModal] = useState(false);
   const [showCommissionModal, setShowCommissionModal] = useState(false);
   const [selectedCommissionAgent, setSelectedCommissionAgent] = useState(null);
   const [commissionSearch, setCommissionSearch] = useState('');
@@ -98,6 +117,8 @@ const AdminDashboard = () => {
   ]);
   
   const [selectedAgent, setSelectedAgent] = useState(null);
+  const [showDocumentPreview, setShowDocumentPreview] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState(null);
 
   const handleDownloadReport = (reportName = 'Report') => {
     addNotification({ 
@@ -148,6 +169,10 @@ const AdminDashboard = () => {
   
   const [showShopModal, setShowShopModal] = useState(false);
   const [shopModalType, setShopModalType] = useState(null); // 'view', 'edit', 'approve', 'correction', 'assign'
+  
+  const [selectedProductPartner, setSelectedProductPartner] = useState(null);
+  const [showProductPartnerModal, setShowProductPartnerModal] = useState(false);
+  const [productPartnerModalType, setProductPartnerModalType] = useState('details'); // 'details' or 'catalog'
   
   const [subAdmins, setSubAdmins] = useState([]);
   
@@ -3367,7 +3392,10 @@ const AdminDashboard = () => {
                     </div>
                   ))}
                 </div>
-                <button className="w-full py-4 bg-gray-100 dark:bg-secondary-dark rounded-2xl text-xs font-black text-text-secondary-light hover:bg-primary-light hover:text-white transition-all uppercase tracking-widest mt-4">
+                <button 
+                  onClick={() => setShowUploadMaterialModal(true)}
+                  className="w-full py-4 bg-gray-100 dark:bg-secondary-dark rounded-2xl text-xs font-black text-text-secondary-light hover:bg-primary-light hover:text-white transition-all uppercase tracking-widest mt-4"
+                >
                   Upload New Material
                 </button>
               </div>
@@ -3462,8 +3490,26 @@ const AdminDashboard = () => {
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 mt-6 pt-4 border-t dark:border-border-dark opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="py-2 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl text-[10px] font-bold dark:text-white hover:bg-gray-100 transition-all">Details</button>
-                      <button className="py-2 bg-primary-light text-white rounded-xl text-[10px] font-bold hover:bg-primary-dark transition-all">Catalog</button>
+                      <button 
+                        onClick={() => {
+                          setSelectedProductPartner(brand);
+                          setProductPartnerModalType('details');
+                          setShowProductPartnerModal(true);
+                        }}
+                        className="py-2 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl text-[10px] font-bold dark:text-white hover:bg-gray-100 transition-all"
+                      >
+                        Details
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setSelectedProductPartner(brand);
+                          setProductPartnerModalType('catalog');
+                          setShowProductPartnerModal(true);
+                        }}
+                        className="py-2 bg-primary-light text-white rounded-xl text-[10px] font-bold hover:bg-primary-dark transition-all"
+                      >
+                        Catalog
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -3477,7 +3523,10 @@ const AdminDashboard = () => {
                   <h4 className="text-lg font-black dark:text-white">Brand Assets & Content</h4>
                   <p className="text-xs text-text-secondary-light">Marketing materials, brand guidelines, and product catalogs.</p>
                 </div>
-                <button className="btn-outline px-4 py-2 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                <button 
+                  onClick={() => setShowUploadMaterialModal(true)}
+                  className="btn-outline px-4 py-2 text-[10px] font-black uppercase tracking-widest flex items-center gap-2"
+                >
                   <Plus size={14} /> Upload Asset
                 </button>
               </div>
@@ -3822,7 +3871,7 @@ const AdminDashboard = () => {
                 <div key={cat.id} className="card-premium group hover:border-primary-light/50 transition-all">
                   <div className="flex justify-between items-start mb-4">
                     <div className={`p-4 rounded-[20px] ${cat.color || 'bg-primary-light/10 text-primary-light'} transition-all shadow-sm group-hover:scale-110`}>
-                      <Layout size={24} />
+                      <CategoryIcon iconName={cat.icon} size={24} />
                     </div>
                     <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all translate-y-1 group-hover:translate-y-0">
                       <button 
@@ -4360,6 +4409,7 @@ const AdminDashboard = () => {
           }}
           onSuccess={fetchSubAdmins}
           initialData={editingItem}
+          subAdmins={subAdmins}
         />
 
         <CategoryManagementModal 
@@ -4393,6 +4443,18 @@ const AdminDashboard = () => {
           onClose={() => setShowSubAdminModal(false)}
           subAdmin={selectedSubAdmin}
           type={subAdminModalType}
+          agents={agents}
+          addNotification={addNotification}
+        />
+        <UploadMaterialModal 
+          isOpen={showUploadMaterialModal}
+          onClose={() => setShowUploadMaterialModal(false)}
+          addNotification={addNotification}
+        />
+        <DocumentPreviewModal 
+          isOpen={showDocumentPreview}
+          onClose={() => setShowDocumentPreview(false)}
+          document={selectedDocument}
         />
         <DeactivateUserModal 
           isOpen={showDeactivateModal}
@@ -4547,12 +4609,49 @@ const AdminDashboard = () => {
           shopTieUps={shopTieUps}
           addNotification={addNotification}
         />
+        <ProductPartnerActionsModal 
+          isOpen={showProductPartnerModal}
+          onClose={() => setShowProductPartnerModal(false)}
+          partner={selectedProductPartner}
+          type={productPartnerModalType}
+        />
       </main>
     </div>
   );
 };
 
-const AddSubAdminModal = ({ isOpen, onClose, onSuccess, initialData }) => {
+const INDIA_LOCATIONS = {
+  "Andhra Pradesh": ["Anantapur", "Chittoor", "East Godavari", "Guntur", "Krishna", "Kurnool", "Prakasam", "Srikakulam", "Visakhapatnam", "Vizianagaram", "West Godavari", "YSR Kadapa"],
+  "Arunachal Pradesh": ["Anjaw", "Changlang", "Dibang Valley", "East Kameng", "East Siang", "Kurung Kumey", "Lohit", "Longding", "Lower Dibang Valley", "Lower Subansiri", "Namsai", "Papum Pare", "Tawang", "Tirap", "Upper Siang", "Upper Subansiri", "West Kameng", "West Siang"],
+  "Assam": ["Baksa", "Barpeta", "Biswanath", "Bongaigaon", "Cachar", "Charaideo", "Chirang", "Darrang", "Dhemaji", "Dhubri", "Dibrugarh", "Goalpara", "Golaghat", "Hailakandi", "Hojai", "Jorhat", "Kamrup Metropolitan", "Kamrup", "Karbi Anglong", "Karimganj", "Kokrajhar", "Lakhimpur", "Majuli", "Morigaon", "Nagaon", "Nalbari", "Sivasagar", "Sonitpur", "South Salmara-Mankachar", "Tinsukia", "Udalguri", "West Karbi Anglong"],
+  "Bihar": ["Araria", "Arwal", "Aurangabad", "Banka", "Begusarai", "Bhagalpur", "Bhojpur", "Buxar", "Darbhanga", "East Champaran", "Gaya", "Gopalganj", "Jamui", "Jehanabad", "Kaimur", "Katihar", "Khagaria", "Kishanganj", "Lakhisarai", "Madhepura", "Madhubani", "Munger", "Muzaffarpur", "Nalanda", "Nawada", "Patna", "Purnia", "Rohtas", "Saharsa", "Samastipur", "Saran", "Sheikhpura", "Sheohar", "Sitamarhi", "Siwan", "Supaul", "Vaishali", "West Champaran"],
+  "Chhattisgarh": ["Balod", "Baloda Bazar", "Balrampur", "Bastar", "Bemetara", "Bijapur", "Bilaspur", "Dantewada", "Dhamtari", "Durg", "Gariaband", "Janjgir-Champa", "Jashpur", "Kabirdham", "Kanker", "Kondagaon", "Korba", "Korea", "Mahasamund", "Mungeli", "Narayanpur", "Raigarh", "Raipur", "Rajnandgaon", "Sukma", "Surajpur", "Surguja"],
+  "Goa": ["North Goa", "South Goa"],
+  "Gujarat": ["Ahmedabad", "Amreli", "Anand", "Aravalli", "Banaskantha", "Bharuch", "Bhavnagar", "Botad", "Chhota Udepur", "Dahod", "Dang", "Devbhoomi Dwarka", "Gandhinagar", "Gir Somnath", "Jamnagar", "Junagadh", "Kheda", "Kutch", "Mahisagar", "Mehsana", "Morbi", "Narmada", "Navsari", "Panchmahal", "Patan", "Porbandar", "Rajkot", "Sabarkantha", "Surat", "Surendranagar", "Tapi", "Vadodara", "Valsad"],
+  "Haryana": ["Ambala", "Bhiwani", "Charkhi Dadri", "Faridabad", "Fatehabad", "Gurugram", "Hisar", "Jhajjar", "Jind", "Kaithal", "Karnal", "Kurukshetra", "Mahendragarh", "Mewat", "Palwal", "Panchkula", "Panipat", "Rewari", "Rohtak", "Sirsa", "Sonipat", "Yamunanagar"],
+  "Himachal Pradesh": ["Bilaspur", "Chamba", "Hamirpur", "Kangra", "Kinnaur", "Kullu", "Lahaul and Spiti", "Mandi", "Shimla", "Sirmaur", "Solan", "Una"],
+  "Jharkhand": ["Bokaro", "Chatra", "Deoghar", "Dhanbad", "Dumka", "East Singhbhum", "Garhwa", "Giridih", "Godda", "Gumla", "Hazaribagh", "Jamtara", "Khunti", "Koderma", "Latehar", "Lohardaga", "Pakur", "Palamu", "Ramgarh", "Ranchi", "Sahibganj", "Seraikela Kharsawan", "Simdega", "West Singhbhum"],
+  "Karnataka": ["Bagalkot", "Ballari", "Belagavi", "Bengaluru Rural", "Bengaluru Urban", "Bidar", "Chamarajanagar", "Chikkaballapur", "Chikkamagaluru", "Chitradurga", "Dakshina Kannada", "Davanagere", "Dharwad", "Gadag", "Hassan", "Haveri", "Kalaburagi", "Kodagu", "Kolar", "Koppal", "Mandya", "Mysuru", "Raichur", "Ramanagara", "Shivamogga", "Tumakuru", "Udupi", "Uttara Kannada", "Vijayapura", "Yadgir"],
+  "Kerala": ["Alappuzha", "Ernakulam", "Idukki", "Kannur", "Kasaragod", "Kollam", "Kottayam", "Kozhikode", "Malappuram", "Palakkad", "Pathanamthitta", "Thiruvananthapuram", "Thrissur", "Wayanad"],
+  "Madhya Pradesh": ["Agar Malwa", "Alirajpur", "Anuppur", "Ashoknagar", "Balaghat", "Barwani", "Betul", "Bhind", "Bhopal", "Burhanpur", "Chhatarpur", "Chhindwara", "Damoh", "Datia", "Dewas", "Dhar", "Dindori", "Guna", "Gwalior", "Harda", "Hoshangabad", "Indore", "Jabalpur", "Jhabua", "Katni", "Khandwa", "Khargone", "Mandla", "Mandsaur", "Morena", "Narsinghpur", "Neemuch", "Panna", "Raisen", "Rajgarh", "Ratlam", "Rewa", "Sagar", "Satna", "Sehore", "Seoni", "Shahdol", "Shajapur", "Sheopur", "Shivpuri", "Sidhi", "Singrauli", "Tikamgarh", "Ujjain", "Umaria", "Vidisha"],
+  "Maharashtra": ["Ahmednagar", "Akola", "Amravati", "Aurangabad", "Beed", "Bhandara", "Buldhana", "Chandrapur", "Dhule", "Gadchiroli", "Gondia", "Hingoli", "Jalgaon", "Jalna", "Kolhapur", "Latur", "Mumbai City", "Mumbai Suburban", "Nagpur", "Nanded", "Nandurbar", "Nashik", "Osmanabad", "Palghar", "Parbhani", "Pune", "Raigad", "Ratnagiri", "Sangli", "Satara", "Sindhudurg", "Solapur", "Thane", "Wardha", "Washim", "Yavatmal"],
+  "Manipur": ["Bishnupur", "Chandel", "Churachandpur", "Imphal East", "Imphal West", "Jiribam", "Kakching", "Kamjong", "Kangpokpi", "Noney", "Pherzawl", "Senapati", "Tamenglong", "Tengnoupal", "Thoubal", "Ukhrul"],
+  "Meghalaya": ["East Garo Hills", "East Jaintia Hills", "East Khasi Hills", "North Garo Hills", "Ri Bhoi", "South Garo Hills", "South West Garo Hills", "South West Khasi Hills", "West Garo Hills", "West Jaintia Hills", "West Khasi Hills"],
+  "Mizoram": ["Aizawl", "Champhai", "Kolasib", "Lawngtlai", "Lunglei", "Mamit", "Saiha", "Serchhip"],
+  "Nagaland": ["Dimapur", "Kiphire", "Kohima", "Longleng", "Mokokchung", "Mon", "Peren", "Phek", "Tuensang", "Wokha", "Zunheboto"],
+  "Odisha": ["Angul", "Balangir", "Balasore", "Bargarh", "Bhadrak", "Boudh", "Cuttack", "Deogarh", "Dhenkanal", "Gajapati", "Ganjam", "Jagatsinghpur", "Jajpur", "Jharsuguda", "Kalahandi", "Kandhamal", "Kendrapara", "Kendujhar", "Khordha", "Koraput", "Malkangiri", "Mayurbhanj", "Nabarangpur", "Nayagarh", "Nuapada", "Puri", "Rayagada", "Sambalpur", "Sonepur", "Sundargarh"],
+  "Punjab": ["Amritsar", "Barnala", "Bathinda", "Faridkot", "Fatehgarh Sahib", "Fazilka", "Ferozepur", "Gurdaspur", "Hoshiarpur", "Jalandur", "Kapurthala", "Ludhiana", "Mansa", "Moga", "Muktsar", "Pathankot", "Patiala", "Rupnagar", "Sahibzada Ajit Singh Nagar", "Sangrur", "Shahid Bhagat Singh Nagar", "Sri Muktsar Sahib", "Tarn Taran"],
+  "Rajasthan": ["Ajmer", "Alwar", "Banswara", "Baran", "Barmer", "Bharatpur", "Bhilwara", "Bikaner", "Bundi", "Chittorgarh", "Churu", "Dausa", "Dholpur", "Dungarpur", "Hanumangarh", "Jaipur", "Jaisalmer", "Jalore", "Jhalawar", "Jhunjhunu", "Jodhpur", "Karauli", "Kota", "Nagaur", "Pali", "Pratapgarh", "Rajsamand", "Sawai Madhopur", "Sikar", "Sirohi", "Sri Ganganagar", "Tonk", "Udaipur"],
+  "Sikkim": ["East Sikkim", "North Sikkim", "South Sikkim", "West Sikkim"],
+  "Tamil Nadu": ["Ariyalur", "Chengalpattu", "Chennai", "Coimbatore", "Cuddalore", "Dharmapuri", "Dindigul", "Erode", "Kallakurichi", "Kanchipuram", "Kanyakumari", "Karur", "Krishnagiri", "Madurai", "Mayiladuthurai", "Nagapattinam", "Namakkal", "Nilgiris", "Perambalur", "Pudukkottai", "Ramanathapuram", "Ranipet", "Salem", "Sivaganga", "Tenkasi", "Thanjavur", "Theni", "Thoothukudi", "Tiruchirappalli", "Tirunelveli", "Tirupathur", "Tiruppur", "Tiruvallur", "Tiruvannamalai", "Tiruvarur", "Vellore", "Viluppuram", "Virudhunagar"],
+  "Telangana": ["Adilabad", "Bhadradri Kothagudem", "Hyderabad", "Jagtial", "Jangaon", "Jayashankar Bhupalpally", "Jogulamba Gadwal", "Kamareddy", "Karimnagar", "Khammam", "Kumuram Bheem", "Mahabubabad", "Mahabubnagar", "Mancherial", "Medak", "Medchal", "Mulugu", "Nagarkurnool", "Nalgonda", "Narayanpet", "Nirmal", "Nizamabad", "Peddapalli", "Rajanna Sircilla", "Rangareddy", "Sangareddy", "Siddipet", "Suryapet", "Vikarabad", "Wanaparthy", "Warangal Rural", "Warangal Urban", "Yadadri Bhuvanagiri"],
+  "Tripura": ["Dhalai", "Gomati", "Khowai", "North Tripura", "Sepahijala", "South Tripura", "Unakoti", "West Tripura"],
+  "Uttar Pradesh": ["Agra", "Aligarh", "Allahabad", "Ambedkar Nagar", "Amethi", "Amroha", "Auraiya", "Azamgarh", "Baghpat", "Bahraich", "Ballia", "Balrampur", "Banda", "Barabanki", "Bareilly", "Basti", "Bhadohi", "Bijnor", "Budaun", "Bulandshahr", "Chandauli", "Chitrakoot", "Deoria", "Etah", "Etawah", "Faizabad", "Farrukhabad", "Fatehpur", "Firozabad", "Gautam Buddha Nagar", "Ghaziabad", "Ghazipur", "Gonda", "Gorakhpur", "Hamirpur", "Hapur", "Hardoi", "Hathras", "Jalaun", "Jaunpur", "Jhansi", "Kannauj", "Kanpur Dehat", "Kanpur Nagar", "Kasganj", "Kaushambi", "Kheri", "Kushinagar", "Lalitpur", "Lucknow", "Maharajganj", "Mahoba", "Mainpuri", "Mathura", "Mau", "Meerut", "Mirzapur", "Moradabad", "Muzaffarnagar", "Pilibhit", "Pratapgarh", "Raebareli", "Rampur", "Saharanpur", "Sambhal", "Sant Kabir Nagar", "Shahjahanpur", "Shamli", "Shravasti", "Siddharthnagar", "Sitapur", "Sonbhadra", "Sultanpur", "Unnao", "Varanasi"],
+  "Uttarakhand": ["Almora", "Bageshwar", "Chamoli", "Champawat", "Dehradun", "Haridwar", "Nainital", "Pauri Garhwal", "Pithoragarh", "Rudraprayag", "Tehri Garhwal", "Udham Singh Nagar", "Uttarkashi"],
+  "West Bengal": ["Alipurduar", "Bankura", "Birbhum", "Cooch Behar", "Dakshin Dinajpur", "Darjeeling", "Hooghly", "Howrah", "Jalpaiguri", "Jhargram", "Kalimpong", "Kolkata", "Malda", "Murshidabad", "Nadia", "North 24 Parganas", "Paschim Bardhaman", "Paschim Medinipur", "Purba Bardhaman", "Purba Medinipur", "Purulia", "South 24 Parganas", "Uttar Dinajpur"]
+};
+
+const AddSubAdminModal = ({ isOpen, onClose, onSuccess, initialData, subAdmins = [] }) => {
 
   const [step, setStep] = useState(1);
   const [emailOtp, setEmailOtp] = useState('');
@@ -4570,8 +4669,35 @@ const AddSubAdminModal = ({ isOpen, onClose, onSuccess, initialData }) => {
     email: '',
     phone: '',
     accessLevel: 'State Wise',
+    assignedState: '',
+    assignedDistrict: '',
     assignedLocation: ''
   });
+
+  const [pincodeResults, setPincodeResults] = useState([]);
+  const [isSearchingPincode, setIsSearchingPincode] = useState(false);
+
+  const lookupPincode = async (pincode) => {
+    if (pincode.length !== 6) {
+      setPincodeResults([]);
+      return;
+    }
+    
+    setIsSearchingPincode(true);
+    try {
+      const response = await axios.get(`https://api.postalpincode.in/pincode/${pincode}`);
+      if (response.data[0].Status === "Success") {
+        setPincodeResults(response.data[0].PostOffice);
+      } else {
+        setPincodeResults([]);
+      }
+    } catch (error) {
+      console.error('Pincode Lookup Error:', error);
+      setPincodeResults([]);
+    } finally {
+      setIsSearchingPincode(false);
+    }
+  };
 
   const [permissions, setPermissions] = useState({
     manageAgents: true,
@@ -4583,6 +4709,54 @@ const AddSubAdminModal = ({ isOpen, onClose, onSuccess, initialData }) => {
   });
   const [isSaving, setIsSaving] = useState(false);
   const { addNotification } = useNotifications();
+
+  useEffect(() => {
+    if (isOpen) {
+      if (initialData) {
+        setFormData({
+          name: initialData.name || '',
+          employeeId: initialData.employeeId || '',
+          email: initialData.email || '',
+          phone: initialData.phone || '',
+          accessLevel: initialData.accessLevel || 'State Wise',
+          assignedState: initialData.assignedState || '',
+          assignedDistrict: initialData.assignedDistrict || '',
+          assignedLocation: initialData.assignedLocation || ''
+        });
+        setPermissions(initialData.permissions || {
+          manageAgents: true,
+          manageShops: true,
+          viewAnalytics: true,
+          approveKYC: false,
+          manageAreas: true,
+          communication: false
+        });
+      } else {
+        // Auto-generate Employee ID
+        const nextId = 1000 + subAdmins.length + 1;
+        const generatedId = `SA-${nextId}`;
+        
+        setFormData({
+          name: '',
+          employeeId: generatedId,
+          email: '',
+          phone: '',
+          accessLevel: 'State Wise',
+          assignedState: '',
+          assignedDistrict: '',
+          assignedLocation: ''
+        });
+        setPermissions({
+          manageAgents: true,
+          manageShops: true,
+          viewAnalytics: true,
+          approveKYC: false,
+          manageAreas: true,
+          communication: false
+        });
+      }
+    }
+  }, [isOpen, initialData, subAdmins]);
 
 
   const handleInputChange = (e) => {
@@ -4746,9 +4920,9 @@ const AddSubAdminModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                       type="text" 
                       name="employeeId"
                       value={formData.employeeId}
-                      onChange={handleInputChange}
+                      readOnly
                       placeholder="SA-1004" 
-                      className="w-full px-4 py-3.5 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all" 
+                      className="w-full px-4 py-3.5 rounded-2xl bg-gray-100 dark:bg-secondary-dark/50 border-2 border-transparent outline-none dark:text-white font-bold transition-all cursor-not-allowed opacity-70" 
                       required 
                     />
                   </div>
@@ -4863,24 +5037,148 @@ const AddSubAdminModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                     <select 
                       name="accessLevel"
                       value={formData.accessLevel}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3.5 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all appearance-none"
+                      onChange={(e) => {
+                        const level = e.target.value;
+                        setFormData(prev => ({ 
+                          ...prev, 
+                          accessLevel: level, 
+                          assignedState: '', 
+                          assignedDistrict: '', 
+                          assignedLocation: level === 'All India' ? 'Pan India' : '' 
+                        }));
+                      }}
+                      className="w-full px-4 py-3.5 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all appearance-none cursor-pointer"
                     >
+                      <option>All India</option>
                       <option>State Wise</option>
                       <option>District Wise</option>
-                      <option>Taluk Wise</option>
+                      <option>Pincode Wise</option>
                     </select>
                   </div>
+                  
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Assigned Location</label>
-                    <input 
-                      type="text" 
-                      name="assignedLocation"
-                      value={formData.assignedLocation}
-                      onChange={handleInputChange}
-                      placeholder="e.g. Maharashtra" 
-                      className="w-full px-4 py-3.5 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all" 
-                    />
+                    
+                    {formData.accessLevel === 'All India' && (
+                      <input 
+                        type="text" 
+                        value="Pan India" 
+                        readOnly 
+                        className="w-full px-4 py-3.5 rounded-2xl bg-gray-100 dark:bg-secondary-dark/50 border-2 border-transparent outline-none dark:text-white font-bold transition-all opacity-70 cursor-not-allowed" 
+                      />
+                    )}
+
+                    {formData.accessLevel === 'State Wise' && (
+                      <select 
+                        value={formData.assignedState}
+                        onChange={(e) => setFormData(prev => ({ ...prev, assignedState: e.target.value, assignedLocation: e.target.value }))}
+                        className="w-full px-4 py-3.5 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all appearance-none cursor-pointer"
+                        required
+                      >
+                        <option value="">Select State</option>
+                        {Object.keys(INDIA_LOCATIONS).map(state => (
+                          <option key={state} value={state}>{state}</option>
+                        ))}
+                      </select>
+                    )}
+
+                    {formData.accessLevel === 'District Wise' && (
+                      <div className="flex flex-col gap-3">
+                        <select 
+                          value={formData.assignedState}
+                          onChange={(e) => setFormData(prev => ({ ...prev, assignedState: e.target.value, assignedDistrict: '', assignedLocation: '' }))}
+                          className="w-full px-4 py-3.5 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all appearance-none cursor-pointer"
+                          required
+                        >
+                          <option value="">Select State</option>
+                          {Object.keys(INDIA_LOCATIONS).map(state => (
+                            <option key={state} value={state}>{state}</option>
+                          ))}
+                        </select>
+                        {formData.assignedState && (
+                          <select 
+                            value={formData.assignedDistrict}
+                            onChange={(e) => setFormData(prev => ({ ...prev, assignedDistrict: e.target.value, assignedLocation: `${e.target.value}, ${prev.assignedState}` }))}
+                            className="w-full px-4 py-3.5 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all appearance-none cursor-pointer animate-in slide-in-from-top-2"
+                            required
+                          >
+                            <option value="">Select District</option>
+                            {INDIA_LOCATIONS[formData.assignedState].map(district => (
+                              <option key={district} value={district}>{district}</option>
+                            ))}
+                          </select>
+                        )}
+                      </div>
+                    )}
+
+                    {formData.accessLevel === 'Pincode Wise' && (
+                      <div className="space-y-3">
+                        <div className="relative">
+                          <input 
+                            type="text" 
+                            name="assignedLocation"
+                            value={formData.assignedLocation}
+                            onChange={(e) => {
+                              handleInputChange(e);
+                              if (e.target.value.length === 6) lookupPincode(e.target.value);
+                              else setPincodeResults([]);
+                            }}
+                            placeholder="Enter 6-digit Pincode" 
+                            maxLength={6}
+                            className="w-full px-4 py-3.5 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all" 
+                            required
+                          />
+                          {isSearchingPincode && (
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                              <div className="w-4 h-4 border-2 border-primary-light border-t-transparent rounded-full animate-spin"></div>
+                            </div>
+                          )}
+                        </div>
+
+                        {pincodeResults.length > 0 && (
+                          <div className="p-4 bg-primary-light/5 rounded-2xl border border-primary-light/20 animate-in slide-in-from-top-2">
+                            <p className="text-[10px] font-black text-primary-light uppercase tracking-widest mb-2 flex items-center gap-2">
+                              <MapPin size={10} /> Areas Found ({pincodeResults.length}) - Click to Select
+                            </p>
+                            <div className="max-h-32 overflow-y-auto custom-scrollbar flex flex-wrap gap-1.5">
+                              {pincodeResults.map((office, idx) => {
+                                const isSelected = formData.assignedLocation.includes(office.Name);
+                                return (
+                                  <button 
+                                    key={idx} 
+                                    type="button"
+                                    onClick={() => {
+                                      const locationString = `${office.Name} (${office.Pincode})`;
+                                      setFormData(prev => {
+                                        const current = prev.assignedLocation;
+                                        if (current.includes(locationString)) {
+                                          return { ...prev, assignedLocation: current.split(', ').filter(loc => loc !== locationString).join(', ') };
+                                        }
+                                        const newVal = current ? `${current}, ${locationString}` : locationString;
+                                        return { ...prev, assignedLocation: newVal };
+                                      });
+                                    }}
+                                    className={`px-2 py-1 rounded-lg text-[9px] font-bold border transition-all ${
+                                      formData.assignedLocation.includes(office.Name) 
+                                        ? 'bg-primary-light text-white border-primary-light shadow-sm scale-105' 
+                                        : 'bg-white dark:bg-secondary-dark text-text-secondary-light border-border-light dark:border-border-dark hover:border-primary-light/50'
+                                    }`}
+                                  >
+                                    {office.Name}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            <p className="text-[8px] text-text-secondary-light mt-2 italic">Dist: {pincodeResults[0].District}, State: {pincodeResults[0].State}</p>
+                          </div>
+                        )}
+                        
+                        <div className="p-3 bg-gray-50 dark:bg-secondary-dark/30 rounded-xl border border-dashed border-border-light dark:border-border-dark">
+                          <span className="text-[10px] font-black text-text-secondary-light uppercase tracking-widest block mb-1">Final Selection:</span>
+                          <p className="text-xs font-bold dark:text-white break-words">{formData.assignedLocation || 'None selected'}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                 </div>
@@ -5106,8 +5404,189 @@ const AddAgentModal = ({ isOpen, onClose, onAdd, initialData }) => {
   );
 };
 
-const SubAdminActionModal = ({ isOpen, onClose, subAdmin, type }) => {
+const DocumentPreviewModal = ({ isOpen, onClose, document }) => {
+  if (!isOpen || !document) return null;
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-background-dark/90 backdrop-blur-md animate-in fade-in" onClick={onClose}></div>
+      <div className="relative w-full max-w-2xl bg-white dark:bg-surface-dark rounded-[2.5rem] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95">
+        <div className="p-6 border-b dark:border-border-dark flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary-light/10 text-primary-light rounded-xl flex items-center justify-center">
+              <FileText size={20} />
+            </div>
+            <h3 className="text-xl font-black dark:text-white tracking-tight">{document} Preview</h3>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-secondary-dark rounded-xl transition-all"><X size={20} className="dark:text-white" /></button>
+        </div>
+        <div className="p-8">
+          <div className="aspect-[4/3] w-full bg-gray-50 dark:bg-secondary-dark rounded-[2rem] border-2 border-dashed border-border-light dark:border-border-dark flex flex-col items-center justify-center gap-4 text-center">
+             <div className="w-20 h-20 bg-white dark:bg-surface-dark rounded-3xl shadow-xl flex items-center justify-center text-text-secondary-light">
+               <FileText size={40} />
+             </div>
+             <div>
+               <p className="text-sm font-black dark:text-white uppercase tracking-widest">{document}_DRAFT.PDF</p>
+               <p className="text-[10px] text-text-secondary-light font-bold mt-1">SECURE DOCUMENT VIEWER â€¢ VERIFIED BY SYSTEM</p>
+             </div>
+             <button onClick={() => window.print()} className="mt-4 px-6 py-3 bg-primary-light text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-primary-light/20 hover:scale-105 transition-all">Download Copy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const UploadMaterialModal = ({ isOpen, onClose, addNotification }) => {
+  const [isUploading, setIsUploading] = useState(false);
+  const [file, setFile] = useState(null);
+  const [title, setTitle] = useState('');
+
+  if (!isOpen) return null;
+
+  const handleUpload = () => {
+    if (!title || !file) {
+      addNotification({ title: 'Incomplete Info', message: 'Please provide a title and select a file.', type: 'warning' });
+      return;
+    }
+    setIsUploading(true);
+    setTimeout(() => {
+      setIsUploading(false);
+      addNotification({ title: 'Upload Successful', message: `${title} has been added to the library.`, type: 'success' });
+      onClose();
+      setFile(null);
+      setTitle('');
+    }, 2000);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-background-dark/60 backdrop-blur-sm animate-in fade-in" onClick={onClose}></div>
+      <div className="relative w-full max-w-md bg-surface-light dark:bg-surface-dark rounded-[2.5rem] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95">
+        <div className="p-8 space-y-6">
+          <div className="flex justify-between items-center">
+            <h3 className="text-2xl font-black dark:text-white tracking-tight">Upload Material</h3>
+            <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-secondary-dark rounded-xl transition-all"><X size={20} className="dark:text-white" /></button>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Document Title</label>
+              <input 
+                type="text" 
+                placeholder="e.g. Terms of Service v2" 
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full px-5 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all" 
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">File Selection</label>
+              <div className="relative group">
+                <input 
+                  type="file" 
+                  onChange={(e) => {
+                    const selectedFile = e.target.files[0];
+                    setFile(selectedFile);
+                    if (selectedFile && !title) {
+                      setTitle(selectedFile.name.split('.')[0]); // Set title to filename without extension
+                    }
+                  }}
+                  className="absolute inset-0 opacity-0 cursor-pointer z-10" 
+                />
+                <div className="w-full p-8 border-2 border-dashed border-border-light dark:border-border-dark rounded-2xl flex flex-col items-center justify-center gap-3 bg-gray-50/50 dark:bg-secondary-dark/30 group-hover:border-primary-light/50 transition-all">
+                  <div className="w-12 h-12 bg-primary-light/10 text-primary-light rounded-full flex items-center justify-center">
+                    <Upload size={24} />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs font-bold dark:text-white">{file ? file.name : 'Click or Drag to Upload'}</p>
+                    <p className="text-[10px] text-text-secondary-light font-bold mt-1 uppercase">PDF, JPG, PNG (Max 10MB)</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button 
+            onClick={handleUpload}
+            disabled={isUploading || !file || !title}
+            className="w-full py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-2"
+          >
+            {isUploading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Uploading...
+              </>
+            ) : (
+              <>
+                <Check size={18} /> Confirm Upload
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const SubAdminActionModal = ({ isOpen, onClose, subAdmin, type, agents = [], addNotification }) => {
+  const [selectedAgents, setSelectedAgents] = useState([]);
+  const [isAssigning, setIsAssigning] = useState(false);
+  const [editData, setEditData] = useState({ name: '', email: '', phone: '' });
+
+  React.useEffect(() => {
+    if (!isOpen) {
+      setSelectedAgents([]);
+    }
+    if (subAdmin) {
+      setEditData({ 
+        name: subAdmin.name || '', 
+        email: subAdmin.email || '', 
+        phone: subAdmin.phone || '' 
+      });
+    }
+  }, [isOpen, subAdmin]);
+
   if (!isOpen || !subAdmin) return null;
+
+  const handleToggleAgent = (agentId) => {
+    setSelectedAgents(prev => 
+      prev.includes(agentId) 
+        ? prev.filter(id => id !== agentId) 
+        : [...prev, agentId]
+    );
+  };
+
+  const handleAssignAgents = () => {
+    if (selectedAgents.length === 0) {
+      addNotification({ title: 'No Agents Selected', message: 'Please select at least one agent to assign.', type: 'warning' });
+      return;
+    }
+    
+    setIsAssigning(true);
+    setTimeout(() => {
+      setIsAssigning(false);
+      addNotification({ 
+        title: 'Agents Assigned', 
+        message: `Successfully assigned ${selectedAgents.length} agents to ${subAdmin.name}.`, 
+        type: 'success' 
+      });
+      onClose();
+    }, 1500);
+  };
+
+  const handleSaveEdit = () => {
+    setIsAssigning(true);
+    setTimeout(() => {
+      setIsAssigning(false);
+      addNotification({ 
+        title: 'Profile Updated', 
+        message: 'Sub Admin details have been saved successfully.', 
+        type: 'success' 
+      });
+      onClose();
+    }, 1200);
+  };
 
   const getTitle = () => {
     switch (type) {
@@ -5179,18 +5658,39 @@ const SubAdminActionModal = ({ isOpen, onClose, subAdmin, type }) => {
           )}
 
           {type === 'edit' && (
-            <div className="space-y-4">
+            <div className="space-y-4 animate-in fade-in slide-in-from-top-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Full Name</label>
-                  <input type="text" defaultValue={subAdmin.name} className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-medium" />
+                  <input 
+                    type="text" 
+                    value={editData.name} 
+                    onChange={(e) => setEditData({...editData, name: e.target.value})}
+                    className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-medium" 
+                  />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Email</label>
-                  <input type="email" defaultValue={subAdmin.email} className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-medium" />
+                  <input 
+                    type="email" 
+                    value={editData.email} 
+                    onChange={(e) => setEditData({...editData, email: e.target.value})}
+                    className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-medium" 
+                  />
                 </div>
               </div>
-              <button className="w-full btn-primary py-4 rounded-2xl font-black text-sm mt-4">Save Changes</button>
+              <button 
+                onClick={handleSaveEdit}
+                disabled={isAssigning}
+                className="w-full btn-primary py-4 rounded-2xl font-black text-sm mt-4 flex items-center justify-center gap-2"
+              >
+                {isAssigning ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Saving Changes...
+                  </>
+                ) : 'Save Changes'}
+              </button>
             </div>
           )}
 
@@ -5216,23 +5716,73 @@ const SubAdminActionModal = ({ isOpen, onClose, subAdmin, type }) => {
           )}
 
           {type === 'agents' && (
-            <div className="space-y-4">
-              <p className="text-sm text-text-secondary-light italic">Select agents from the list below to assign to {subAdmin.name}.</p>
-              <div className="max-h-[300px] overflow-y-auto space-y-2 pr-2 custom-scrollbar">
-                {[1, 2, 3, 4, 5].map(i => (
-                  <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-secondary-dark rounded-xl border border-transparent hover:border-primary-light transition-all cursor-pointer group">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-primary-light/10 text-primary-light rounded-lg flex items-center justify-center font-bold text-xs">A{i}</div>
-                      <div>
-                        <p className="text-xs font-bold dark:text-white">Agent {i}</p>
-                        <p className="text-[10px] text-text-secondary-light uppercase">Pincode: 60000{i}</p>
+            <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-500">
+              <div className="flex justify-between items-center">
+                <p className="text-sm text-text-secondary-light font-medium italic">Select agents from the list below to assign to {subAdmin.name}.</p>
+                <p className="text-[10px] font-black text-primary-light uppercase tracking-widest">{selectedAgents.length} Selected</p>
+              </div>
+              <div className="max-h-[350px] overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                {agents.length === 0 ? (
+                  <div className="p-10 text-center bg-gray-50 dark:bg-secondary-dark rounded-2xl border-2 border-dashed border-border-light dark:border-border-dark">
+                    <Users size={32} className="mx-auto mb-3 opacity-20" />
+                    <p className="text-sm font-bold text-text-secondary-light">No agents available to assign.</p>
+                  </div>
+                ) : (
+                  agents.map(agent => (
+                    <div 
+                      key={agent.id} 
+                      onClick={() => handleToggleAgent(agent.id)}
+                      className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all cursor-pointer group ${
+                        selectedAgents.includes(agent.id) 
+                          ? 'bg-primary-light/5 border-primary-light shadow-md scale-[1.01]' 
+                          : 'bg-gray-50 dark:bg-secondary-dark border-transparent hover:border-primary-light/30'
+                      }`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs transition-colors ${
+                          selectedAgents.includes(agent.id) ? 'bg-primary-light text-white' : 'bg-primary-light/10 text-primary-light'
+                        }`}>
+                          {agent.name.charAt(0)}
+                        </div>
+                        <div>
+                          <p className={`text-sm font-black transition-colors ${selectedAgents.includes(agent.id) ? 'text-primary-light' : 'dark:text-white'}`}>
+                            {agent.name}
+                          </p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[9px] font-bold text-text-secondary-light uppercase tracking-wider bg-gray-200 dark:bg-secondary-dark/50 px-1.5 py-0.5 rounded">
+                              {agent.pincode || '600001'}
+                            </span>
+                            <span className="text-[9px] font-bold text-text-secondary-light uppercase tracking-wider">
+                              {agent.role || 'Pincode Agent'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
+                        selectedAgents.includes(agent.id) 
+                          ? 'bg-primary-light border-primary-light text-white' 
+                          : 'border-gray-300 dark:border-gray-600 group-hover:border-primary-light/50'
+                      }`}>
+                        {selectedAgents.includes(agent.id) && <Check size={14} strokeWidth={4} />}
                       </div>
                     </div>
-                    <div className="w-5 h-5 rounded border-2 border-gray-300 dark:border-gray-600 group-hover:border-primary-light"></div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
-              <button className="w-full btn-primary py-4 rounded-2xl font-black text-sm">Assign Selected Agents</button>
+              <button 
+                onClick={handleAssignAgents}
+                disabled={isAssigning || selectedAgents.length === 0}
+                className="w-full btn-primary py-4 rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:grayscale transition-all"
+              >
+                {isAssigning ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Assigning...
+                  </>
+                ) : (
+                  <>Assign {selectedAgents.length > 0 ? selectedAgents.length : ''} Selected Agents</>
+                )}
+              </button>
             </div>
           )}
 
@@ -7408,11 +7958,19 @@ const ShopActionsModal = ({ isOpen, onClose, shop, type, setShopTieUps, shopTieU
                  <h4 className="text-xs font-black uppercase tracking-widest text-primary-light mb-4">Submitted Documents</h4>
                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     {['GST Certificate', 'Trade License', 'Owner ID', 'Shop Photo'].map(doc => (
-                      <div key={doc} className="p-4 bg-white dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark text-center space-y-2">
-                         <FileText size={20} className="mx-auto text-text-secondary-light" />
-                         <p className="text-[10px] font-bold dark:text-white">{doc}</p>
-                         <button className="text-[10px] font-black text-primary-light hover:underline uppercase">Preview</button>
-                      </div>
+                       <div key={doc} className="p-4 bg-white dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark text-center space-y-2 group hover:border-primary-light transition-all cursor-pointer">
+                          <FileText size={20} className="mx-auto text-text-secondary-light group-hover:text-primary-light transition-colors" />
+                          <p className="text-[10px] font-bold dark:text-white">{doc}</p>
+                          <button 
+                            onClick={() => {
+                              setSelectedDocument(doc);
+                              setShowDocumentPreview(true);
+                            }}
+                            className="text-[10px] font-black text-primary-light hover:underline uppercase"
+                          >
+                            Preview
+                          </button>
+                       </div>
                     ))}
                  </div>
               </div>
@@ -7809,7 +8367,7 @@ const CategoryManagementModal = ({ isOpen, onClose, initialData, categories, set
         <div className={`p-8 border-b dark:border-border-dark flex justify-between items-center ${initialData ? 'bg-emerald-500' : 'bg-primary-light'}`}>
           <div className="flex items-center gap-4 text-white">
             <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center shadow-inner">
-              <Layout size={24} />
+              <CategoryIcon iconName={formData.icon} size={24} />
             </div>
             <div>
               <h3 className="text-xl font-black tracking-tight">{initialData ? 'Edit Category' : 'Add New Category'}</h3>
@@ -7836,14 +8394,14 @@ const CategoryManagementModal = ({ isOpen, onClose, initialData, categories, set
 
           <div className="space-y-2">
             <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Icon Representation</label>
-            <div className="grid grid-cols-4 gap-3">
-              {['Utensils', 'ShoppingBag', 'HeartPulse', 'Pill', 'Shirt', 'Zap', 'Scissors', 'GraduationCap'].map((icon) => (
+            <div className="grid grid-cols-5 gap-3">
+              {['Utensils', 'ShoppingBag', 'HeartPulse', 'Pill', 'Shirt', 'Zap', 'Scissors', 'GraduationCap', 'Wrench', 'MoreHorizontal'].map((icon) => (
                 <div 
                   key={icon}
                   onClick={() => setFormData({ ...formData, icon })}
                   className={`p-4 rounded-2xl border-2 flex items-center justify-center cursor-pointer transition-all ${formData.icon === icon ? 'border-primary-light bg-primary-light/5' : 'border-transparent bg-gray-50 dark:bg-secondary-dark hover:border-gray-200'}`}
                 >
-                  <Layout size={20} className={formData.icon === icon ? 'text-primary-light' : 'text-text-secondary-light'} />
+                  <CategoryIcon iconName={icon} size={20} className={formData.icon === icon ? 'text-primary-light' : 'text-text-secondary-light'} />
                 </div>
               ))}
             </div>
@@ -8341,6 +8899,95 @@ const CommissionInsightModal = ({ isOpen, onClose, agent }) => {
           <button className="w-full py-4 bg-secondary-dark dark:bg-white dark:text-background-dark text-white rounded-2xl font-black text-sm hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl">
             Download Payout Receipt
           </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ProductPartnerActionsModal = ({ isOpen, onClose, partner, type }) => {
+  if (!isOpen || !partner) return null;
+
+  return (
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
+      <div className="relative w-full max-w-2xl bg-surface-light dark:bg-surface-dark rounded-[32px] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
+        <div className="p-8 border-b dark:border-border-dark flex justify-between items-center bg-primary-light text-white">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
+              {type === 'details' ? <Briefcase size={24} /> : <Package size={24} />}
+            </div>
+            <div>
+              <h3 className="text-xl font-black">{partner.name}</h3>
+              <p className="text-xs font-bold uppercase opacity-80">{type === 'details' ? 'Partner Details' : 'Product Catalog'}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-3 hover:bg-white/10 rounded-2xl transition-all"><X size={24} /></button>
+        </div>
+
+        <div className="p-8 overflow-y-auto custom-scrollbar space-y-6">
+          {type === 'details' ? (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black text-text-secondary-light uppercase tracking-widest">Category</p>
+                  <p className="font-bold dark:text-white">{partner.category}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black text-text-secondary-light uppercase tracking-widest">Representative</p>
+                  <p className="font-bold dark:text-white">{partner.representative}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black text-text-secondary-light uppercase tracking-widest">Commission</p>
+                  <p className="font-bold text-emerald-500">{partner.commission}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black text-text-secondary-light uppercase tracking-widest">Live Products</p>
+                  <p className="font-bold dark:text-white">{partner.products}</p>
+                </div>
+              </div>
+
+              <div className="p-6 bg-gray-50 dark:bg-secondary-dark rounded-3xl border border-border-light dark:border-border-dark">
+                <h4 className="text-xs font-black dark:text-white uppercase tracking-widest mb-4">Contact Information</h4>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 text-sm font-bold dark:text-white">
+                    <Mail size={16} className="text-primary-light" /> 
+                    {partner.name.toLowerCase().replace(/\s+/g, '')}@representative.com
+                  </div>
+                  <div className="flex items-center gap-3 text-sm font-bold dark:text-white">
+                    <Smartphone size={16} className="text-primary-light" />
+                    +91 90000 12345
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-sm font-black dark:text-white uppercase tracking-widest">Live Product List</h4>
+                <button className="text-xs font-black text-primary-light hover:underline">Download full catalog (PDF)</button>
+              </div>
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark flex items-center gap-4 group">
+                  <div className="w-12 h-12 bg-white dark:bg-surface-dark rounded-xl flex items-center justify-center border border-border-light dark:border-border-dark">
+                    <Package size={20} className="text-text-secondary-light group-hover:text-primary-light transition-colors" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold dark:text-white">Premium Product Model {100 + i}</p>
+                    <p className="text-[10px] text-text-secondary-light font-bold">SKU: PROD-{partner.name[0]}{partner.id}-{i + 1}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-black text-primary-light">â‚¹{2499 + (i * 500)}</p>
+                    <p className="text-[10px] text-success font-bold uppercase">In Stock</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="p-8 border-t dark:border-border-dark bg-gray-50/50 dark:bg-secondary-dark/30">
+          <button onClick={onClose} className="w-full py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] transition-all">Close</button>
         </div>
       </div>
     </div>
