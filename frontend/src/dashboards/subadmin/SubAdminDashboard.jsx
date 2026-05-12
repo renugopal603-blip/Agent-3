@@ -703,7 +703,7 @@ const SubAdminDashboard = () => {
                       </div>
                       <div>
                         <h4 className="font-black dark:text-white text-lg tracking-tight">{k.name}</h4>
-                        <p className="text-xs font-bold text-text-secondary-light uppercase tracking-widest">{k.role} Ãƒâ€šÃ‚Â· {k.location}</p>
+                        <p className="text-xs font-bold text-text-secondary-light uppercase tracking-widest">{k.role} • {k.location}</p>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2">
@@ -779,9 +779,9 @@ const SubAdminDashboard = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
-                { label: 'Total Volume', value: 'ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹12.5L', color: 'bg-primary-light', icon: <Briefcase /> },
-                { label: 'This Month', value: 'ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹2.4L', color: 'bg-emerald-500', icon: <TrendingUp /> },
-                { label: 'Pending Settlement', value: 'ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹45K', color: 'bg-orange-500', icon: <Clock /> },
+                { label: 'Total Volume', value: '₹12.5L', color: 'bg-primary-light', icon: <Briefcase /> },
+                { label: 'This Month', value: '₹2.4L', color: 'bg-emerald-500', icon: <TrendingUp /> },
+                { label: 'Pending Settlement', value: '₹45K', color: 'bg-orange-500', icon: <Clock /> },
               ].map((stat, i) => (
                 <div key={i} className="card-premium flex items-center gap-4">
                   <div className={`p-4 ${stat.color} text-white rounded-2xl shadow-lg`}>
@@ -813,9 +813,9 @@ const SubAdminDashboard = () => {
                     </thead>
                     <tbody className="divide-y divide-border-light dark:divide-border-dark">
                       {[
-                        { id: 'TXN-00192', date: 'Today, 10:30 AM', type: 'Shop Onboarding', amount: 'ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹1,200', status: 'Completed' },
-                        { id: 'TXN-00191', date: 'Yesterday', type: 'Sales Commission', amount: 'ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹4,500', status: 'Pending' },
-                        { id: 'TXN-00189', date: 'Oct 24', type: 'Performance Bonus', amount: 'ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹12,400', status: 'Completed' },
+                        { id: 'TXN-00192', date: 'Today, 10:30 AM', type: 'Shop Onboarding', amount: '₹1,200', status: 'Completed' },
+                        { id: 'TXN-00191', date: 'Yesterday', type: 'Sales Commission', amount: '₹4,500', status: 'Pending' },
+                        { id: 'TXN-00189', date: 'Oct 24', type: 'Performance Bonus', amount: '₹12,400', status: 'Completed' },
                       ].map((t, i) => (
                         <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50 group transition-colors">
                           <td className="py-4 font-bold dark:text-white text-sm">{t.id}</td>
@@ -856,7 +856,7 @@ const SubAdminDashboard = () => {
                       </div>
                       <div className="flex-1">
                         <p className="text-xs font-black dark:text-white">{item.title}</p>
-                        <p className="text-[10px] font-bold text-text-secondary-light uppercase mt-0.5">{item.size} Ãƒâ€šÃ‚Â· PDF</p>
+                        <p className="text-[10px] font-bold text-text-secondary-light uppercase mt-0.5">{item.size} • PDF</p>
                       </div>
                       <Download size={14} className="text-text-secondary-light group-hover:text-primary-light" />
                     </div>
@@ -2014,11 +2014,11 @@ const CommissionPlanModal = ({ isOpen, onClose }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark">
                 <p className="text-xs font-bold text-text-secondary-light uppercase">New Shop Tie-up</p>
-                <p className="text-2xl font-black dark:text-white mt-1">ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹500 <span className="text-xs font-medium text-text-secondary-light">per shop</span></p>
+                <p className="text-2xl font-black dark:text-white mt-1">₹500 <span className="text-xs font-medium text-text-secondary-light">per shop</span></p>
               </div>
               <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark">
                 <p className="text-xs font-bold text-text-secondary-light uppercase">Agent Referral</p>
-                <p className="text-2xl font-black dark:text-white mt-1">ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹1,000 <span className="text-xs font-medium text-text-secondary-light">per agent</span></p>
+                <p className="text-2xl font-black dark:text-white mt-1">₹1,000 <span className="text-xs font-medium text-text-secondary-light">per agent</span></p>
               </div>
             </div>
           </div>
@@ -2035,15 +2035,15 @@ const CommissionPlanModal = ({ isOpen, onClose }) => {
                 </thead>
                 <tbody className="divide-y divide-border-light dark:divide-border-dark">
                   <tr>
-                    <td className="p-4 text-sm font-bold dark:text-white">Up to ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹5 Lakhs</td>
+                    <td className="p-4 text-sm font-bold dark:text-white">Up to ₹5 Lakhs</td>
                     <td className="p-4 text-sm font-black text-emerald-500 text-right">3%</td>
                   </tr>
                   <tr>
-                    <td className="p-4 text-sm font-bold dark:text-white">ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹5 Lakhs - ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹15 Lakhs</td>
+                    <td className="p-4 text-sm font-bold dark:text-white">₹5 Lakhs - ₹15 Lakhs</td>
                     <td className="p-4 text-sm font-black text-emerald-500 text-right">5%</td>
                   </tr>
                   <tr>
-                    <td className="p-4 text-sm font-bold dark:text-white">Above ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹15 Lakhs</td>
+                    <td className="p-4 text-sm font-bold dark:text-white">Above ₹15 Lakhs</td>
                     <td className="p-4 text-sm font-black text-emerald-500 text-right">8%</td>
                   </tr>
                 </tbody>
@@ -2241,7 +2241,7 @@ const ShopDetailModal = ({ isOpen, onClose, shop }) => {
             <div className="w-14 h-14 bg-primary-light rounded-2xl flex items-center justify-center text-white text-xl font-black">{shop.name[0]}</div>
             <div>
               <h3 className="text-xl font-black dark:text-white">{shop.name}</h3>
-              <p className="text-xs font-bold text-text-secondary-light uppercase tracking-widest">{shop.cat} Ãƒâ€šÃ‚Â· {shop.loc}</p>
+              <p className="text-xs font-bold text-text-secondary-light uppercase tracking-widest">{shop.cat} • {shop.loc}</p>
             </div>
           </div>
           <button onClick={onClose} className="p-3 hover:bg-gray-100 dark:hover:bg-secondary-dark rounded-2xl transition-all"><X size={24} className="dark:text-white"/></button>
@@ -2473,7 +2473,7 @@ const ReportDetailsModal = ({ isOpen, onClose, reportTitle }) => {
                     <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
                     <span className="text-sm font-bold dark:text-white">Region Zone - {i * 10} Alpha</span>
                   </div>
-                  <span className="text-sm font-black text-primary-light">ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹{(i * 12.5).toFixed(1)}L</span>
+                  <span className="text-sm font-black text-primary-light">₹{(i * 12.5).toFixed(1)}L</span>
                 </div>
               ))}
             </div>
@@ -2589,9 +2589,9 @@ const SessionsModal = ({ isOpen, onClose }) => {
         </div>
         <div className="p-8 space-y-4">
           {[
-            { device: 'Windows PC Ãƒâ€šÃ‚Â· Chrome', location: 'Delhi, India (Current)', status: 'Online', icon: <History /> },
-            { device: 'iPhone 15 Ãƒâ€šÃ‚Â· Safari', location: 'Mumbai, India', status: '2h ago', icon: <History /> },
-            { device: 'macOS Ãƒâ€šÃ‚Â· Firefox', location: 'Pune, India', status: 'Yesterday', icon: <History /> },
+            { device: 'Windows PC • Chrome', location: 'Delhi, India (Current)', status: 'Online', icon: <History /> },
+            { device: 'iPhone 15 • Safari', location: 'Mumbai, India', status: '2h ago', icon: <History /> },
+            { device: 'macOS • Firefox', location: 'Pune, India', status: 'Yesterday', icon: <History /> },
           ].map((s, i) => (
             <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-secondary-dark/50 rounded-2xl border border-border-light dark:border-border-dark group">
               <div className="flex items-center gap-4">
