@@ -90,11 +90,11 @@ const AdminDashboard = () => {
   const [commissionRoleFilter, setCommissionRoleFilter] = useState('All Agent Roles');
   const [openMoreMenuId, setOpenMoreMenuId] = useState(null);
   const [commissionAgents, setCommissionAgents] = useState([
-    { id: 1, name: 'Amit Singh', role: 'State Agent', volume: '₹14.5L', rate: '5%', earned: '₹72,500', status: 'Pending' },
-    { id: 2, name: 'Priya Verma', role: 'District Agent', volume: '₹8.2L', rate: '8%', earned: '₹65,600', status: 'Ready for Payout' },
-    { id: 3, name: 'Kiran Deep', role: 'Divisional Agent', volume: '₹5.4L', rate: '10%', earned: '₹54,000', status: 'Processing' },
-    { id: 4, name: 'Rahul Dev', role: 'Pincode Agent', volume: '₹2.4L', rate: '12%', earned: '₹28,800', status: 'Paid' },
-    { id: 5, name: 'Sanjay Dutt', role: 'Category Agent', volume: '₹5.8L', rate: '10%', earned: '₹58,000', status: 'Held' },
+    { id: 1, name: 'Amit Singh', role: 'State Agent', volume: 'â‚¹14.5L', rate: '5%', earned: 'â‚¹72,500', status: 'Pending' },
+    { id: 2, name: 'Priya Verma', role: 'District Agent', volume: 'â‚¹8.2L', rate: '8%', earned: 'â‚¹65,600', status: 'Ready for Payout' },
+    { id: 3, name: 'Kiran Deep', role: 'Divisional Agent', volume: 'â‚¹5.4L', rate: '10%', earned: 'â‚¹54,000', status: 'Processing' },
+    { id: 4, name: 'Rahul Dev', role: 'Pincode Agent', volume: 'â‚¹2.4L', rate: '12%', earned: 'â‚¹28,800', status: 'Paid' },
+    { id: 5, name: 'Sanjay Dutt', role: 'Category Agent', volume: 'â‚¹5.8L', rate: '10%', earned: 'â‚¹58,000', status: 'Held' },
   ]);
   
   const [selectedAgent, setSelectedAgent] = useState(null);
@@ -279,11 +279,11 @@ const AdminDashboard = () => {
   ]);
 
   const [transactions, setTransactions] = useState([
-    { id: 'TXN-990812', date: 'Today, 10:45 AM', name: 'Fresh Grocery Mart', type: 'Shop Settlement', method: 'Bank Transfer', amount: '+ ₹12,450.00', status: 'Completed' },
-    { id: 'TXN-990813', date: 'Today, 09:15 AM', name: 'Arjun Reddy', type: 'Membership Upgrade', method: 'UPI', amount: '+ ₹4,999.00', status: 'Completed' },
-    { id: 'TXN-990814', date: 'Yesterday, 04:30 PM', name: 'State Agent Commission', type: 'Payout', method: 'NEFT', amount: '- ₹45,000.00', status: 'Processing' },
-    { id: 'TXN-990815', date: 'Yesterday, 02:10 PM', name: 'Modern Electronics', type: 'Platform Fee', method: 'Credit Card', amount: '+ ₹1,250.00', status: 'Failed' },
-    { id: 'TXN-990816', date: 'Oct 24, 11:20 AM', name: 'Customer Refund', type: 'Order Cancellation', method: 'Original Source', amount: '- ₹850.00', status: 'Refunded' },
+    { id: 'TXN-990812', date: 'Today, 10:45 AM', name: 'Fresh Grocery Mart', type: 'Shop Settlement', method: 'Bank Transfer', amount: '+ â‚¹12,450.00', status: 'Completed' },
+    { id: 'TXN-990813', date: 'Today, 09:15 AM', name: 'Arjun Reddy', type: 'Membership Upgrade', method: 'UPI', amount: '+ â‚¹4,999.00', status: 'Completed' },
+    { id: 'TXN-990814', date: 'Yesterday, 04:30 PM', name: 'State Agent Commission', type: 'Payout', method: 'NEFT', amount: '- â‚¹45,000.00', status: 'Processing' },
+    { id: 'TXN-990815', date: 'Yesterday, 02:10 PM', name: 'Modern Electronics', type: 'Platform Fee', method: 'Credit Card', amount: '+ â‚¹1,250.00', status: 'Failed' },
+    { id: 'TXN-990816', date: 'Oct 24, 11:20 AM', name: 'Customer Refund', type: 'Order Cancellation', method: 'Original Source', amount: '- â‚¹850.00', status: 'Refunded' },
   ]);
 
   const [documentVerifications, setDocumentVerifications] = useState([
@@ -399,7 +399,7 @@ const AdminDashboard = () => {
       ));
       addNotification({ 
         title: 'Payout Successful', 
-        message: `₹${agent.earned} has been credited to ${agent.name}'s account.`, 
+        message: `â‚¹${agent.earned} has been credited to ${agent.name}'s account.`, 
         type: 'success' 
       });
     }, 3000);
@@ -443,7 +443,7 @@ const AdminDashboard = () => {
       location: 'Pune, Maharashtra',
       pincode: '411001',
       assignedAgent: 'Rajesh Kumar',
-      submittedBy: 'Agent राजेश',
+      submittedBy: 'Agent à¤°à¤¾à¤œà¥‡à¤¶',
       status: 'Pending',
       docs: ['Shop License', 'Owner ID', 'Bank Proof']
     },
@@ -497,11 +497,11 @@ const AdminDashboard = () => {
   ]);
 
   const [agentPerformanceData] = useState([
-    { name: 'Amit Singh', shops: 52, revenue: '₹4.2L', rating: 4.8, status: 'Top Performer' },
-    { name: 'Priya Verma', shops: 38, revenue: '₹2.8L', rating: 4.5, status: 'Consistent' },
-    { name: 'Vikram Batra', shops: 45, revenue: '₹3.5L', rating: 4.2, status: 'Average' },
-    { name: 'Rajesh Kumar', shops: 28, revenue: '₹2.1L', rating: 4.0, status: 'Needs Support' },
-    { name: 'Sneha Patel', shops: 64, revenue: '₹5.5L', rating: 4.9, status: 'Top Performer' },
+    { name: 'Amit Singh', shops: 52, revenue: 'â‚¹4.2L', rating: 4.8, status: 'Top Performer' },
+    { name: 'Priya Verma', shops: 38, revenue: 'â‚¹2.8L', rating: 4.5, status: 'Consistent' },
+    { name: 'Vikram Batra', shops: 45, revenue: 'â‚¹3.5L', rating: 4.2, status: 'Average' },
+    { name: 'Rajesh Kumar', shops: 28, revenue: 'â‚¹2.1L', rating: 4.0, status: 'Needs Support' },
+    { name: 'Sneha Patel', shops: 64, revenue: 'â‚¹5.5L', rating: 4.9, status: 'Top Performer' },
   ]);
 
   const [shopCategoryPerformance] = useState([
@@ -540,7 +540,7 @@ const AdminDashboard = () => {
       details: {
         territory: { state: 'Telangana', district: 'Hyderabad', division: 'South', pincode: '500001' },
         bankDetails: { bankName: 'HDFC Bank', accNo: 'XXXXXX9842', ifsc: 'HDFC0001234' },
-        paymentDetails: { amount: '₹15,000', txnId: 'UTR9988776655', date: '2026-05-04' },
+        paymentDetails: { amount: 'â‚¹15,000', txnId: 'UTR9988776655', date: '2026-05-04' },
         kycDocs: { aadharFront: true, aadharBack: true, panCard: true, bankPassbook: true }
       }
     },
@@ -554,7 +554,7 @@ const AdminDashboard = () => {
       details: {
         territory: { state: 'Karnataka', district: 'Bangalore', division: 'Central', pincode: '560001' },
         bankDetails: { bankName: 'ICICI Bank', accNo: 'XXXXXX5521', ifsc: 'ICIC0005521' },
-        paymentDetails: { amount: '₹5,000', txnId: 'UTR5544332211', date: '2026-05-05' },
+        paymentDetails: { amount: 'â‚¹5,000', txnId: 'UTR5544332211', date: '2026-05-05' },
         kycDocs: { gstCert: true, tradeLicense: true, panCard: true, shopPhoto: true }
       }
     },
@@ -568,7 +568,7 @@ const AdminDashboard = () => {
       details: {
         territory: { state: 'Delhi', district: 'New Delhi', division: 'North', pincode: '110001' },
         bankDetails: { bankName: 'SBI', accNo: 'XXXXXX2211', ifsc: 'SBIN0000001' },
-        paymentDetails: { amount: '₹50,000', txnId: 'UTR1122334455', date: '2026-05-03' },
+        paymentDetails: { amount: 'â‚¹50,000', txnId: 'UTR1122334455', date: '2026-05-03' },
         kycDocs: { aadharFront: true, aadharBack: true, panCard: true, businessCert: true }
       }
     }
@@ -1056,7 +1056,7 @@ const AdminDashboard = () => {
                       </div>
                       <div>
                         <h4 className="font-bold dark:text-white text-lg tracking-tight">{kyc.name}</h4>
-                        <p className="text-sm font-medium text-text-secondary-light">{kyc.role} • {kyc.location}</p>
+                        <p className="text-sm font-medium text-text-secondary-light">{kyc.role} â€¢ {kyc.location}</p>
                         <div className="flex items-center gap-2 mt-2">
                           <span className="px-2 py-0.5 bg-warning/10 text-warning text-[10px] font-black rounded uppercase">{kyc.status}</span>
                           <span className="text-[10px] text-text-secondary-light font-bold">UTR: {kyc.details.paymentDetails.txnId}</span>
@@ -1239,9 +1239,9 @@ const AdminDashboard = () => {
                 <h4 className="font-bold dark:text-white">Active Agent Goals</h4>
                 <div className="space-y-6">
                   {[
-                    { name: 'State Agents', progress: 75, target: '₹50L', current: '₹37.5L' },
-                    { name: 'District Agents', progress: 42, target: '₹20L', current: '₹8.4L' },
-                    { name: 'Category Agents', progress: 88, target: '₹10L', current: '₹8.8L' },
+                    { name: 'State Agents', progress: 75, target: 'â‚¹50L', current: 'â‚¹37.5L' },
+                    { name: 'District Agents', progress: 42, target: 'â‚¹20L', current: 'â‚¹8.4L' },
+                    { name: 'Category Agents', progress: 88, target: 'â‚¹10L', current: 'â‚¹8.8L' },
                   ].map((goal) => (
                     <div key={goal.name} className="space-y-2">
                       <div className="flex justify-between text-sm">
@@ -1261,7 +1261,7 @@ const AdminDashboard = () => {
                 <h4 className="font-bold dark:text-white">Reward Distribution</h4>
                 <div className="flex items-center justify-center h-48">
                   <div className="text-center">
-                    <p className="text-4xl font-bold text-primary-light">₹2.4L</p>
+                    <p className="text-4xl font-bold text-primary-light">â‚¹2.4L</p>
                     <p className="text-sm text-text-secondary-light mt-1">Total Incentives Distributed</p>
                     <button className="mt-4 text-xs font-bold text-accent-light hover:underline">View Breakdown</button>
                   </div>
@@ -1559,7 +1559,7 @@ const AdminDashboard = () => {
                           </span>
                         </div>
                         <p className="text-sm font-bold text-text-secondary-light flex items-center gap-2 mt-1">
-                          <User size={14} className="opacity-50" /> {verify.owner} • {verify.type}
+                          <User size={14} className="opacity-50" /> {verify.owner} â€¢ {verify.type}
                         </p>
                       </div>
                     </div>
@@ -1662,7 +1662,7 @@ const AdminDashboard = () => {
                         </div>
                         <div>
                           <p className="text-sm font-black dark:text-white">{agent.name}</p>
-                          <p className="text-[10px] font-bold text-text-secondary-light uppercase">{agent.shops} Shops • {agent.revenue}</p>
+                          <p className="text-[10px] font-bold text-text-secondary-light uppercase">{agent.shops} Shops â€¢ {agent.revenue}</p>
                         </div>
                       </div>
                       <div className="text-right">
@@ -1727,7 +1727,7 @@ const AdminDashboard = () => {
                     <div className="mt-4 pt-4 border-t border-border-light dark:border-border-dark grid grid-cols-2 gap-4">
                       <div>
                         <p className="text-[10px] font-bold text-text-secondary-light uppercase">Revenue</p>
-                        <p className="font-black dark:text-white mt-1">₹{(area.revenue / 100000).toFixed(1)}L</p>
+                        <p className="font-black dark:text-white mt-1">â‚¹{(area.revenue / 100000).toFixed(1)}L</p>
                       </div>
                       <div>
                         <p className="text-[10px] font-bold text-text-secondary-light uppercase">Active Shops</p>
@@ -1764,9 +1764,9 @@ const AdminDashboard = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
-                { label: 'Platform Fees', value: '₹4.2L', trend: '+15%', color: 'text-blue-500' },
-                { label: 'Membership Revenue', value: '₹18.5L', trend: '+22%', color: 'text-emerald-500' },
-                { label: 'Agent Commission', value: '₹2.8L', trend: '-2%', color: 'text-orange-500' },
+                { label: 'Platform Fees', value: 'â‚¹4.2L', trend: '+15%', color: 'text-blue-500' },
+                { label: 'Membership Revenue', value: 'â‚¹18.5L', trend: '+22%', color: 'text-emerald-500' },
+                { label: 'Agent Commission', value: 'â‚¹2.8L', trend: '-2%', color: 'text-orange-500' },
               ].map((stat) => (
                 <div key={stat.label} className="card-premium">
                   <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">{stat.label}</p>
@@ -1900,7 +1900,7 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="card-premium border-l-4 border-l-blue-500">
                 <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">Processing Volume (MTD)</p>
-                <h3 className="text-3xl font-bold dark:text-white mt-2">₹48.2L</h3>
+                <h3 className="text-3xl font-bold dark:text-white mt-2">â‚¹48.2L</h3>
                 <p className="text-xs font-semibold text-success mt-1">+12.4% vs last month</p>
               </div>
               <div className="card-premium border-l-4 border-l-emerald-500">
@@ -2014,17 +2014,17 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="card-premium">
                 <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">Pending Commissions</p>
-                <h3 className="text-3xl font-bold text-orange-500 mt-2">{"₹"}4.8L</h3>
+                <h3 className="text-3xl font-bold text-orange-500 mt-2">{"â‚¹"}4.8L</h3>
                 <p className="text-xs font-semibold text-warning mt-1">Awaiting next cycle</p>
               </div>
               <div className="card-premium">
                 <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">Paid This Month</p>
-                <h3 className="text-3xl font-bold text-emerald-500 mt-2">{"₹"}12.2L</h3>
+                <h3 className="text-3xl font-bold text-emerald-500 mt-2">{"â‚¹"}12.2L</h3>
                 <p className="text-xs font-semibold text-success mt-1">Distributed successfully</p>
               </div>
               <div className="card-premium">
                 <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">Average Agent Earning</p>
-                <h3 className="text-3xl font-bold text-blue-500 mt-2">{"₹"}18,450</h3>
+                <h3 className="text-3xl font-bold text-blue-500 mt-2">{"â‚¹"}18,450</h3>
                 <p className="text-xs font-semibold text-text-secondary-light mt-1">Per active agent (MTD)</p>
               </div>
             </div>
@@ -2279,7 +2279,7 @@ const AdminDashboard = () => {
                     <tr className="text-left border-b border-border-light dark:border-border-dark">
                       <th className="pb-4 font-bold dark:text-white text-sm">Order ID</th>
                       <th className="pb-4 font-bold dark:text-white text-sm">Delivery Partner</th>
-                      <th className="pb-4 font-bold dark:text-white text-sm">Route (Pickup → Drop)</th>
+                      <th className="pb-4 font-bold dark:text-white text-sm">Route (Pickup â†’ Drop)</th>
                       <th className="pb-4 font-bold dark:text-white text-sm">Time</th>
                       <th className="pb-4 font-bold dark:text-white text-sm">Status</th>
                       <th className="pb-4 font-bold dark:text-white text-sm text-right">Actions</th>
@@ -2304,7 +2304,7 @@ const AdminDashboard = () => {
                         </td>
                         <td className="py-4">
                           <p className="text-sm dark:text-white">{delivery.pickup}</p>
-                          <p className="text-[10px] text-text-secondary-light font-medium">→ {delivery.drop}</p>
+                          <p className="text-[10px] text-text-secondary-light font-medium">â†’ {delivery.drop}</p>
                         </td>
                         <td className="py-4 text-text-secondary-light text-xs font-bold uppercase">{delivery.time}</td>
                         <td className="py-4">
@@ -2405,7 +2405,7 @@ const AdminDashboard = () => {
                       <tr key={report.name} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50 transition-colors">
                         <td className="py-4">
                           <p className="dark:text-white font-bold text-sm">{report.name}</p>
-                          <p className="text-xs text-text-secondary-light mt-0.5">CSV • 2.4 MB</p>
+                          <p className="text-xs text-text-secondary-light mt-0.5">CSV â€¢ 2.4 MB</p>
                         </td>
                         <td className="py-4">
                           <span className="px-2 py-1 bg-gray-100 dark:bg-secondary-dark rounded-lg text-xs font-semibold dark:text-white">
@@ -2525,7 +2525,7 @@ const AdminDashboard = () => {
                         <td className="py-3">
                           <p className="dark:text-white font-bold text-sm">{ticket.subject}</p>
                           <p className="text-xs text-text-secondary-light font-medium flex items-center gap-1 mt-0.5">
-                            <span className="text-primary-light">{ticket.id}</span> • <Clock size={10} /> {ticket.time}
+                            <span className="text-primary-light">{ticket.id}</span> â€¢ <Clock size={10} /> {ticket.time}
                           </p>
                         </td>
                         <td className="py-3">
@@ -2718,7 +2718,7 @@ const AdminDashboard = () => {
               </div>
               <div className="card-premium">
                 <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">Rewards Distributed</p>
-                <h3 className="text-3xl font-bold text-purple-500 mt-2">₹4.2L</h3>
+                <h3 className="text-3xl font-bold text-purple-500 mt-2">â‚¹4.2L</h3>
                 <p className="text-xs font-semibold text-text-secondary-light mt-1">Total cash bonuses paid</p>
               </div>
               <div className="card-premium">
@@ -2763,10 +2763,10 @@ const AdminDashboard = () => {
                   </thead>
                   <tbody className="divide-y divide-border-light dark:divide-border-dark">
                     {[
-                      { referrer: 'Arjun Reddy', code: 'ARJUN500', referred: 'Sneha Patil', reward: '₹500.00', status: 'Paid', date: 'Today' },
-                      { referrer: 'Modern Electronics', code: 'MODERNX', referred: 'Tech World Shop', reward: '₹2,000.00', status: 'Pending Verification', date: 'Yesterday' },
-                      { referrer: 'Vikram Batra', code: 'VIKRAM01', referred: 'Amit Singh', reward: '₹500.00', status: 'Paid', date: 'Oct 24' },
-                      { referrer: 'Zoya Khan', code: 'ZOYA99', referred: 'Rahul Dev', reward: '₹0.00', status: 'Rejected / Fraud', date: 'Oct 20' },
+                      { referrer: 'Arjun Reddy', code: 'ARJUN500', referred: 'Sneha Patil', reward: 'â‚¹500.00', status: 'Paid', date: 'Today' },
+                      { referrer: 'Modern Electronics', code: 'MODERNX', referred: 'Tech World Shop', reward: 'â‚¹2,000.00', status: 'Pending Verification', date: 'Yesterday' },
+                      { referrer: 'Vikram Batra', code: 'VIKRAM01', referred: 'Amit Singh', reward: 'â‚¹500.00', status: 'Paid', date: 'Oct 24' },
+                      { referrer: 'Zoya Khan', code: 'ZOYA99', referred: 'Rahul Dev', reward: 'â‚¹0.00', status: 'Rejected / Fraud', date: 'Oct 20' },
                     ].map((ref, i) => (
                       <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50 transition-colors">
                         <td className="py-4">
@@ -2850,7 +2850,7 @@ const AdminDashboard = () => {
                     onClick={() => setShowPermissionsModal(true)}
                     className="mt-4 text-xs font-bold text-primary-light hover:underline w-full text-left"
                   >
-                    Edit Permissions →
+                    Edit Permissions â†’
                   </button>
                 </div>
               ))}
@@ -3139,7 +3139,7 @@ const AdminDashboard = () => {
                             </div>
                             <div>
                               <p className="font-bold dark:text-white text-sm">{shop.shopName}</p>
-                              <p className="text-xs text-text-secondary-light">{shop.ownerName} • {shop.phone}</p>
+                              <p className="text-xs text-text-secondary-light">{shop.ownerName} â€¢ {shop.phone}</p>
                             </div>
                           </div>
                         </td>
@@ -3356,7 +3356,7 @@ const AdminDashboard = () => {
                       </div>
                       <div className="flex-1">
                         <p className="text-xs font-black dark:text-white">{item.title}</p>
-                        <p className="text-[10px] font-bold text-text-secondary-light uppercase mt-0.5">{item.size} · PDF</p>
+                        <p className="text-[10px] font-bold text-text-secondary-light uppercase mt-0.5">{item.size} Â· PDF</p>
                       </div>
                       <Download size={14} className="text-text-secondary-light group-hover:text-primary-light" />
                     </div>
@@ -3452,7 +3452,7 @@ const AdminDashboard = () => {
                       </div>
                       <div className="flex justify-between items-center text-[10px]">
                         <span className="text-text-secondary-light font-medium">Rating</span>
-                        <span className="font-bold text-yellow-500">★ {brand.rating}</span>
+                        <span className="font-bold text-yellow-500">â˜… {brand.rating}</span>
                       </div>
                     </div>
 
@@ -3490,7 +3490,7 @@ const AdminDashboard = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-black dark:text-white truncate">{item.title}</p>
-                        <p className="text-[10px] text-text-secondary-light font-bold mt-0.5">{item.type} • {item.size} • {item.date}</p>
+                        <p className="text-[10px] text-text-secondary-light font-bold mt-0.5">{item.type} â€¢ {item.size} â€¢ {item.date}</p>
                       </div>
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button 
@@ -4276,7 +4276,7 @@ const AdminDashboard = () => {
                   </div>
                   <div>
                     <h4 className="font-black dark:text-white uppercase tracking-tight">{previewDoc.name}</h4>
-                    <p className="text-[10px] font-black text-text-secondary-light uppercase tracking-widest">Document ID: {previewDoc.id} • {previewDoc.size}</p>
+                    <p className="text-[10px] font-black text-text-secondary-light uppercase tracking-widest">Document ID: {previewDoc.id} â€¢ {previewDoc.size}</p>
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -5137,7 +5137,7 @@ const SubAdminActionModal = ({ isOpen, onClose, subAdmin, type }) => {
             </div>
             <div>
               <h3 className="text-xl font-black dark:text-white tracking-tight">{getTitle()}</h3>
-              <p className="text-xs text-text-secondary-light font-bold uppercase tracking-widest">{subAdmin.name} • {subAdmin.empId}</p>
+              <p className="text-xs text-text-secondary-light font-bold uppercase tracking-widest">{subAdmin.name} â€¢ {subAdmin.empId}</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-secondary-dark rounded-xl transition-all"><X size={20} className="dark:text-white" /></button>
@@ -5236,7 +5236,7 @@ const SubAdminActionModal = ({ isOpen, onClose, subAdmin, type }) => {
               <div className="grid grid-cols-3 gap-4">
                 <div className="p-4 bg-success/5 rounded-2xl border border-success/10 text-center">
                   <p className="text-[10px] font-black text-success uppercase tracking-widest">Revenue</p>
-                  <p className="text-xl font-black dark:text-white">₹4.2L</p>
+                  <p className="text-xl font-black dark:text-white">â‚¹4.2L</p>
                 </div>
                 <div className="p-4 bg-primary-light/5 rounded-2xl border border-primary-light/10 text-center">
                   <p className="text-[10px] font-black text-primary-light uppercase tracking-widest">Growth</p>
@@ -5383,7 +5383,7 @@ const AreaDetailsModal = ({ isOpen, onClose, area }) => {
                   </div>
                   <div>
                     <h5 className="font-bold dark:text-white">{area.agent}</h5>
-                    <p className="text-xs text-text-secondary-light uppercase font-bold tracking-widest">Pincode Agent • Active</p>
+                    <p className="text-xs text-text-secondary-light uppercase font-bold tracking-widest">Pincode Agent â€¢ Active</p>
                     <div className="flex items-center gap-4 mt-2">
                       <span className="text-[10px] font-bold text-text-secondary-light flex items-center gap-1"><Store size={10} /> 42 Shops Managed</span>
                       <span className="text-[10px] font-bold text-text-secondary-light flex items-center gap-1"><CheckCircle size={10} /> 98% Perf.</span>
@@ -5484,11 +5484,11 @@ const SetTargetModal = ({ isOpen, onClose }) => {
               <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1 flex items-center gap-1"><Trophy size={12} className="text-orange-500" /> Incentive / Reward</label>
               <div className="relative">
                 <select className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold appearance-none">
-                  <option>₹1,000 Bonus</option>
-                  <option>₹2,000 Bonus</option>
-                  <option>₹5,000 Bonus</option>
-                  <option>₹7,500 Bonus</option>
-                  <option>₹10,000 Bonus</option>
+                  <option>â‚¹1,000 Bonus</option>
+                  <option>â‚¹2,000 Bonus</option>
+                  <option>â‚¹5,000 Bonus</option>
+                  <option>â‚¹7,500 Bonus</option>
+                  <option>â‚¹10,000 Bonus</option>
                 </select>
                 <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary-light pointer-events-none" size={16} />
               </div>
@@ -5557,7 +5557,7 @@ const BulkPayoutModal = ({ isOpen, onClose }) => {
               </div>
               <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark">
                 <p className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light mb-1">Ready to Release</p>
-                <h4 className="text-2xl font-black text-primary-light">₹2.1L</h4>
+                <h4 className="text-2xl font-black text-primary-light">â‚¹2.1L</h4>
                 <p className="text-xs font-bold text-text-secondary-light mt-1">Verified & Approved (64 Agents)</p>
               </div>
             </div>
@@ -5570,10 +5570,10 @@ const BulkPayoutModal = ({ isOpen, onClose }) => {
               </div>
               <div className="space-y-2">
                 {[
-                  { name: 'Amit Singh', role: 'State Agent', amount: '₹72,500', bank: 'HDFC Bank •••• 9842' },
-                  { name: 'Priya Verma', role: 'District Agent', amount: '₹65,600', bank: 'ICICI Bank •••• 5521' },
-                  { name: 'Ravi Kumar', role: 'Divisional Agent', amount: '₹34,200', bank: 'SBI •••• 1122' },
-                  { name: 'Anjali Desai', role: 'Pincode Agent', amount: '₹12,400', bank: 'Axis Bank •••• 8844' }
+                  { name: 'Amit Singh', role: 'State Agent', amount: 'â‚¹72,500', bank: 'HDFC Bank â€¢â€¢â€¢â€¢ 9842' },
+                  { name: 'Priya Verma', role: 'District Agent', amount: 'â‚¹65,600', bank: 'ICICI Bank â€¢â€¢â€¢â€¢ 5521' },
+                  { name: 'Ravi Kumar', role: 'Divisional Agent', amount: 'â‚¹34,200', bank: 'SBI â€¢â€¢â€¢â€¢ 1122' },
+                  { name: 'Anjali Desai', role: 'Pincode Agent', amount: 'â‚¹12,400', bank: 'Axis Bank â€¢â€¢â€¢â€¢ 8844' }
                 ].map((agent, i) => (
                   <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-secondary-dark/50 rounded-xl hover:bg-gray-100 dark:hover:bg-secondary-dark transition-colors">
                     <div className="flex items-center gap-4">
@@ -5582,7 +5582,7 @@ const BulkPayoutModal = ({ isOpen, onClose }) => {
                       </div>
                       <div>
                         <p className="font-bold dark:text-white text-sm">{agent.name}</p>
-                        <p className="text-[10px] text-text-secondary-light font-bold uppercase tracking-wider">{agent.role} • {agent.bank}</p>
+                        <p className="text-[10px] text-text-secondary-light font-bold uppercase tracking-wider">{agent.role} â€¢ {agent.bank}</p>
                       </div>
                     </div>
                     <p className="font-black text-success">{agent.amount}</p>
@@ -5625,7 +5625,7 @@ const BulkPayoutModal = ({ isOpen, onClose }) => {
               }} 
               className="flex-[2] py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
             >
-              <Coins size={18} /> Confirm & Release {"₹"}2.1L
+              <Coins size={18} /> Confirm & Release {"â‚¹"}2.1L
             </button>
           </div>
         </div>
@@ -5774,7 +5774,7 @@ const ReportModal = ({ isOpen, onClose, setActiveTab }) => {
             </div>
             <div>
               <h3 className="text-2xl font-black dark:text-white tracking-tight leading-tight">Monthly Revenue Report</h3>
-              <p className="text-sm text-text-secondary-light font-bold">April 2026 • Financial Performance</p>
+              <p className="text-sm text-text-secondary-light font-bold">April 2026 â€¢ Financial Performance</p>
             </div>
           </div>
           <div className="flex gap-2">
@@ -5802,7 +5802,7 @@ const ReportModal = ({ isOpen, onClose, setActiveTab }) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="p-6 bg-emerald-500/10 rounded-3xl border border-emerald-500/20">
               <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-1">Total Revenue</p>
-              <h4 className="text-3xl font-black text-emerald-600">₹25.5L</h4>
+              <h4 className="text-3xl font-black text-emerald-600">â‚¹25.5L</h4>
               <div className="flex items-center gap-1 text-emerald-600 mt-2 text-xs font-bold">
                 <ArrowUpRight size={14} /> +18.4% vs last month
               </div>
@@ -5816,7 +5816,7 @@ const ReportModal = ({ isOpen, onClose, setActiveTab }) => {
             </div>
             <div className="p-6 bg-purple-500/10 rounded-3xl border border-purple-500/20">
               <p className="text-[10px] font-black uppercase tracking-widest text-purple-600 mb-1">Avg. Transaction</p>
-              <h4 className="text-3xl font-black text-purple-600">₹12,450</h4>
+              <h4 className="text-3xl font-black text-purple-600">â‚¹12,450</h4>
               <div className="flex items-center gap-1 text-purple-600 mt-2 text-xs font-bold">
                 <ArrowDownRight size={14} /> -2.1% vs last month
               </div>
@@ -5838,10 +5838,10 @@ const ReportModal = ({ isOpen, onClose, setActiveTab }) => {
                 </thead>
                 <tbody className="divide-y dark:divide-border-dark">
                   {[
-                    { name: 'Membership Fees', value: '₹15.2L', share: '59%', status: 'Stable' },
-                    { name: 'Onboarding Charges', value: '₹4.8L', share: '19%', status: 'Growing' },
-                    { name: 'Platform Service Tax', value: '₹3.2L', share: '13%', status: 'Stable' },
-                    { name: 'Agent Target Overheads', value: '₹2.3L', share: '9%', status: 'At Risk' }
+                    { name: 'Membership Fees', value: 'â‚¹15.2L', share: '59%', status: 'Stable' },
+                    { name: 'Onboarding Charges', value: 'â‚¹4.8L', share: '19%', status: 'Growing' },
+                    { name: 'Platform Service Tax', value: 'â‚¹3.2L', share: '13%', status: 'Stable' },
+                    { name: 'Agent Target Overheads', value: 'â‚¹2.3L', share: '9%', status: 'At Risk' }
                   ].map((row, i) => (
                     <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/30 transition-colors">
                       <td className="px-6 py-4 font-bold dark:text-white text-sm">{row.name}</td>
@@ -5910,7 +5910,7 @@ const ForecastModal = ({ isOpen, onClose }) => {
             </div>
             <div>
               <h3 className="text-2xl font-black dark:text-white tracking-tight leading-tight">Annual Revenue Forecast</h3>
-              <p className="text-sm text-text-secondary-light font-bold">Projected Performance • FY 2026-27</p>
+              <p className="text-sm text-text-secondary-light font-bold">Projected Performance â€¢ FY 2026-27</p>
             </div>
           </div>
           <button onClick={onClose} className="p-3 hover:bg-white dark:hover:bg-secondary-dark rounded-2xl transition-all shadow-sm">
@@ -5927,7 +5927,7 @@ const ForecastModal = ({ isOpen, onClose }) => {
                 <TrendingUp size={120} />
               </div>
               <p className="text-[10px] font-black uppercase tracking-widest opacity-80">Projected Annual Revenue</p>
-              <h4 className="text-5xl font-black mt-2">₹3.2Cr</h4>
+              <h4 className="text-5xl font-black mt-2">â‚¹3.2Cr</h4>
               <p className="text-xs mt-4 font-bold opacity-90 flex items-center gap-2">
                 <ArrowUpRight size={14} /> Estimated 35% YoY Growth
               </p>
@@ -5936,10 +5936,10 @@ const ForecastModal = ({ isOpen, onClose }) => {
               <p className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light mb-4">Quarterly Projections</p>
               <div className="space-y-4">
                 {[
-                  { label: 'Q1 (Apr-Jun)', value: '₹65L', progress: '20%' },
-                  { label: 'Q2 (Jul-Sep)', value: '₹78L', progress: '24%' },
-                  { label: 'Q3 (Oct-Dec)', value: '₹85L', progress: '27%' },
-                  { label: 'Q4 (Jan-Mar)', value: '₹92L', progress: '29%' }
+                  { label: 'Q1 (Apr-Jun)', value: 'â‚¹65L', progress: '20%' },
+                  { label: 'Q2 (Jul-Sep)', value: 'â‚¹78L', progress: '24%' },
+                  { label: 'Q3 (Oct-Dec)', value: 'â‚¹85L', progress: '27%' },
+                  { label: 'Q4 (Jan-Mar)', value: 'â‚¹92L', progress: '29%' }
                 ].map((q, i) => (
                   <div key={i} className="space-y-1.5">
                     <div className="flex justify-between items-center text-xs font-bold">
@@ -6497,14 +6497,14 @@ const CampaignSettingsModal = ({ isOpen, onClose }) => {
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Referrer Reward (Agent)</label>
                 <div className="relative">
-                  <input type="text" defaultValue="₹500" className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
+                  <input type="text" defaultValue="â‚¹500" className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
                   <Coins className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary-light opacity-50" size={18} />
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Referee Bonus (Shop)</label>
                 <div className="relative">
-                  <input type="text" defaultValue="₹200" className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
+                  <input type="text" defaultValue="â‚¹200" className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
                   <Gift className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary-light opacity-50" size={18} />
                 </div>
               </div>
@@ -6704,7 +6704,7 @@ const PasswordModal = ({ isOpen, onClose }) => {
             <div className="relative">
               <input 
                 type={showCurrentPassword ? "text" : "password"} 
-                placeholder="••••••••••••" 
+                placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" 
                 className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" 
               />
               <button
@@ -6875,7 +6875,7 @@ const SessionsModal = ({ isOpen, onClose }) => {
                   <p className="text-xs font-black dark:text-white">This Device: Windows PC (Mumbai)</p>
                   <span className="px-2 py-0.5 bg-blue-500 text-white rounded-full text-[8px] font-black uppercase tracking-widest">Current</span>
                 </div>
-                <p className="text-[10px] text-text-secondary-light font-bold mt-1">Chrome Browser • Last active: Just now</p>
+                <p className="text-[10px] text-text-secondary-light font-bold mt-1">Chrome Browser â€¢ Last active: Just now</p>
               </div>
             </div>
           </div>
@@ -6893,7 +6893,7 @@ const SessionsModal = ({ isOpen, onClose }) => {
                   </div>
                   <div className="flex-1">
                     <p className="text-xs font-black dark:text-white">{session.device}</p>
-                    <p className="text-[10px] text-text-secondary-light font-bold mt-0.5">{session.location} • {session.time}</p>
+                    <p className="text-[10px] text-text-secondary-light font-bold mt-0.5">{session.location} â€¢ {session.time}</p>
                   </div>
                   <button className="px-4 py-2 bg-error/10 text-error rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-error hover:text-white transition-all">Logout</button>
                 </div>
@@ -7366,7 +7366,7 @@ const ShopActionsModal = ({ isOpen, onClose, shop, type, setShopTieUps, shopTieU
             </div>
             <div>
               <h3 className="text-xl font-black">{type.charAt(0).toUpperCase() + type.slice(1)}: {shop.shopName}</h3>
-              <p className="text-xs opacity-80 font-bold uppercase tracking-widest">{shop.category} • ID: SHP-{shop.id}001</p>
+              <p className="text-xs opacity-80 font-bold uppercase tracking-widest">{shop.category} â€¢ ID: SHP-{shop.id}001</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-full transition-all text-white">
@@ -7515,7 +7515,7 @@ const ShopActionsModal = ({ isOpen, onClose, shop, type, setShopTieUps, shopTieU
                     <div className="text-right flex items-center gap-4">
                       <div>
                         <p className="text-[10px] text-text-secondary-light font-black uppercase">Rating</p>
-                        <p className="text-sm font-black text-blue-500">{agent.rating} ★</p>
+                        <p className="text-sm font-black text-blue-500">{agent.rating} â˜…</p>
                       </div>
                       <button 
                         onClick={() => handleStatusUpdate(shop.status, `Shop assigned to ${agent.name} successfully.`)}
@@ -7540,6 +7540,18 @@ const ShopActionsModal = ({ isOpen, onClose, shop, type, setShopTieUps, shopTieU
 };
 
 const AgentActionsModal = ({ isOpen, onClose, agent, type, setAgents, agents, addNotification }) => {
+  const [formData, setFormData] = useState({ name: '', role: '', territory: '' });
+
+  useEffect(() => {
+    if (agent) {
+      setFormData({
+        name: agent.name || '',
+        role: agent.role || '',
+        territory: agent.territory || ''
+      });
+    }
+  }, [agent]);
+
   if (!isOpen || !agent) return null;
 
   return (
@@ -7559,7 +7571,7 @@ const AgentActionsModal = ({ isOpen, onClose, agent, type, setAgents, agents, ad
             </div>
             <div>
               <h3 className="text-xl font-black">{type.charAt(0).toUpperCase() + type.slice(1)} Agent: {agent.name}</h3>
-              <p className="text-xs opacity-80 font-bold uppercase tracking-widest">{agent.role} • ID: AGT-{agent.id}001</p>
+              <p className="text-xs opacity-80 font-bold uppercase tracking-widest">{agent.role} â€¢ ID: AGT-{agent.id}001</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-full transition-all text-white">
@@ -7610,11 +7622,20 @@ const AgentActionsModal = ({ isOpen, onClose, agent, type, setAgents, agents, ad
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Agent Name</label>
-                  <input type="text" defaultValue={agent.name} className="w-full p-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-emerald-500 outline-none dark:text-white font-bold" />
+                  <input 
+                    type="text" 
+                    value={formData.name} 
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full p-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-emerald-500 outline-none dark:text-white font-bold" 
+                  />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Operational Role</label>
-                  <select defaultValue={agent.role} className="w-full p-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-emerald-500 outline-none dark:text-white font-bold appearance-none">
+                  <select 
+                    value={formData.role} 
+                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                    className="w-full p-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-emerald-500 outline-none dark:text-white font-bold appearance-none"
+                  >
                     <option>State Agent</option>
                     <option>District Agent</option>
                     <option>Pincode Agent</option>
@@ -7624,11 +7645,17 @@ const AgentActionsModal = ({ isOpen, onClose, agent, type, setAgents, agents, ad
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Assigned Territory</label>
-                <input type="text" defaultValue={agent.territory} className="w-full p-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-emerald-500 outline-none dark:text-white font-bold" />
+                <input 
+                  type="text" 
+                  value={formData.territory} 
+                  onChange={(e) => setFormData({ ...formData, territory: e.target.value })}
+                  className="w-full p-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-emerald-500 outline-none dark:text-white font-bold" 
+                />
               </div>
               <div className="pt-6">
                  <button 
                    onClick={() => {
+                     setAgents(agents.map(a => a.id === agent.id ? { ...a, ...formData } : a));
                      onClose();
                      addNotification({ title: 'Success', message: 'Agent profile updated successfully.', type: 'success' });
                    }}
@@ -7708,8 +7735,8 @@ const AgentActionsModal = ({ isOpen, onClose, agent, type, setAgents, agents, ad
                      <div className="h-full bg-orange-500 w-[85%]"></div>
                   </div>
                   <div className="flex justify-between text-[10px] font-black text-text-secondary-light uppercase">
-                     <span>₹8.5L Achieved</span>
-                     <span>₹10L Target</span>
+                     <span>â‚¹8.5L Achieved</span>
+                     <span>â‚¹10L Target</span>
                   </div>
                </div>
             </div>
@@ -8088,7 +8115,7 @@ const VerificationDetailModal = ({ isOpen, onClose, verification, onApprove, onR
             </div>
             <div>
               <h3 className="text-xl font-black dark:text-white tracking-tight uppercase">{verification.entityName}</h3>
-              <p className="text-sm text-text-secondary-light font-bold">Verification Request • {verification.type}</p>
+              <p className="text-sm text-text-secondary-light font-bold">Verification Request â€¢ {verification.type}</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-secondary-dark rounded-xl transition-all"><X size={20} className="dark:text-white" /></button>
@@ -8140,7 +8167,7 @@ const VerificationDetailModal = ({ isOpen, onClose, verification, onApprove, onR
                       </div>
                       <div>
                         <p className="text-sm font-black dark:text-white">{doc.name}</p>
-                        <p className="text-[10px] font-bold text-text-secondary-light uppercase">{doc.fileType} • {doc.size}</p>
+                        <p className="text-[10px] font-bold text-text-secondary-light uppercase">{doc.fileType} â€¢ {doc.size}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -8316,4 +8343,5 @@ const CommissionInsightModal = ({ isOpen, onClose, agent }) => {
 };
 
 export default AdminDashboard;
+
 
