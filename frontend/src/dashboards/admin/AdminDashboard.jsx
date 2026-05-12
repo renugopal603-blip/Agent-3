@@ -272,6 +272,20 @@ const AdminDashboard = () => {
     { id: 4, name: 'Sanjay Dutt', role: 'Divisional Agent', territory: 'Electronics', status: 'Active' },
   ]);
 
+  const [kycApplications, setKycApplications] = useState([
+    { id: 'KYC-8821', agent: 'Rahul Dev', territory: 'Pune', status: 'Pending', date: '2h ago', risk: 'Low' },
+    { id: 'KYC-8820', agent: 'Sneha Patel', territory: 'Mumbai', status: 'Approved', date: '5h ago', risk: 'Low' },
+    { id: 'KYC-8818', agent: 'Vikram Singh', territory: 'Delhi', status: 'Rejected', date: '1d ago', risk: 'High' }
+  ]);
+
+  const [transactions, setTransactions] = useState([
+    { id: 'TXN-990812', date: 'Today, 10:45 AM', name: 'Fresh Grocery Mart', type: 'Shop Settlement', method: 'Bank Transfer', amount: '+ ₹12,450.00', status: 'Completed' },
+    { id: 'TXN-990813', date: 'Today, 09:15 AM', name: 'Arjun Reddy', type: 'Membership Upgrade', method: 'UPI', amount: '+ ₹4,999.00', status: 'Completed' },
+    { id: 'TXN-990814', date: 'Yesterday, 04:30 PM', name: 'State Agent Commission', type: 'Payout', method: 'NEFT', amount: '- ₹45,000.00', status: 'Processing' },
+    { id: 'TXN-990815', date: 'Yesterday, 02:10 PM', name: 'Modern Electronics', type: 'Platform Fee', method: 'Credit Card', amount: '+ ₹1,250.00', status: 'Failed' },
+    { id: 'TXN-990816', date: 'Oct 24, 11:20 AM', name: 'Customer Refund', type: 'Order Cancellation', method: 'Original Source', amount: '- ₹850.00', status: 'Refunded' },
+  ]);
+
   const [documentVerifications, setDocumentVerifications] = useState([
     {
       id: 1,
@@ -1874,7 +1888,7 @@ const AdminDashboard = () => {
                   <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary-light group-hover:text-primary-light transition-colors pointer-events-none" />
                 </div>
                 <button 
-                  onClick={() => addNotification({ title: 'Exporting Ledger', message: 'Preparing financial ledger for export... CSV/PDF formats will be ready in a moment.', type: 'info' })}
+                  onClick={() => exportToCSV(transactions, 'transaction_ledger')}
                   className="btn-primary px-6 py-2.5 text-sm font-bold flex items-center gap-2 shadow-lg shadow-primary-light/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
                 >
                   <CreditCard size={18} /> Export Ledger
@@ -1934,13 +1948,7 @@ const AdminDashboard = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border-light dark:divide-border-dark">
-                    {[
-                      { id: 'TXN-990812', date: 'Today, 10:45 AM', name: 'Fresh Grocery Mart', type: 'Shop Settlement', method: 'Bank Transfer', amount: '+ ₹12,450.00', status: 'Completed' },
-                      { id: 'TXN-990813', date: 'Today, 09:15 AM', name: 'Arjun Reddy', type: 'Membership Upgrade', method: 'UPI', amount: '+ ₹4,999.00', status: 'Completed' },
-                      { id: 'TXN-990814', date: 'Yesterday, 04:30 PM', name: 'State Agent Commission', type: 'Payout', method: 'NEFT', amount: '- ₹45,000.00', status: 'Processing' },
-                      { id: 'TXN-990815', date: 'Yesterday, 02:10 PM', name: 'Modern Electronics', type: 'Platform Fee', method: 'Credit Card', amount: '+ ₹1,250.00', status: 'Failed' },
-                      { id: 'TXN-990816', date: 'Oct 24, 11:20 AM', name: 'Customer Refund', type: 'Order Cancellation', method: 'Original Source', amount: '- ₹850.00', status: 'Refunded' },
-                    ].map((txn) => (
+                    {transactions.map((txn) => (
                       <tr key={txn.id} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50 transition-colors">
                         <td className="py-3">
                           <p className="dark:text-white font-bold text-sm tracking-tight">{txn.id}</p>

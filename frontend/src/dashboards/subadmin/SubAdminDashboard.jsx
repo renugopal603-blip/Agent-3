@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -82,6 +82,14 @@ const SubAdminDashboard = () => {
     { id: 'TKT-4815', subject: 'App crash on data submission', by: 'Rahul Dev', priority: 'Low', status: 'In Progress', time: 'Yesterday' },
     { id: 'TKT-4810', subject: 'Wrong area assigned to agent', by: 'Sneha Patel', priority: 'Medium', status: 'Resolved', time: '2 days ago' },
     { id: 'TKT-4805', subject: 'Referral bonus not reflecting', by: 'Vikram Kumar', priority: 'Low', status: 'Resolved', time: '3 days ago' },
+  ]);
+
+
+
+  const [payoutData, setPayoutData] = useState([
+    { id: 'TXN-9021', name: 'Amit Singh (Fresh Mart)', amount: '1240', date: 'Oct 12, 2023', status: 'Successful' },
+    { id: 'TXN-9020', name: 'Priya Verma (ElectroHub)', amount: '850', date: 'Oct 12, 2023', status: 'Pending' },
+    { id: 'TXN-9018', name: 'Rahul Dev (Style Studio)', amount: '2100', date: 'Oct 11, 2023', status: 'Successful' },
   ]);
 
   const exportToCSV = (data, filename) => {
@@ -518,7 +526,7 @@ const SubAdminDashboard = () => {
                   <Filter size={14} /> Filters
                 </button>
                 <button 
-                  onClick={() => handleDownload('Shop_Verification_Report', 'pdf')}
+                  onClick={() => exportToCSV(verifyShops, 'shop_verification_report')}
                   className="px-4 py-2 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl text-xs font-black text-text-secondary-light flex items-center gap-2 hover:border-primary-light transition-all"
                 >
                   <Download size={14} /> Export
@@ -639,7 +647,7 @@ const SubAdminDashboard = () => {
                   <Filter size={14} /> Filters
                 </button>
                 <button 
-                  onClick={() => handleDownload('KYC_Document_Ledger', 'csv')}
+                  onClick={() => exportToCSV(kycRequests, 'kyc_document_ledger')}
                   className="px-4 py-2 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl text-xs font-black text-text-secondary-light flex items-center gap-2 hover:border-primary-light transition-all"
                 >
                   <Download size={14} /> Export
@@ -1539,10 +1547,7 @@ const SubAdminDashboard = () => {
               </div>
               <div className="flex gap-3">
                 <button 
-                  onClick={() => {
-                    addNotification({ title: 'Exporting Ledger', message: 'Preparing financial report (CSV)...', type: 'info' });
-                    setTimeout(() => addNotification({ title: 'Export Ready', message: 'Ledger downloaded successfully.', type: 'success' }), 2000);
-                  }}
+                  onClick={() => exportToCSV(payoutData, 'commission_ledger')}
                   className="px-4 py-2 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl text-xs font-black text-text-secondary-light flex items-center gap-2 hover:border-primary-light transition-all"
                 >
                   <Download size={14} /> Export CSV
@@ -1614,12 +1619,7 @@ const SubAdminDashboard = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border-light dark:divide-border-dark">
-                  {[
-                    { id: 'TXN-9021', name: 'Amit Singh (Fresh Mart)', amount: 'Ã¢â€šÂ¹1,240', date: 'Oct 12, 2023', status: 'Successful' },
-                    { id: 'TXN-9020', name: 'Priya Verma (ElectroHub)', amount: 'Ã¢â€šÂ¹850', date: 'Oct 12, 2023', status: 'Pending' },
-                    { id: 'TXN-9018', name: 'Rahul Dev (Style Studio)', amount: 'Ã¢â€šÂ¹2,100', date: 'Oct 11, 2023', status: 'Successful' },
-                    { id: 'TXN-9015', name: 'Vikram Kumar (Gadget Zone)', amount: 'Ã¢â€šÂ¹420', date: 'Oct 11, 2023', status: 'Refunded' },
-                  ]
+                  {payoutData
                   .filter(txn => {
                     const matchesFilter = financeFilter === 'All' || txn.status === financeFilter;
                     const matchesSearch = txn.id.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -2430,7 +2430,12 @@ const ReportDetailsModal = ({ isOpen, onClose, reportTitle }) => {
               </h4>
               <p className="text-xs text-text-secondary-light">This report is verified and synced in real-time.</p>
             </div>
-            <button className="px-4 py-2 bg-primary-light text-white rounded-xl text-xs font-black shadow-lg">Export CSV</button>
+            <button 
+              onClick={() => exportToCSV(systemUsers, 'area_performance_report')}
+              className="px-4 py-2 bg-primary-light text-white rounded-xl text-xs font-black shadow-lg"
+            >
+              Export CSV
+            </button>
           </div>
         </div>
 
