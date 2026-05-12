@@ -36,6 +36,15 @@ const seedAdmin = async () => {
         role: 'Agent',
         status: 'Active',
         applicationStatus: 'Approved'
+      },
+      {
+        name: 'Demo User',
+        email: 'user8778@agenticstore.com',
+        phone: '8778942170',
+        password: '8778942170',
+        role: 'Sub-Admin',
+        status: 'Active',
+        applicationStatus: 'Approved'
       }
     ];
 
