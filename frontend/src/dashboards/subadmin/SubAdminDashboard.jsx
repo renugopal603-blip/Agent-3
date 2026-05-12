@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -226,7 +226,7 @@ const SubAdminDashboard = () => {
       };
       const { data } = await axios.put(`/api/shops/${id}/verify`, { status: 'Verified' }, config);
       
-      setVerifyShops(verifyShops.map(s => s.id === id ? { ...s, status: 'Verified' } : s));
+      setVerifyShops(verifyShops.filter(s => shopStatusFilter === 'All' || s.status === shopStatusFilter).map(s => s.id === id ? { ...s, status: 'Verified' } : s));
       addNotification({
         title: 'Shop Verified',
         message: `Shop has been verified and sent to Admin for final approval.`,
@@ -239,7 +239,7 @@ const SubAdminDashboard = () => {
 
   const handleApproveKYC = (id) => {
     const kyc = kycRequests.find(k => k.id === id);
-    setKycRequests(kycRequests.map(k => k.id === id ? { ...k, status: 'Approved' } : k));
+    setKycRequests(kycRequests.filter(k => kycStatusFilter === 'All' || k.status === kycStatusFilter).map(k => k.id === id ? { ...k, status: 'Approved' } : k));
     addNotification({
       title: 'KYC Approved',
       message: `KYC for ${kyc.name} has been approved successfully.`,
@@ -249,7 +249,7 @@ const SubAdminDashboard = () => {
 
   const handleRejectKYC = (id) => {
     const kyc = kycRequests.find(k => k.id === id);
-    setKycRequests(kycRequests.map(k => k.id === id ? { ...k, status: 'Rejected' } : k));
+    setKycRequests(kycRequests.filter(k => kycStatusFilter === 'All' || k.status === kycStatusFilter).map(k => k.id === id ? { ...k, status: 'Rejected' } : k));
     addNotification({
       title: 'KYC Rejected',
       message: `KYC for ${kyc.name} has been rejected.`,
@@ -259,7 +259,7 @@ const SubAdminDashboard = () => {
 
   const handleReject = (id) => {
     const shop = verifyShops.find(s => s.id === id);
-    setVerifyShops(verifyShops.map(s => s.id === id ? { ...s, status: 'Rejected' } : s));
+    setVerifyShops(verifyShops.filter(s => shopStatusFilter === 'All' || s.status === shopStatusFilter).map(s => s.id === id ? { ...s, status: 'Rejected' } : s));
     addNotification({
       title: 'Shop Rejected',
       message: `Shop "${shop.name}" has been rejected. The agent will be notified.`,
@@ -533,6 +533,23 @@ const SubAdminDashboard = () => {
                 </button>
               </div>
             </div>
+
+            {showShopFilters && (
+              <div className="p-6 bg-white dark:bg-secondary-dark rounded-2xl shadow-sm border border-border-light dark:border-border-dark flex flex-wrap gap-4 animate-in slide-in-from-top-2 duration-300">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-text-secondary-light">Status Filter</label>
+                  <select 
+                    value={shopStatusFilter}
+                    onChange={(e) => setShopStatusFilter(e.target.value)}
+                    className="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-background-dark border-none outline-none dark:text-white text-xs font-bold">
+                    <option>All</option>
+                    <option>Pending Review</option>
+                    <option>Action Required</option>
+                    <option>Incomplete</option>
+                  </select>
+                </div>
+              </div>
+            )}
             
             <div className="card-premium p-0 overflow-hidden">
               <table className="w-full text-left">
@@ -546,7 +563,7 @@ const SubAdminDashboard = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border-light dark:divide-border-dark">
-                  {verifyShops.map((s) => (
+                  {verifyShops.filter(s => shopStatusFilter === 'All' || s.status === shopStatusFilter).map((s) => (
                     <tr key={s.id} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50 transition-colors">
                       <td className="p-4">
                         <div>
@@ -658,8 +675,26 @@ const SubAdminDashboard = () => {
               </div>
             </div>
 
+            {showKYCFilters && (
+              <div className="p-6 bg-white dark:bg-secondary-dark rounded-2xl shadow-sm border border-border-light dark:border-border-dark flex flex-wrap gap-4 animate-in slide-in-from-top-2 duration-300">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-text-secondary-light">Status Filter</label>
+                  <select 
+                    value={kycStatusFilter}
+                    onChange={(e) => setKycStatusFilter(e.target.value)}
+                    className="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-background-dark border-none outline-none dark:text-white text-xs font-bold">
+                    <option>All</option>
+                    <option>Pending Review</option>
+                    <option>In Review</option>
+                    <option>Approved</option>
+                    <option>Rejected</option>
+                  </select>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {kycRequests.map((k) => (
+              {kycRequests.filter(k => kycStatusFilter === 'All' || k.status === kycStatusFilter).map((k) => (
                 <div key={k.id} className="card-premium group hover:border-primary-light/50 transition-all">
                   <div className="flex justify-between items-start mb-6">
                     <div className="flex gap-4 items-center">
@@ -668,7 +703,7 @@ const SubAdminDashboard = () => {
                       </div>
                       <div>
                         <h4 className="font-black dark:text-white text-lg tracking-tight">{k.name}</h4>
-                        <p className="text-xs font-bold text-text-secondary-light uppercase tracking-widest">{k.role} Ã‚Â· {k.location}</p>
+                        <p className="text-xs font-bold text-text-secondary-light uppercase tracking-widest">{k.role} Ãƒâ€šÃ‚Â· {k.location}</p>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2">
@@ -744,9 +779,9 @@ const SubAdminDashboard = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
-                { label: 'Total Volume', value: 'Ã¢â€šÂ¹12.5L', color: 'bg-primary-light', icon: <Briefcase /> },
-                { label: 'This Month', value: 'Ã¢â€šÂ¹2.4L', color: 'bg-emerald-500', icon: <TrendingUp /> },
-                { label: 'Pending Settlement', value: 'Ã¢â€šÂ¹45K', color: 'bg-orange-500', icon: <Clock /> },
+                { label: 'Total Volume', value: 'ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹12.5L', color: 'bg-primary-light', icon: <Briefcase /> },
+                { label: 'This Month', value: 'ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹2.4L', color: 'bg-emerald-500', icon: <TrendingUp /> },
+                { label: 'Pending Settlement', value: 'ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹45K', color: 'bg-orange-500', icon: <Clock /> },
               ].map((stat, i) => (
                 <div key={i} className="card-premium flex items-center gap-4">
                   <div className={`p-4 ${stat.color} text-white rounded-2xl shadow-lg`}>
@@ -778,9 +813,9 @@ const SubAdminDashboard = () => {
                     </thead>
                     <tbody className="divide-y divide-border-light dark:divide-border-dark">
                       {[
-                        { id: 'TXN-00192', date: 'Today, 10:30 AM', type: 'Shop Onboarding', amount: 'Ã¢â€šÂ¹1,200', status: 'Completed' },
-                        { id: 'TXN-00191', date: 'Yesterday', type: 'Sales Commission', amount: 'Ã¢â€šÂ¹4,500', status: 'Pending' },
-                        { id: 'TXN-00189', date: 'Oct 24', type: 'Performance Bonus', amount: 'Ã¢â€šÂ¹12,400', status: 'Completed' },
+                        { id: 'TXN-00192', date: 'Today, 10:30 AM', type: 'Shop Onboarding', amount: 'ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹1,200', status: 'Completed' },
+                        { id: 'TXN-00191', date: 'Yesterday', type: 'Sales Commission', amount: 'ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹4,500', status: 'Pending' },
+                        { id: 'TXN-00189', date: 'Oct 24', type: 'Performance Bonus', amount: 'ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹12,400', status: 'Completed' },
                       ].map((t, i) => (
                         <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50 group transition-colors">
                           <td className="py-4 font-bold dark:text-white text-sm">{t.id}</td>
@@ -821,7 +856,7 @@ const SubAdminDashboard = () => {
                       </div>
                       <div className="flex-1">
                         <p className="text-xs font-black dark:text-white">{item.title}</p>
-                        <p className="text-[10px] font-bold text-text-secondary-light uppercase mt-0.5">{item.size} Ã‚Â· PDF</p>
+                        <p className="text-[10px] font-bold text-text-secondary-light uppercase mt-0.5">{item.size} Ãƒâ€šÃ‚Â· PDF</p>
                       </div>
                       <Download size={14} className="text-text-secondary-light group-hover:text-primary-light" />
                     </div>
@@ -1200,7 +1235,7 @@ const SubAdminDashboard = () => {
 
             {/* Quick Submit Form */}
             <div className="card-premium space-y-5">
-              <h4 className="font-bold dark:text-white text-lg border-b border-border-light dark:border-border-dark pb-3">Ã°Å¸â€œÂ Today's Field Update</h4>
+              <h4 className="font-bold dark:text-white text-lg border-b border-border-light dark:border-border-dark pb-3">ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â Today's Field Update</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Zone / Area Covered</label>
@@ -1229,17 +1264,17 @@ const SubAdminDashboard = () => {
                 disabled={reportSubmitted}
                 className={`w-full py-3 text-white rounded-2xl font-black text-sm shadow-xl transition-all ${reportSubmitted ? 'bg-success shadow-success/20 scale-[0.98]' : 'bg-primary-light shadow-primary-light/20 hover:scale-[1.01] active:scale-[0.99]'}`}
               >
-                {reportSubmitted ? 'Ã¢Å“â€œ Report Submitted' : 'Submit Field Report'}
+                {reportSubmitted ? 'ÃƒÂ¢Ã…â€œÃ¢â‚¬Å“ Report Submitted' : 'Submit Field Report'}
               </button>
             </div>
 
             {/* Recent Team Updates */}
             <div className="card-premium space-y-4">
-              <h4 className="font-bold dark:text-white text-lg border-b border-border-light dark:border-border-dark pb-3">Ã°Å¸â€¢Â Recent Team Updates</h4>
+              <h4 className="font-bold dark:text-white text-lg border-b border-border-light dark:border-border-dark pb-3">ÃƒÂ°Ã…Â¸Ã¢â‚¬Â¢Ã‚Â Recent Team Updates</h4>
               {[
                 { name: 'Amit Singh', zone: 'Pune South', time: '10:30 AM', note: 'Visited 6 shops, 1 new KYC submitted.', status: 'Submitted' },
                 { name: 'Priya Verma', zone: 'Pincode 411001', time: '11:15 AM', note: 'Agent follow-up done, updates collected.', status: 'Submitted' },
-                { name: 'Rahul Dev', zone: 'Mumbai South', time: 'Ã¢â‚¬â€', note: 'No update yet for today.', status: 'Pending' },
+                { name: 'Rahul Dev', zone: 'Mumbai South', time: 'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â', note: 'No update yet for today.', status: 'Pending' },
                 { name: 'Sneha Patel', zone: 'Delhi NCR A', time: '09:00 AM', note: 'Morning route complete, 4 shops verified.', status: 'Submitted' },
               ].map((update, i) => (
                 <div key={i} className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark">
@@ -1248,7 +1283,7 @@ const SubAdminDashboard = () => {
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="font-bold dark:text-white text-sm">{update.name}</p>
-                        <p className="text-[10px] text-text-secondary-light font-bold">{update.zone} Ã‚Â· {update.time}</p>
+                        <p className="text-[10px] text-text-secondary-light font-bold">{update.zone} Ãƒâ€šÃ‚Â· {update.time}</p>
                       </div>
                       <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
                         update.status === 'Submitted' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'
@@ -1379,7 +1414,7 @@ const SubAdminDashboard = () => {
 
             {/* Raise New Ticket Form */}
             <div className="card-premium space-y-5">
-              <h4 className="font-bold dark:text-white text-lg border-b border-border-light dark:border-border-dark pb-3">Ã°Å¸Å½Â« Raise a New Ticket</h4>
+              <h4 className="font-bold dark:text-white text-lg border-b border-border-light dark:border-border-dark pb-3">ÃƒÂ°Ã…Â¸Ã…Â½Ã‚Â« Raise a New Ticket</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Issue Category</label>
@@ -1494,7 +1529,7 @@ const SubAdminDashboard = () => {
               {[
                 { title: 'Agent Performance', value: '42 Active', sub: '+3 this week', color: 'bg-blue-500', icon: <Users size={22} /> },
                 { title: 'Shop Activity', value: '128 Shops', sub: '12 pending review', color: 'bg-emerald-500', icon: <Store size={22} /> },
-                { title: 'Commission Earned', value: 'Ã¢â€šÂ¹2.4L', sub: '+8% vs last month', color: 'bg-primary-light', icon: <DollarSign size={22} /> },
+                { title: 'Commission Earned', value: 'ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹2.4L', sub: '+8% vs last month', color: 'bg-primary-light', icon: <DollarSign size={22} /> },
               ].map((stat) => (
                 <div key={stat.title} className="card-premium flex items-center gap-4">
                   <div className={`p-4 ${stat.color} text-white rounded-2xl shadow-lg shrink-0`}>{stat.icon}</div>
@@ -1527,7 +1562,7 @@ const SubAdminDashboard = () => {
                         className="flex items-center justify-between p-3 bg-gray-50 dark:bg-secondary-dark rounded-xl group hover:bg-primary-light/5 cursor-pointer transition-all"
                       >
                         <span className="text-sm font-medium dark:text-white">{item}</span>
-                        <button className="text-[10px] font-black text-primary-light px-3 py-1 bg-primary-light/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">View Ã¢â€ â€™</button>
+                        <button className="text-[10px] font-black text-primary-light px-3 py-1 bg-primary-light/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">View ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢</button>
                       </div>
                     ))}
                   </div>
@@ -1592,9 +1627,9 @@ const SubAdminDashboard = () => {
             {/* Commission Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
-                { title: 'Total Commission', value: 'Ã¢â€šÂ¹4.8L', icon: <DollarSign size={20} />, color: 'bg-primary-light' },
-                { title: 'Payout Processed', value: 'Ã¢â€šÂ¹3.2L', icon: <CheckCircle size={20} />, color: 'bg-emerald-500' },
-                { title: 'Outstanding Balance', value: 'Ã¢â€šÂ¹1.6L', icon: <Clock size={20} />, color: 'bg-orange-500' },
+                { title: 'Total Commission', value: 'ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹4.8L', icon: <DollarSign size={20} />, color: 'bg-primary-light' },
+                { title: 'Payout Processed', value: 'ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹3.2L', icon: <CheckCircle size={20} />, color: 'bg-emerald-500' },
+                { title: 'Outstanding Balance', value: 'ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹1.6L', icon: <Clock size={20} />, color: 'bg-orange-500' },
               ].map((stat) => (
                 <div key={stat.title} className="card-premium flex items-center gap-4">
                   <div className={`p-4 ${stat.color} text-white rounded-2xl shadow-lg`}>{stat.icon}</div>
@@ -1751,7 +1786,7 @@ const SubAdminDashboard = () => {
         <header className="h-20 bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md border-b border-border-light dark:border-border-dark flex items-center justify-between px-8 sticky top-0 z-10 shadow-sm">
           <div>
             <h2 className="text-2xl font-bold dark:text-white tracking-tight">{activeTab}</h2>
-            <p className="text-xs text-text-secondary-light font-medium">Sub-Admin ID: SA-10294 Ã¢â‚¬â€ Welcome back, {user?.name?.split(' ')[0] || 'State'}!</p>
+            <p className="text-xs text-text-secondary-light font-medium">Sub-Admin ID: SA-10294 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Welcome back, {user?.name?.split(' ')[0] || 'State'}!</p>
           </div>
           <div className="flex items-center space-x-6">
             <button 
@@ -1958,11 +1993,11 @@ const CommissionPlanModal = ({ isOpen, onClose }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark">
                 <p className="text-xs font-bold text-text-secondary-light uppercase">New Shop Tie-up</p>
-                <p className="text-2xl font-black dark:text-white mt-1">Ã¢â€šÂ¹500 <span className="text-xs font-medium text-text-secondary-light">per shop</span></p>
+                <p className="text-2xl font-black dark:text-white mt-1">ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹500 <span className="text-xs font-medium text-text-secondary-light">per shop</span></p>
               </div>
               <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark">
                 <p className="text-xs font-bold text-text-secondary-light uppercase">Agent Referral</p>
-                <p className="text-2xl font-black dark:text-white mt-1">Ã¢â€šÂ¹1,000 <span className="text-xs font-medium text-text-secondary-light">per agent</span></p>
+                <p className="text-2xl font-black dark:text-white mt-1">ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹1,000 <span className="text-xs font-medium text-text-secondary-light">per agent</span></p>
               </div>
             </div>
           </div>
@@ -1979,15 +2014,15 @@ const CommissionPlanModal = ({ isOpen, onClose }) => {
                 </thead>
                 <tbody className="divide-y divide-border-light dark:divide-border-dark">
                   <tr>
-                    <td className="p-4 text-sm font-bold dark:text-white">Up to Ã¢â€šÂ¹5 Lakhs</td>
+                    <td className="p-4 text-sm font-bold dark:text-white">Up to ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹5 Lakhs</td>
                     <td className="p-4 text-sm font-black text-emerald-500 text-right">3%</td>
                   </tr>
                   <tr>
-                    <td className="p-4 text-sm font-bold dark:text-white">Ã¢â€šÂ¹5 Lakhs - Ã¢â€šÂ¹15 Lakhs</td>
+                    <td className="p-4 text-sm font-bold dark:text-white">ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹5 Lakhs - ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹15 Lakhs</td>
                     <td className="p-4 text-sm font-black text-emerald-500 text-right">5%</td>
                   </tr>
                   <tr>
-                    <td className="p-4 text-sm font-bold dark:text-white">Above Ã¢â€šÂ¹15 Lakhs</td>
+                    <td className="p-4 text-sm font-bold dark:text-white">Above ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹15 Lakhs</td>
                     <td className="p-4 text-sm font-black text-emerald-500 text-right">8%</td>
                   </tr>
                 </tbody>
@@ -2185,7 +2220,7 @@ const ShopDetailModal = ({ isOpen, onClose, shop }) => {
             <div className="w-14 h-14 bg-primary-light rounded-2xl flex items-center justify-center text-white text-xl font-black">{shop.name[0]}</div>
             <div>
               <h3 className="text-xl font-black dark:text-white">{shop.name}</h3>
-              <p className="text-xs font-bold text-text-secondary-light uppercase tracking-widest">{shop.cat} Ã‚Â· {shop.loc}</p>
+              <p className="text-xs font-bold text-text-secondary-light uppercase tracking-widest">{shop.cat} Ãƒâ€šÃ‚Â· {shop.loc}</p>
             </div>
           </div>
           <button onClick={onClose} className="p-3 hover:bg-gray-100 dark:hover:bg-secondary-dark rounded-2xl transition-all"><X size={24} className="dark:text-white"/></button>
@@ -2417,7 +2452,7 @@ const ReportDetailsModal = ({ isOpen, onClose, reportTitle }) => {
                     <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
                     <span className="text-sm font-bold dark:text-white">Region Zone - {i * 10} Alpha</span>
                   </div>
-                  <span className="text-sm font-black text-primary-light">Ã¢â€šÂ¹{(i * 12.5).toFixed(1)}L</span>
+                  <span className="text-sm font-black text-primary-light">ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹{(i * 12.5).toFixed(1)}L</span>
                 </div>
               ))}
             </div>
@@ -2467,7 +2502,7 @@ const ChangePasswordModal = ({ isOpen, onClose, onSuccess }) => {
               <div key={label} className="space-y-2">
                 <label className="text-[10px] font-black uppercase text-text-secondary-light">{label}</label>
                 <div className="relative">
-                  <input type="password" placeholder="Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢" className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
+                  <input type="password" placeholder="ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢" className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" />
                   <Key className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary-light" size={18} />
                 </div>
               </div>
@@ -2533,9 +2568,9 @@ const SessionsModal = ({ isOpen, onClose }) => {
         </div>
         <div className="p-8 space-y-4">
           {[
-            { device: 'Windows PC Ã‚Â· Chrome', location: 'Delhi, India (Current)', status: 'Online', icon: <History /> },
-            { device: 'iPhone 15 Ã‚Â· Safari', location: 'Mumbai, India', status: '2h ago', icon: <History /> },
-            { device: 'macOS Ã‚Â· Firefox', location: 'Pune, India', status: 'Yesterday', icon: <History /> },
+            { device: 'Windows PC Ãƒâ€šÃ‚Â· Chrome', location: 'Delhi, India (Current)', status: 'Online', icon: <History /> },
+            { device: 'iPhone 15 Ãƒâ€šÃ‚Â· Safari', location: 'Mumbai, India', status: '2h ago', icon: <History /> },
+            { device: 'macOS Ãƒâ€šÃ‚Â· Firefox', location: 'Pune, India', status: 'Yesterday', icon: <History /> },
           ].map((s, i) => (
             <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-secondary-dark/50 rounded-2xl border border-border-light dark:border-border-dark group">
               <div className="flex items-center gap-4">
@@ -2763,6 +2798,8 @@ const AgentDetailModal = ({ isOpen, onClose, agent, type, onSave }) => {
   );
 };
 export default SubAdminDashboard;
+
+
 
 
 
