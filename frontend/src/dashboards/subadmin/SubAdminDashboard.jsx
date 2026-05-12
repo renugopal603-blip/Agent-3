@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -1205,8 +1205,12 @@ const SubAdminDashboard = () => {
               <button 
                 onClick={() => {
                   setReportSubmitted(true);
-                  addNotification({ title: 'Report Submitted', message: 'Your daily field report has been sent successfully.', type: 'success' });
-                  setTimeout(() => setReportSubmitted(false), 3000);
+                  addNotification({ 
+                    title: 'Report Submitted', 
+                    message: 'Your daily field report for Pune Central has been successfully recorded.', 
+                    type: 'success' 
+                  });
+                  setTimeout(() => setReportSubmitted(false), 5000);
                 }}
                 disabled={reportSubmitted}
                 className={`btn-primary px-4 py-2 text-sm flex items-center gap-2 transition-all ${reportSubmitted ? 'bg-success border-success' : ''}`}
@@ -1235,7 +1239,7 @@ const SubAdminDashboard = () => {
 
             {/* Quick Submit Form */}
             <div className="card-premium space-y-5">
-              <h4 className="font-bold dark:text-white text-lg border-b border-border-light dark:border-border-dark pb-3">ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â Today's Field Update</h4>
+              <h4 className="font-bold dark:text-white text-lg border-b border-border-light dark:border-border-dark pb-3">📝 Today's Field Update</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Zone / Area Covered</label>
@@ -1258,23 +1262,27 @@ const SubAdminDashboard = () => {
               <button 
                 onClick={() => {
                   setReportSubmitted(true);
-                  addNotification({ title: 'Report Submitted', message: 'Your daily field report has been sent successfully.', type: 'success' });
-                  setTimeout(() => setReportSubmitted(false), 3000);
+                  addNotification({ 
+                    title: 'Report Submitted', 
+                    message: 'Your daily field report for Pune Central has been successfully recorded.', 
+                    type: 'success' 
+                  });
+                  setTimeout(() => setReportSubmitted(false), 5000);
                 }}
                 disabled={reportSubmitted}
                 className={`w-full py-3 text-white rounded-2xl font-black text-sm shadow-xl transition-all ${reportSubmitted ? 'bg-success shadow-success/20 scale-[0.98]' : 'bg-primary-light shadow-primary-light/20 hover:scale-[1.01] active:scale-[0.99]'}`}
               >
-                {reportSubmitted ? 'ÃƒÂ¢Ã…â€œÃ¢â‚¬Å“ Report Submitted' : 'Submit Field Report'}
+                {reportSubmitted ? '✅ Report Submitted' : 'Submit Field Report'}
               </button>
             </div>
 
             {/* Recent Team Updates */}
             <div className="card-premium space-y-4">
-              <h4 className="font-bold dark:text-white text-lg border-b border-border-light dark:border-border-dark pb-3">ÃƒÂ°Ã…Â¸Ã¢â‚¬Â¢Ã‚Â Recent Team Updates</h4>
+              <h4 className="font-bold dark:text-white text-lg border-b border-border-light dark:border-border-dark pb-3">🕒 Recent Team Updates</h4>
               {[
                 { name: 'Amit Singh', zone: 'Pune South', time: '10:30 AM', note: 'Visited 6 shops, 1 new KYC submitted.', status: 'Submitted' },
                 { name: 'Priya Verma', zone: 'Pincode 411001', time: '11:15 AM', note: 'Agent follow-up done, updates collected.', status: 'Submitted' },
-                { name: 'Rahul Dev', zone: 'Mumbai South', time: 'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â', note: 'No update yet for today.', status: 'Pending' },
+                { name: 'Rahul Dev', zone: 'Mumbai South', time: '--:--', note: 'No update yet for today.', status: 'Pending' },
                 { name: 'Sneha Patel', zone: 'Delhi NCR A', time: '09:00 AM', note: 'Morning route complete, 4 shops verified.', status: 'Submitted' },
               ].map((update, i) => (
                 <div key={i} className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark">
@@ -1283,7 +1291,7 @@ const SubAdminDashboard = () => {
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="font-bold dark:text-white text-sm">{update.name}</p>
-                        <p className="text-[10px] text-text-secondary-light font-bold">{update.zone} Ãƒâ€šÃ‚Â· {update.time}</p>
+                        <p className="text-[10px] text-text-secondary-light font-bold">{update.zone} · {update.time}</p>
                       </div>
                       <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
                         update.status === 'Submitted' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'
@@ -1414,7 +1422,7 @@ const SubAdminDashboard = () => {
 
             {/* Raise New Ticket Form */}
             <div className="card-premium space-y-5">
-              <h4 className="font-bold dark:text-white text-lg border-b border-border-light dark:border-border-dark pb-3">ÃƒÂ°Ã…Â¸Ã…Â½Ã‚Â« Raise a New Ticket</h4>
+              <h4 className="font-bold dark:text-white text-lg border-b border-border-light dark:border-border-dark pb-3">🎟️ Raise a New Ticket</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Issue Category</label>
@@ -1529,7 +1537,7 @@ const SubAdminDashboard = () => {
               {[
                 { title: 'Agent Performance', value: '42 Active', sub: '+3 this week', color: 'bg-blue-500', icon: <Users size={22} /> },
                 { title: 'Shop Activity', value: '128 Shops', sub: '12 pending review', color: 'bg-emerald-500', icon: <Store size={22} /> },
-                { title: 'Commission Earned', value: 'ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹2.4L', sub: '+8% vs last month', color: 'bg-primary-light', icon: <DollarSign size={22} /> },
+                { title: 'Commission Earned', value: '₹2.4L', sub: '+8% vs last month', color: 'bg-primary-light', icon: <DollarSign size={22} /> },
               ].map((stat) => (
                 <div key={stat.title} className="card-premium flex items-center gap-4">
                   <div className={`p-4 ${stat.color} text-white rounded-2xl shadow-lg shrink-0`}>{stat.icon}</div>
@@ -1562,7 +1570,7 @@ const SubAdminDashboard = () => {
                         className="flex items-center justify-between p-3 bg-gray-50 dark:bg-secondary-dark rounded-xl group hover:bg-primary-light/5 cursor-pointer transition-all"
                       >
                         <span className="text-sm font-medium dark:text-white">{item}</span>
-                        <button className="text-[10px] font-black text-primary-light px-3 py-1 bg-primary-light/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">View ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢</button>
+                        <button className="text-[10px] font-black text-primary-light px-3 py-1 bg-primary-light/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">View ➔</button>
                       </div>
                     ))}
                   </div>
@@ -1627,9 +1635,9 @@ const SubAdminDashboard = () => {
             {/* Commission Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
-                { title: 'Total Commission', value: 'ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹4.8L', icon: <DollarSign size={20} />, color: 'bg-primary-light' },
-                { title: 'Payout Processed', value: 'ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹3.2L', icon: <CheckCircle size={20} />, color: 'bg-emerald-500' },
-                { title: 'Outstanding Balance', value: 'ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¹1.6L', icon: <Clock size={20} />, color: 'bg-orange-500' },
+                { title: 'Total Commission', value: '₹4.8L', icon: <DollarSign size={20} />, color: 'bg-primary-light' },
+                { title: 'Payout Processed', value: '₹3.2L', icon: <CheckCircle size={20} />, color: 'bg-emerald-500' },
+                { title: 'Outstanding Balance', value: '₹1.6L', icon: <Clock size={20} />, color: 'bg-orange-500' },
               ].map((stat) => (
                 <div key={stat.title} className="card-premium flex items-center gap-4">
                   <div className={`p-4 ${stat.color} text-white rounded-2xl shadow-lg`}>{stat.icon}</div>
@@ -1786,7 +1794,7 @@ const SubAdminDashboard = () => {
         <header className="h-20 bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-md border-b border-border-light dark:border-border-dark flex items-center justify-between px-8 sticky top-0 z-10 shadow-sm">
           <div>
             <h2 className="text-2xl font-bold dark:text-white tracking-tight">{activeTab}</h2>
-            <p className="text-xs text-text-secondary-light font-medium">Sub-Admin ID: SA-10294 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Welcome back, {user?.name?.split(' ')[0] || 'State'}!</p>
+            <p className="text-xs text-text-secondary-light font-medium">Sub-Admin ID: SA-10294 • Welcome back, {user?.name?.split(' ')[0] || 'State'}!</p>
           </div>
           <div className="flex items-center space-x-6">
             <button 
