@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { jsPDF } from 'jspdf';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -242,15 +243,26 @@ const AgentDashboard = () => {
     } catch (e) {
       console.error('Failed to load shops from localStorage', e);
     }
-    return [
-      { id: 1, name: 'Fresh Mart Grocery', category: 'Grocery', owner: 'Ramesh K.', sales: '₹1.2L', status: 'Active', rating: '4.8', date: 'May 01, 2026' },
-      { id: 2, name: 'Electro World', category: 'Electronics', owner: 'Vijay M.', sales: '₹4.5L', status: 'Active', rating: '4.5', date: 'May 02, 2026' },
-      { id: 3, name: 'Style Studio', category: 'Fashion', owner: 'Anjali S.', sales: '₹85K', status: 'Pending Admin', rating: 'N/A', date: 'May 03, 2026' },
-      { id: 4, name: 'Raj Electronics', category: 'Electronics', owner: 'Rajesh P.', sales: '₹0', status: 'Pending Review', rating: 'N/A', date: 'May 04, 2026' },
-      { id: 5, name: 'Gourmet Kitchen', category: 'Restaurant', owner: 'Suresh R.', sales: '₹2.1L', status: 'Active', rating: '4.9', date: 'May 05, 2026' },
-      { id: 6, name: 'City Inn Hotel', category: 'Hotel', owner: 'Priya X.', sales: '₹6.2L', status: 'Active', rating: '4.7', date: 'May 06, 2026' },
-    ];
+    return []; // Start empty, will fetch from API
   });
+
+  // 1. Fetch shops from MongoDB on load
+  useEffect(() => {
+    const fetchShops = async () => {
+      try {
+        if (!user?.token) return;
+        const config = { headers: { Authorization: `Bearer ${user.token}` } };
+        const { data } = await axios.get('/api/shops', config);
+        if (data && Array.isArray(data)) {
+          setShops(data);
+          localStorage.setItem('agentShops', JSON.stringify(data));
+        }
+      } catch (error) {
+        console.error('Error fetching shops from MongoDB:', error);
+      }
+    };
+    fetchShops();
+  }, [user?.token]);
 
   useEffect(() => {
     localStorage.setItem('agentShops', JSON.stringify(shops));
@@ -284,10 +296,19 @@ const AgentDashboard = () => {
     return () => window.removeEventListener('storage', syncGlobalShops);
   }, []);
 
-  const handleDeleteShop = (id) => {
+  const handleDeleteShop = async (id) => {
     if (window.confirm('Are you sure you want to remove this shop onboarding?')) {
-      setShops(shops.filter(s => s.id !== id));
-      addNotification({ title: 'Shop Removed', message: 'The shop has been removed from your list.', type: 'success' });
+      try {
+        if (user?.token) {
+          const config = { headers: { Authorization: `Bearer ${user.token}` } };
+          await axios.delete(`/api/shops/${id}`, config);
+        }
+        setShops(shops.filter(s => s.id !== id && s._id !== id));
+        addNotification({ title: 'Shop Removed', message: 'The shop has been removed from the database.', type: 'success' });
+      } catch (error) {
+        console.error('Delete error:', error);
+        addNotification({ title: 'Error', message: 'Failed to remove shop from database.', type: 'error' });
+      }
     }
   };
 
@@ -342,14 +363,31 @@ const AgentDashboard = () => {
         }
       };
 
-      const updatedShops = [...currentShops, newShop];
+      // 1. API Call to save to MongoDB
+      let savedShop = null;
+      if (user?.token) {
+        const config = { headers: { Authorization: `Bearer ${user.token}` } };
+        const payload = {
+          name: shopName,
+          category: shopForm.category || 'Grocery',
+          owner: ownerName,
+          location: shopLoc,
+          agent: user?.name,
+          documents: {
+            license: (shopForm.documents && shopForm.documents.licenseName) ? shopForm.documents.licenseName : 'Shop_License.pdf',
+            gst: (shopForm.documents && shopForm.documents.gstName) ? shopForm.documents.gstName : 'GST_Certificate.pdf'
+          }
+        };
+        const { data } = await axios.post('/api/shops', payload, config);
+        savedShop = data;
+      }
+
+      const shopToStore = savedShop || newShop;
+      const updatedShops = [...currentShops, shopToStore];
       
       // Sync to shared global state for Admin/Sub-Admin access
       const globalShops = JSON.parse(localStorage.getItem('globalShops') || '[]');
-      localStorage.setItem('globalShops', JSON.stringify([...globalShops, newShop]));
-      
-      // PERSIST AGENT SPECIFIC LIST
-      localStorage.setItem('agentShops', JSON.stringify(updatedShops));
+      localStorage.setItem('globalShops', JSON.stringify([...globalShops, shopToStore]));
       
       // UPDATE STATE
       setShops(updatedShops);

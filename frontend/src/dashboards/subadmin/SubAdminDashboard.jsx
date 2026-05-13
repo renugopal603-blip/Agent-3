@@ -31,6 +31,38 @@ const SubAdminDashboard = () => {
     { id: 3, name: 'Sneha Patel', role: 'Agent', docs: 'Aadhar', status: 'Incomplete', location: 'Pune', date: '1d ago' },
   ]);
 
+  const [verifyShops, setVerifyShops] = useState(() => {
+    try {
+      const saved = localStorage.getItem('verifyShops');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error('Failed to load verifyShops from localStorage', e);
+    }
+    return []; // Start empty
+  });
+
+  // 1. Fetch shops from MongoDB on load
+  useEffect(() => {
+    const fetchShops = async () => {
+      try {
+        if (!user?.token) return;
+        const config = { headers: { Authorization: `Bearer ${user.token}` } };
+        const { data } = await axios.get('/api/shops', config);
+        if (data && Array.isArray(data)) {
+          setVerifyShops(data);
+          localStorage.setItem('globalShops', JSON.stringify(data));
+        }
+      } catch (error) {
+        console.error('Error fetching shops from MongoDB:', error);
+      }
+    };
+    fetchShops();
+  }, [user?.token]);
+
+  useEffect(() => {
+    localStorage.setItem('verifyShops', JSON.stringify(verifyShops));
+  }, [verifyShops]);
+
   const [systemUsers, setSystemUsers] = useState([
     { id: 1, name: 'Amit Kumar', role: 'Sub Admin', phone: '+91 98765 43210', email: 'amit@adminhub.com', location: 'Delhi', status: 'Active', lastLogin: '2026-05-04 10:30', riskLevel: 'Low' },
     { id: 2, name: 'Rajesh Singh', role: 'Agent', phone: '+91 87654 32109', email: 'rajesh@agent.com', location: 'Mumbai', status: 'Suspended', lastLogin: '2026-05-03 15:45', riskLevel: 'Medium' },
@@ -231,65 +263,6 @@ const SubAdminDashboard = () => {
     }, 1000);
   };
 
-  const [verifyShops, setVerifyShops] = useState([
-    { id: 1, name: 'Fresh Mart', cat: 'Grocery', loc: 'Pune Central', status: 'Pending', agent: 'Rajesh Kumar', docs: ['GST', 'License'] },
-    { id: 2, name: 'ElectroHub', cat: 'Electronics', loc: 'Mumbai South', status: 'Pending', agent: 'Vikram Singh', docs: ['Trade License', 'Owner ID'] },
-    { id: 3, name: 'Style Studio', cat: 'Fashion', loc: 'Delhi NCR', status: 'Verified', agent: 'Sneha Patel', docs: ['GST', 'Photo'] },
-  ]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const config = {
-          headers: { Authorization: `Bearer ${user.token}` }
-        };
-        
-        const [agentsRes, shopsRes] = await Promise.all([
-          axios.get('/api/agents', config),
-          axios.get('/api/shops', config)
-        ]);
-
-        // Transform backend data to frontend format if necessary
-        const formattedAgents = agentsRes.data.map(a => ({
-          id: a._id,
-          name: a.name,
-          role: a.role,
-          phone: a.phone,
-          email: a.email,
-          location: a.territory?.pincode || 'Not Set',
-          status: a.status,
-          lastLogin: a.lastLogin || 'Never',
-          riskLevel: a.riskLevel || 'Low'
-        }));
-
-        const formattedShops = shopsRes.data.map(s => ({
-          id: s._id,
-          name: s.shopName,
-          cat: s.category,
-          loc: s.taluk + ', ' + s.pincode,
-          status: s.kycStatus,
-          agent: s.ownerId?.name || 'Unassigned',
-          docs: ['GST', 'License']
-        }));
-
-        setSystemUsers(formattedAgents);
-        setVerifyShops(formattedShops);
-      } catch (error) {
-        console.error('Error fetching dashboard data, using mock data:', error);
-        // Fallback to mock data if API fails to prevent white screen
-        setSystemUsers([
-          { id: 1, name: 'Amit Kumar', role: 'Agent', phone: '+91 98765 43210', email: 'amit@test.com', location: 'Delhi', status: 'Active', lastLogin: '10 min ago', riskLevel: 'Low' },
-          { id: 2, name: 'Rajesh Singh', role: 'Agent', phone: '+91 87654 32109', email: 'rajesh@test.com', location: 'Mumbai', status: 'Active', lastLogin: '1h ago', riskLevel: 'Medium' }
-        ]);
-        setVerifyShops([
-          { id: 1, name: 'Fresh Mart', cat: 'Grocery', loc: 'Pune Central', status: 'Pending', agent: 'Amit Kumar', docs: ['GST'] }
-        ]);
-      }
-    };
-
-    if (user?.token) fetchData();
-  }, [user]);
-
   useEffect(() => {
     const syncGlobalShops = () => {
       const globalShops = JSON.parse(localStorage.getItem('globalShops') || '[]');
@@ -328,16 +301,23 @@ const SubAdminDashboard = () => {
 
   const handleVerify = async (id) => {
     try {
-      // 1. Update local state
+      const dbId = id._id || id;
+      // 1. API call to update status in MongoDB
+      if (user?.token) {
+        const config = { headers: { Authorization: `Bearer ${user.token}` } };
+        await axios.put(`/api/shops/${dbId}/verify`, { status: 'Verified by Sub Admin' }, config);
+      }
+
+      // 2. Update local state
       const updatedShops = verifyShops.map(s => 
-        s.id === id ? { ...s, status: 'Verified by Sub Admin' } : s
+        (s._id === dbId || s.id === dbId) ? { ...s, status: 'Verified by Sub Admin' } : s
       );
       setVerifyShops(updatedShops);
-
-      // 2. Sync to globalShops for Admin approval
+ 
+      // 3. Sync to globalShops for Admin approval
       const globalShops = JSON.parse(localStorage.getItem('globalShops') || '[]');
       const updatedGlobal = globalShops.map(gs => 
-        gs.id === id ? { ...gs, status: 'Verified by Sub Admin' } : gs
+        (gs._id === dbId || gs.id === dbId) ? { ...gs, status: 'Verified by Sub Admin' } : gs
       );
       localStorage.setItem('globalShops', JSON.stringify(updatedGlobal));
 

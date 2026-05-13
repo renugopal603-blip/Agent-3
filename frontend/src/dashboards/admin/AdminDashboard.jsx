@@ -132,61 +132,85 @@ const AdminDashboard = () => {
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [globalShops, setGlobalShops] = useState([]);
 
-  useEffect(() => {
-    const syncGlobalShops = () => {
-      const shops = JSON.parse(localStorage.getItem('globalShops') || '[]');
-      setGlobalShops(shops);
-      
-      // Update shopTieUps state with latest global data
-      setShopTieUps(prev => {
-        const updated = [...prev];
-        shops.forEach(gs => {
-          const index = updated.findIndex(s => s.id === gs.id);
-          const normalized = {
-            id: gs.id,
-            shopName: gs.name || gs.shopName,
-            ownerName: gs.owner || gs.ownerName,
-            phone: gs.phone || '+91 00000 00000',
-            category: gs.category,
-            location: gs.location,
-            pincode: gs.pincode || 'N/A',
-            assignedAgent: gs.agent || 'AgentHub',
-            submittedBy: gs.submittedBy || (gs.agent ? `Agent ${gs.agent}` : 'AgentHub'),
-            status: gs.status,
-            docs: gs.documents ? Object.values(gs.documents) : ['GST', 'License']
-          };
+  const handleAdminApproveShop = async (id) => {
+    try {
+      const dbId = id._id || id;
+      // 1. API call to approve in MongoDB
+      if (user?.token) {
+        const config = { headers: { Authorization: `Bearer ${user.token}` } };
+        await axios.put(`/api/shops/${dbId}/approve`, {}, config);
+      }
 
-          if (index !== -1) {
-            // Update existing shop if status or data changed
-            updated[index] = normalized;
-          } else {
-            // Add new shop
-            updated.push(normalized);
-          }
-        });
-        return updated;
+      // 2. Update local state
+      setShopTieUps(prev => prev.map(s => 
+        (s.id === dbId || s._id === dbId) ? { ...s, status: 'Active' } : s
+      ));
+
+      // 3. Update global storage for other tabs
+      const globalShops = JSON.parse(localStorage.getItem('globalShops') || '[]');
+      const updatedGlobal = globalShops.map(s => 
+        (s._id === dbId || s.id === dbId) ? { ...s, status: 'Active' } : s
+      );
+      localStorage.setItem('globalShops', JSON.stringify(updatedGlobal));
+      
+      addNotification({
+        title: 'Shop Approved',
+        message: 'Shop registration is now complete and active.',
+        type: 'success'
       });
+      
+      pushGlobalNotification({ 
+        title: 'Shop Registration', 
+        message: 'A new shop has been approved.', 
+        type: 'success' 
+      });
+    } catch (error) {
+      console.error('Approval error:', error);
+      addNotification({ title: 'Error', message: 'Failed to approve shop.', type: 'error' });
+    }
+  };
+
+  useEffect(() => {
+    const syncGlobalShops = async () => {
+      try {
+        // 1. Fetch from MongoDB API
+        if (user?.token) {
+          const config = { headers: { Authorization: `Bearer ${user.token}` } };
+          const { data } = await axios.get('/api/shops', config);
+          if (data && Array.isArray(data)) {
+             setShopTieUps(prev => {
+                const updated = [...prev];
+                data.forEach(gs => {
+                  const index = updated.findIndex(s => s.id === gs._id || s._id === gs._id || s.id === gs.id);
+                  const normalized = {
+                    id: gs._id || gs.id,
+                    name: gs.name || gs.shopName,
+                    category: gs.category || gs.cat,
+                    owner: gs.owner || 'N/A',
+                    location: gs.location || gs.loc,
+                    agent: gs.agent || 'N/A',
+                    status: gs.status,
+                    date: gs.date
+                  };
+                  if (index !== -1) {
+                    updated[index] = normalized;
+                  } else {
+                    updated.push(normalized);
+                  }
+                });
+                return updated;
+             });
+             localStorage.setItem('globalShops', JSON.stringify(data));
+          }
+        }
+      } catch (err) {
+        console.error('API Sync Error:', err);
+      }
     };
+
     syncGlobalShops();
     window.addEventListener('storage', syncGlobalShops);
     return () => window.removeEventListener('storage', syncGlobalShops);
-  }, []);
-
-  const handleAdminApproveShop = (id) => {
-    const updatedGlobal = globalShops.map(s => 
-      s.id === id ? { ...s, status: 'Active' } : s
-    );
-    localStorage.setItem('globalShops', JSON.stringify(updatedGlobal));
-    setGlobalShops(updatedGlobal);
-    
-    // Update local shopTieUps as well
-    setShopTieUps(prev => prev.map(s => 
-      s.id === id ? { ...s, status: 'Active' } : s
-    ));
-    
-    addNotification({
-      title: 'Shop Approved',
-      message: 'Shop registration is now complete and active.',
       type: 'success'
     });
     pushGlobalNotification({ title: 'Shop Registration', message: 'A new shop has been approved.', type: 'success' });
