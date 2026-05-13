@@ -1299,20 +1299,21 @@ const AdminDashboard = () => {
                   </div>
 
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between text-xs font-bold">
-                      <span className="text-text-secondary-light">Submitted On</span>
+                    <div className="flex items-center text-xs font-bold">
+                      <span className="text-text-secondary-light w-32 shrink-0">Submitted On</span>
                       <span className="dark:text-white">{kyc.date}</span>
                     </div>
-                    <div className="flex items-center justify-between text-xs font-bold">
-                      <span className="text-text-secondary-light">Documents</span>
-                      <div className="flex gap-1">
+                    <div className="flex items-center text-xs font-bold">
+                      <span className="text-text-secondary-light w-32 shrink-0">Documents</span>
+                      <div className="flex flex-wrap gap-1">
                         {Object.keys(kyc.details.kycDocs).map((docKey, i) => (
-                          <span key={i} className="px-2 py-0.5 bg-gray-100 dark:bg-secondary-dark rounded-lg text-[10px] dark:text-white uppercase">{docKey.replace(/([A-Z])/g, ' $1')}</span>
+                          <span key={i} className="px-2 py-0.5 bg-gray-100 dark:bg-secondary-dark rounded-lg text-[10px] dark:text-white uppercase tracking-tight">{docKey.replace(/([A-Z])/g, ' $1')}</span>
                         ))}
                       </div>
                     </div>
+                  </div>
 
-                    <div className="pt-4 flex gap-2">
+                  <div className="pt-4 flex gap-2">
                       <button 
                         onClick={() => setSelectedApplication(kyc)}
                         className="px-5 py-2.5 bg-primary-light/10 text-primary-light rounded-xl font-black text-xs hover:bg-primary-light hover:text-white transition-all flex items-center gap-2"
