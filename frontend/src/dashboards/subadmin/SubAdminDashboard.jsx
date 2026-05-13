@@ -14,6 +14,7 @@ import {
 
 import { useNotifications } from '../../context/NotificationContext';
 import axios from 'axios';
+import { jsPDF } from 'jspdf';
 
 const SubAdminDashboard = () => {
   const { user, logout } = useAuth();
@@ -126,38 +127,108 @@ const SubAdminDashboard = () => {
   };
   const handleDownload = (docName = 'Document', extension = 'pdf') => {
     addNotification({ 
-      title: 'Preparing Download', 
-      message: `Securing ${docName} for transfer...`, 
+      title: 'Generating Document', 
+      message: `Preparing ${docName} for download...`, 
       type: 'info' 
     });
     
     setTimeout(() => {
       try {
-        const type = extension === 'csv' ? 'text/csv' : 'application/pdf';
-        const content = `Simulated ${extension.toUpperCase()} content for ${docName}\nGenerated on: ${new Date().toLocaleString()}`;
-        const blob = new Blob([content], { type });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${docName.replace(/\s+/g, '_')}.${extension}`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+        if (extension === 'pdf') {
+          const doc = new jsPDF();
+          const timestamp = new Date().toLocaleString();
+          
+          // Header
+          doc.setFontSize(22);
+          doc.setTextColor(16, 185, 129); // emerald-500
+          doc.text("ADMINHUB", 20, 20);
+          
+          doc.setFontSize(10);
+          doc.setTextColor(100);
+          doc.text("Official Platform Document", 20, 28);
+          doc.text(`Generated on: ${timestamp}`, 130, 28);
+          
+          doc.setLineWidth(0.5);
+          doc.setDrawColor(200);
+          doc.line(20, 32, 190, 32);
+          
+          // Title
+          doc.setFontSize(18);
+          doc.setTextColor(30);
+          doc.text(docName.toUpperCase(), 20, 45);
+          
+          // Body Content
+          doc.setFontSize(12);
+          doc.setTextColor(60);
+          
+          let content = [];
+          if (docName.includes('Policy')) {
+            content = [
+              "1. Overview: This document outlines the standard commission structures.",
+              "2. Eligibility: All active agents are eligible for commissions based on verified shops.",
+              "3. Rates: 5% for Standard Onboarding, 10% for Premium Partnerships.",
+              "4. Payouts: Settled bi-weekly on the 1st and 15th of every month.",
+              "5. Compliance: All documentation must be verified by Sub-Admins.",
+              "",
+              "This policy is subject to change based on platform updates."
+            ];
+          } else if (docName.includes('Reward')) {
+            content = [
+              "Milestone 1: 50 Shops - ₹5,000 Bonus",
+              "Milestone 2: 100 Shops - ₹12,000 Bonus + Silver Badge",
+              "Milestone 3: 250 Shops - ₹30,000 Bonus + Gold Badge",
+              "",
+              "Rewards are credited within 48 hours of achieving the milestone."
+            ];
+          } else {
+            content = [
+              "This is a system-generated document for " + docName + ".",
+              "Please refer to the main dashboard for real-time tracking.",
+              "For support, contact sub-admin management."
+            ];
+          }
+          
+          let yPos = 60;
+          content.forEach(line => {
+            doc.text(line, 20, yPos);
+            yPos += 10;
+          });
+          
+          // Footer
+          doc.setFontSize(10);
+          doc.setTextColor(150);
+          doc.text("Confidential - For Internal Use Only", 20, 280);
+          doc.text("Page 1 of 1", 170, 280);
+          
+          doc.save(`${docName.replace(/\s+/g, '_')}_${new Date().getTime()}.pdf`);
+        } else {
+          // CSV Fallback
+          const content = `ADMINHUB DOCUMENT: ${docName}\nGenerated on: ${new Date().toLocaleString()}\n\nSimulated ${extension.toUpperCase()} data row 1, data 2, data 3`;
+          const blob = new Blob([content], { type: 'text/csv' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `${docName.replace(/\s+/g, '_')}.${extension}`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        }
         
         addNotification({ 
           title: 'Download Ready', 
-          message: `${docName} has been saved successfully.`, 
+          message: `${docName} has been saved to your downloads.`, 
           type: 'success' 
         });
       } catch (error) {
+        console.error('PDF Gen Error:', error);
         addNotification({ 
           title: 'Download Failed', 
           message: 'An error occurred during file generation.', 
           type: 'error' 
         });
       }
-    }, 1500);
+    }, 1000);
   };
 
   const [verifyShops, setVerifyShops] = useState([

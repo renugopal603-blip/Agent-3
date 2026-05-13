@@ -11,7 +11,7 @@ import {
   Clock, Star, LogOut, ChevronRight, ChevronDown, Lock, BellRing, Palette,
   CreditCard, Percent, Truck, BarChart as BarChartIcon, LifeBuoy, Share2, Key, History,
   UserCheck, Briefcase, Megaphone, Sun, Moon, Eye, EyeOff, User, FileText, Shield, MapPin, Coins, Wallet, Trophy, Calendar, Zap, Navigation, Download, ArrowUpRight, ArrowDownRight, PieChart, Activity, FileSpreadsheet, Layout, MessageSquare, Send, Smartphone, Mail, Plus, Headset, Ticket, Paperclip, Smile, Link2, Copy, Gift, Camera, Fingerprint, Monitor, Check, Menu, FileSearch,
-  Flag, Milestone, Hash, Globe, Settings2, ShieldAlert,
+  Flag, Milestone, Hash, Globe, Settings2, ShieldAlert, MousePointer2, BarChart3,
   Utensils, ShoppingBag, HeartPulse, Pill, Shirt, Scissors, GraduationCap, Wrench, MoreHorizontal, Upload
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
@@ -83,6 +83,8 @@ const AdminDashboard = () => {
 
   const [docFilter, setDocFilter] = useState('Pending');
   const [showTwoFAModal, setShowTwoFAModal] = useState(false);
+  const [showStatsModal, setShowStatsModal] = useState(false);
+  const [selectedStatsCampaign, setSelectedStatsCampaign] = useState(null);
   const [showSessionsModal, setShowSessionsModal] = useState(false);
   const [showCreateRoleModal, setShowCreateRoleModal] = useState(false);
   const [showPermissionsModal, setShowPermissionsModal] = useState(false);
@@ -234,7 +236,41 @@ const AdminDashboard = () => {
   const [showProductPartnerModal, setShowProductPartnerModal] = useState(false);
   const [productPartnerModalType, setProductPartnerModalType] = useState('details'); // 'details' or 'catalog'
   
-  const [subAdmins, setSubAdmins] = useState([]);
+  const [subAdmins, setSubAdmins] = useState([
+    {
+      _id: '1',
+      name: 'Renu Gopal',
+      employeeId: 'SA-001',
+      phone: '+91 98765 43210',
+      email: 'renu@premium.com',
+      accessLevel: 'State Wise',
+      assignedLocation: 'Tamil Nadu',
+      agentsCount: 12,
+      status: 'Active'
+    },
+    {
+      _id: '2',
+      name: 'Priya Sharma',
+      employeeId: 'SA-002',
+      phone: '+91 87654 32109',
+      email: 'priya@premium.com',
+      accessLevel: 'District Wise',
+      assignedLocation: 'Mumbai, MH',
+      agentsCount: 8,
+      status: 'Active'
+    },
+    {
+      _id: '3',
+      name: 'Amit Singh',
+      employeeId: 'SA-003',
+      phone: '+91 76543 21098',
+      email: 'amit@premium.com',
+      accessLevel: 'Pincode Wise',
+      assignedLocation: '110001 (Delhi)',
+      agentsCount: 5,
+      status: 'Suspended'
+    }
+  ]);
   
   const fetchSubAdmins = async () => {
     try {
@@ -2789,7 +2825,15 @@ const AdminDashboard = () => {
                           </span>
                         </td>
                         <td className="py-3 text-right">
-                          <button className="text-xs font-bold text-primary-light hover:underline px-3 py-1.5 bg-primary-light/10 rounded-lg">View Stats</button>
+                          <button 
+                            onClick={() => {
+                              setSelectedStatsCampaign(notif);
+                              setShowStatsModal(true);
+                            }}
+                            className="text-xs font-bold text-primary-light hover:underline px-3 py-1.5 bg-primary-light/10 rounded-lg"
+                          >
+                            View Stats
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -3681,7 +3725,7 @@ const AdminDashboard = () => {
       case 'Subadmin Management':
       case 'Sub Admin Management': {
         const filteredSubAdmins = subAdmins.filter(sa => {
-          const accessMatch = subAdminAccessFilter === 'All Levels' || sa.accessLevel === subAdminAccessFilter;
+          const accessMatch = subAdminAccessFilter === 'All Levels' || (sa.accessLevel || 'State Wise') === subAdminAccessFilter;
           const statusMatch = subAdminStatusFilter === 'All Status' || sa.status === subAdminStatusFilter;
           const searchMatch = !searchTerm || 
             sa.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -4755,6 +4799,11 @@ const AdminDashboard = () => {
           setSelectedDocument={setSelectedDocument}
           setShowDocumentPreview={setShowDocumentPreview}
         />
+        <CampaignStatsModal 
+          isOpen={showStatsModal} 
+          onClose={() => setShowStatsModal(false)} 
+          campaign={selectedStatsCampaign} 
+        />
         <ProductPartnerActionsModal 
           isOpen={showProductPartnerModal}
           onClose={() => setShowProductPartnerModal(false)}
@@ -5409,23 +5458,52 @@ const AddSubAdminModal = ({ isOpen, onClose, onSuccess, initialData, subAdmins =
   );
 };
 
+const INDIAN_LOCATIONS = {
+  "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Trichy", "Salem", "Tirunelveli", "Erode", "Vellore", "Thoothukudi", "Thanjavur"],
+  "Maharashtra": ["Mumbai", "Pune", "Nagpur", "Nashik", "Thane", "Aurangabad", "Solapur", "Amravati", "Navi Mumbai", "Kolhapur"],
+  "Karnataka": ["Bengaluru", "Mysuru", "Hubballi", "Mangaluru", "Belagavi", "Davanagere", "Ballari", "Vijayapura", "Shivamogga", "Tumakuru"],
+  "Delhi": ["New Delhi", "North Delhi", "South Delhi", "West Delhi", "East Delhi", "Central Delhi", "South West Delhi", "North West Delhi"],
+  "Kerala": ["Thiruvananthapuram", "Kochi", "Kozhikode", "Thrissur", "Kollam", "Alappuzha", "Palakkad", "Kottayam", "Kannur", "Malappuram"],
+  "Gujarat": ["Ahmedabad", "Surat", "Vadodara", "Rajkot", "Bhavnagar", "Jamnagar", "Junagadh", "Gandhinagar", "Anand", "Navsari"],
+  "Telangana": ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar", "Ramagundam", "Khammam", "Mahbubnagar", "Nalgonda", "Adilabad", "Suryapet"],
+  "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Nellore", "Kurnool", "Rajahmundry", "Tirupati", "Kakinada", "Kadapa", "Anantapur"]
+};
+
 const AddAgentModal = ({ isOpen, onClose, onAdd, initialData }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     role: 'Pincode Agent',
-    territory: ''
+    state: '',
+    district: '',
+    pincode: ''
   });
 
   useEffect(() => {
     if (initialData) {
+      // Try to parse territory string if it exists: "State, District - Pincode"
+      let state = '', district = '', pincode = '';
+      if (initialData.territory) {
+        const parts = initialData.territory.split(', ');
+        if (parts.length >= 2) {
+          state = parts[0];
+          const distPart = parts[1].split(' - ');
+          district = distPart[0];
+          pincode = distPart[1] || '';
+        } else {
+          state = initialData.territory;
+        }
+      }
+
       setFormData({
         name: initialData.name || '',
         email: initialData.email || '',
         phone: initialData.phone || '',
         role: initialData.role || 'Pincode Agent',
-        territory: initialData.territory || ''
+        state: state,
+        district: district,
+        pincode: pincode
       });
     } else {
       setFormData({
@@ -5433,7 +5511,9 @@ const AddAgentModal = ({ isOpen, onClose, onAdd, initialData }) => {
         email: '',
         phone: '',
         role: 'Pincode Agent',
-        territory: ''
+        state: '',
+        district: '',
+        pincode: ''
       });
     }
   }, [initialData, isOpen]);
@@ -5463,7 +5543,11 @@ const AddAgentModal = ({ isOpen, onClose, onAdd, initialData }) => {
 
         <form className="p-8 grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={(e) => {
           e.preventDefault();
-          onAdd(formData);
+          const submissionData = {
+            ...formData,
+            territory: `${formData.state}, ${formData.district} - ${formData.pincode}`
+          };
+          onAdd(submissionData);
         }}>
           <div className="space-y-2">
             <label className="text-xs font-black uppercase tracking-widest text-text-secondary-light ml-1">Full Name</label>
@@ -5517,14 +5601,47 @@ const AddAgentModal = ({ isOpen, onClose, onAdd, initialData }) => {
             </select>
           </div>
 
+          <div className="space-y-2">
+            <label className="text-xs font-black uppercase tracking-widest text-text-secondary-light ml-1">State</label>
+            <select 
+              value={formData.state}
+              onChange={(e) => setFormData({...formData, state: e.target.value, district: ''})}
+              required
+              className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light focus:bg-white dark:focus:bg-background-dark transition-all outline-none dark:text-white font-medium appearance-none"
+            >
+              <option value="">Select State</option>
+              {Object.keys(INDIAN_LOCATIONS).map(state => (
+                <option key={state} value={state}>{state}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-black uppercase tracking-widest text-text-secondary-light ml-1">District</label>
+            <select 
+              value={formData.district}
+              onChange={(e) => setFormData({...formData, district: e.target.value})}
+              required
+              disabled={!formData.state}
+              className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light focus:bg-white dark:focus:bg-background-dark transition-all outline-none dark:text-white font-medium appearance-none disabled:opacity-50"
+            >
+              <option value="">Select District</option>
+              {formData.state && INDIAN_LOCATIONS[formData.state].map(district => (
+                <option key={district} value={district}>{district}</option>
+              ))}
+            </select>
+          </div>
+
           <div className="space-y-2 md:col-span-2">
-            <label className="text-xs font-black uppercase tracking-widest text-text-secondary-light ml-1">Assigned Territory / Detail</label>
+            <label className="text-xs font-black uppercase tracking-widest text-text-secondary-light ml-1">Pincode</label>
             <input 
               type="text" 
-              placeholder="e.g. Maharashtra, Pune, 411001, or Electronics"
-              value={formData.territory}
-              onChange={(e) => setFormData({...formData, territory: e.target.value})}
+              placeholder="e.g. 411001"
+              value={formData.pincode}
+              onChange={(e) => setFormData({...formData, pincode: e.target.value})}
               required
+              maxLength={6}
+              pattern="[0-9]{6}"
               className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light focus:bg-white dark:focus:bg-background-dark transition-all outline-none dark:text-white font-medium"
             />
           </div>
@@ -9615,6 +9732,87 @@ const SystemUserModal = ({ isOpen, onClose, type, initialData, systemUsers, setS
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  );
+};
+
+const CampaignStatsModal = ({ isOpen, onClose, campaign }) => {
+  if (!isOpen || !campaign) return null;
+
+  const stats = [
+    { label: 'Total Sent', value: '124,500', icon: <Send size={20} />, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    { label: 'Delivered', value: '118,240', icon: <CheckCircle size={20} />, color: 'text-success', bg: 'bg-success/10' },
+    { label: 'Read Rate', value: '42.8%', icon: <Eye size={20} />, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+    { label: 'Clicked', value: '8,420', icon: <MousePointer2 size={20} />, color: 'text-orange-500', bg: 'bg-orange-500/10' },
+  ];
+
+  return (
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
+      <div className="relative w-full max-w-2xl bg-surface-light dark:bg-surface-dark rounded-[32px] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="p-8 border-b dark:border-border-dark flex justify-between items-center bg-primary-light">
+          <div className="flex items-center gap-4 text-white">
+            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
+              <BarChart3 size={24} />
+            </div>
+            <div>
+              <h3 className="text-xl font-black">Campaign Performance</h3>
+              <p className="text-xs font-bold uppercase opacity-80">{campaign.title}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-3 hover:bg-white/10 rounded-2xl transition-all">
+            <X size={24} className="text-white" />
+          </button>
+        </div>
+
+        <div className="p-8 space-y-8">
+          <div className="grid grid-cols-4 gap-4">
+            {stats.map((stat, i) => (
+              <div key={i} className={`p-4 rounded-2xl ${stat.bg} border border-white/5`}>
+                <div className={`${stat.color} mb-2`}>{stat.icon}</div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light">{stat.label}</p>
+                <p className="text-xl font-black dark:text-white mt-1">{stat.value}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-4">
+            <h4 className="text-xs font-black uppercase tracking-widest text-text-secondary-light">Channel Delivery Breakdown</h4>
+            <div className="space-y-3">
+              {[
+                { label: 'Push Notification', val: 85, color: 'bg-purple-500' },
+                { label: 'Email Outreach', val: 65, color: 'bg-blue-500' },
+                { label: 'SMS Gateway', val: 45, color: 'bg-orange-500' },
+              ].map((item, i) => (
+                <div key={i} className="space-y-1.5">
+                  <div className="flex justify-between text-xs font-bold">
+                    <span className="dark:text-white">{item.label}</span>
+                    <span className="text-text-secondary-light">{item.val}%</span>
+                  </div>
+                  <div className="h-2 w-full bg-gray-100 dark:bg-secondary-dark rounded-full overflow-hidden">
+                    <div className={`h-full ${item.color} rounded-full`} style={{ width: `${item.val}%` }}></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="p-6 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-dashed border-border-light dark:border-border-dark">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-success/10 rounded-xl flex items-center justify-center text-success">
+                <Target size={20} />
+              </div>
+              <div>
+                <p className="text-xs font-black uppercase tracking-widest text-text-secondary-light">Target Audience</p>
+                <p className="text-sm font-bold dark:text-white">{campaign.audience}</p>
+              </div>
+            </div>
+            <p className="text-xs text-text-secondary-light leading-relaxed">
+              This campaign was successfully delivered via {campaign.channel} channels. The read rate is currently 4.2% higher than your average for this audience segment.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
