@@ -3104,12 +3104,17 @@ const AgentDashboard = () => {
       {/* Commission Plan Modal */}
       <CommissionPlanModal isOpen={showCommissionModal} onClose={() => setShowCommissionModal(false)} />
       <SupportTicketModal isOpen={showTicketModal} onClose={() => setShowTicketModal(false)} />
-      <FileViewModal isOpen={!!viewingFile} onClose={() => setViewingFile(null)} fileName={viewingFile || ''} />
+      <FileViewModal 
+        isOpen={!!viewingFile} 
+        onClose={() => setViewingFile(null)} 
+        fileName={viewingFile || ''} 
+        onDownload={(name) => handleDownloadFile(name.split('.')[0], name.split('.').pop())}
+      />
     </div>
   );
 };
 
-const FileViewModal = ({ isOpen, onClose, fileName }) => {
+const FileViewModal = ({ isOpen, onClose, fileName, onDownload }) => {
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
@@ -3154,8 +3159,8 @@ const FileViewModal = ({ isOpen, onClose, fileName }) => {
         <div className="p-8 bg-gray-50 dark:bg-secondary-dark/30 border-t dark:border-border-dark">
           <button 
             onClick={() => {
+              onDownload(fileName);
               onClose();
-              window.alert('Download started for ' + fileName);
             }}
             className="w-full py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
           >
