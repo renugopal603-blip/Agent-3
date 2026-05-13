@@ -3102,7 +3102,11 @@ const AgentDashboard = () => {
         </div>
       )}
       {/* Commission Plan Modal */}
-      <CommissionPlanModal isOpen={showCommissionModal} onClose={() => setShowCommissionModal(false)} />
+      <CommissionPlanModal 
+        isOpen={showCommissionModal} 
+        onClose={() => setShowCommissionModal(false)} 
+        onDownload={(name) => handleDownloadFile(name, 'pdf')}
+      />
       <SupportTicketModal isOpen={showTicketModal} onClose={() => setShowTicketModal(false)} />
       <FileViewModal 
         isOpen={!!viewingFile} 
@@ -3247,7 +3251,7 @@ const SupportTicketModal = ({ isOpen, onClose }) => {
   );
 };
 
-const CommissionPlanModal = ({ isOpen, onClose }) => {
+const CommissionPlanModal = ({ isOpen, onClose, onDownload }) => {
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
@@ -3349,7 +3353,7 @@ const CommissionPlanModal = ({ isOpen, onClose }) => {
         <div className="p-8 bg-gray-50 dark:bg-secondary-dark/30 border-t dark:border-border-dark flex gap-4">
           <button onClick={onClose} className="flex-1 py-4 bg-white dark:bg-surface-dark border-2 border-border-light dark:border-border-dark rounded-2xl font-black text-sm dark:text-white hover:bg-gray-100 transition-all">Close</button>
           <button 
-            onClick={() => handleDownloadFile('Compensation_Plan_May_2026', 'pdf')}
+            onClick={() => onDownload('Compensation_Plan_May_2026')}
             className="flex-1 py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 flex items-center justify-center gap-2"
           >
             <Download size={18} /> Download PDF
