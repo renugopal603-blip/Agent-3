@@ -22,14 +22,53 @@ export const NotificationProvider = ({ children }) => {
     }
   ]);
 
+  useEffect(() => {
+    const syncGlobalNotifications = () => {
+      const globalNotes = JSON.parse(localStorage.getItem('globalNotifications') || '[]');
+      if (globalNotes.length > 0) {
+        // Filter out notifications already in our local state to avoid duplicates
+        setNotifications(prev => {
+          const prevIds = new Set(prev.map(n => n.id));
+          const newNotes = globalNotes.filter(n => !prevIds.has(n.id));
+          if (newNotes.length === 0) return prev;
+          return [...newNotes, ...prev];
+        });
+      }
+    };
+
+    syncGlobalNotifications();
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'globalNotifications') {
+        syncGlobalNotifications();
+      }
+    });
+    return () => window.removeEventListener('storage', syncGlobalNotifications);
+  }, []);
+
   const addNotification = (notification) => {
     const newNotification = {
-      id: Date.now(),
+      id: notification.id || Date.now(),
+      isRead: false,
+      time: notification.time || 'Just now',
+      ...notification
+    };
+    setNotifications(prev => [newNotification, ...prev]);
+  };
+
+  const pushGlobalNotification = (notification) => {
+    const newNote = {
+      id: Date.now() + Math.floor(Math.random() * 1000),
       isRead: false,
       time: 'Just now',
       ...notification
     };
-    setNotifications(prev => [newNotification, ...prev]);
+    
+    // Add locally
+    addNotification(newNote);
+    
+    // Sync to localStorage
+    const globalNotes = JSON.parse(localStorage.getItem('globalNotifications') || '[]');
+    localStorage.setItem('globalNotifications', JSON.stringify([newNote, ...globalNotes.slice(0, 49)])); // Keep last 50
   };
 
   const markAsRead = (id) => {
@@ -52,6 +91,7 @@ export const NotificationProvider = ({ children }) => {
     <NotificationContext.Provider value={{
       notifications,
       addNotification,
+      pushGlobalNotification,
       markAsRead,
       markAllAsRead,
       clearNotifications,

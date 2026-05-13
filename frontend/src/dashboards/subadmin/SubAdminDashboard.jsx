@@ -19,7 +19,7 @@ import { jsPDF } from 'jspdf';
 const SubAdminDashboard = () => {
   const { user, logout } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
-  const { addNotification } = useNotifications();
+  const { notifications, addNotification, pushGlobalNotification, markAsRead, unreadCount } = useNotifications();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [selectedShop, setSelectedShop] = useState(null);
@@ -290,21 +290,77 @@ const SubAdminDashboard = () => {
     if (user?.token) fetchData();
   }, [user]);
 
+  useEffect(() => {
+    const syncGlobalShops = () => {
+      const globalShops = JSON.parse(localStorage.getItem('globalShops') || '[]');
+      if (globalShops.length > 0) {
+        setVerifyShops(prev => {
+          const updated = [...prev];
+          globalShops.forEach(gs => {
+            const index = updated.findIndex(m => m.id === gs.id);
+            const normalized = {
+              id: gs.id,
+              name: gs.name || gs.shopName,
+              cat: gs.category || 'General',
+              owner: gs.owner || gs.ownerName,
+              loc: gs.location || 'N/A',
+              agent: gs.agent || 'Unknown',
+              status: gs.status || 'Pending Review',
+              date: gs.date || new Date().toLocaleDateString()
+            };
+
+            if (index !== -1) {
+              // Update existing shop status
+              updated[index] = normalized;
+            } else {
+              // Add new shop
+              updated.push(normalized);
+            }
+          });
+          return updated;
+        });
+      }
+    };
+    syncGlobalShops();
+    window.addEventListener('storage', syncGlobalShops);
+    return () => window.removeEventListener('storage', syncGlobalShops);
+  }, []);
+
   const handleVerify = async (id) => {
     try {
-      const config = {
-        headers: { Authorization: `Bearer ${user.token}` }
-      };
-      const { data } = await axios.put(`/api/shops/${id}/verify`, { status: 'Verified' }, config);
-      
-      setVerifyShops(verifyShops.filter(s => shopStatusFilter === 'All' || s.status === shopStatusFilter).map(s => s.id === id ? { ...s, status: 'Verified' } : s));
+      // 1. Update local state
+      const updatedShops = verifyShops.map(s => 
+        s.id === id ? { ...s, status: 'Verified by Sub Admin' } : s
+      );
+      setVerifyShops(updatedShops);
+
+      // 2. Sync to globalShops for Admin approval
+      const globalShops = JSON.parse(localStorage.getItem('globalShops') || '[]');
+      const updatedGlobal = globalShops.map(gs => 
+        gs.id === id ? { ...gs, status: 'Verified by Sub Admin' } : gs
+      );
+      localStorage.setItem('globalShops', JSON.stringify(updatedGlobal));
+
       addNotification({
         title: 'Shop Verified',
         message: `Shop has been verified and sent to Admin for final approval.`,
         type: 'success'
       });
+      
+      pushGlobalNotification({
+        title: 'Shop Verified',
+        message: `Sub-Admin ${user?.name || 'Sub-Admin'} has verified a shop and is waiting for your final approval.`,
+        type: 'success'
+      });
+      
+      // Optional: API call if token exists
+      if (user?.token) {
+        const config = { headers: { Authorization: `Bearer ${user.token}` } };
+        await axios.put(`/api/shops/${id}/verify`, { status: 'Verified by Sub Admin' }, config);
+      }
     } catch (error) {
-      addNotification({ title: 'Verification Error', message: error.message, type: 'error' });
+      console.error('Verification error:', error);
+      addNotification({ title: 'Sync Warning', message: 'Verified locally. API sync failed.', type: 'warning' });
     }
   };
 
@@ -648,11 +704,13 @@ const SubAdminDashboard = () => {
                       <td className="p-4 text-sm text-text-secondary-light font-medium">{s.loc}</td>
                       <td className="p-4">
                         <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                          s.status === 'Verified' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'
+                          s.status === 'Active' ? 'bg-success/10 text-success' : 
+                          s.status === 'Verified by Sub Admin' ? 'bg-primary-light/20 text-primary-light border border-primary-light/30' : 
+                          'bg-warning/10 text-warning'
                         }`}>{s.status}</span>
                       </td>
                       <td className="p-4 text-right">
-                        {s.status === 'Pending' ? (
+                        {(s.status === 'Pending Review' || s.status === 'Pending') ? (
                           <div className="flex justify-end gap-2">
                             <button 
                               onClick={() => {
@@ -706,7 +764,7 @@ const SubAdminDashboard = () => {
                               <Trash2 size={16} />
                             </button>
                             <span className="text-xs font-bold text-text-secondary-light italic bg-gray-50 dark:bg-secondary-dark/50 px-3 py-2 rounded-xl flex items-center">
-                              {s.status === 'Verified' ? 'Waiting for Admin' : 'Action Taken'}
+                              {s.status === 'Verified by Sub Admin' ? 'Waiting for Admin' : 'Action Taken'}
                             </span>
                           </div>
                         )}

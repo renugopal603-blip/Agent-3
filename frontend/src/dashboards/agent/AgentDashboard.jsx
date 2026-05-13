@@ -20,7 +20,7 @@ import { useNotifications } from '../../context/NotificationContext';
 const AgentDashboard = () => {
   const { user, logout } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
-  const { addNotification } = useNotifications();
+  const { notifications, addNotification, pushGlobalNotification, markAsRead, markAllAsRead, unreadCount } = useNotifications();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [applicationStep, setApplicationStep] = useState(1);
@@ -256,6 +256,34 @@ const AgentDashboard = () => {
     localStorage.setItem('agentShops', JSON.stringify(shops));
   }, [shops]);
 
+  useEffect(() => {
+    const syncGlobalShops = () => {
+      const globalShops = JSON.parse(localStorage.getItem('globalShops') || '[]');
+      if (globalShops.length > 0) {
+        setShops(prev => {
+          const updated = [...prev];
+          globalShops.forEach(gs => {
+            const index = updated.findIndex(s => s.id === gs.id);
+            if (index !== -1) {
+              // Update status and other fields from global registry
+              updated[index] = {
+                ...updated[index],
+                status: gs.status,
+                name: gs.name || updated[index].name,
+                category: gs.category || updated[index].category
+              };
+            }
+          });
+          return updated;
+        });
+      }
+    };
+
+    syncGlobalShops();
+    window.addEventListener('storage', syncGlobalShops);
+    return () => window.removeEventListener('storage', syncGlobalShops);
+  }, []);
+
   const handleDeleteShop = (id) => {
     if (window.confirm('Are you sure you want to remove this shop onboarding?')) {
       setShops(shops.filter(s => s.id !== id));
@@ -303,29 +331,47 @@ const AgentDashboard = () => {
         category: shopForm.category || 'Grocery', 
         owner: ownerName, 
         location: shopLoc,
+        agent: user?.name || 'AgentHub',
         sales: '₹0', 
         status: 'Pending Review', 
         rating: 'N/A',
         date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
         documents: {
-          license: (shopForm.documents && shopForm.documents.licenseName) ? shopForm.documents.licenseName : '',
-          gst: (shopForm.documents && shopForm.documents.gstName) ? shopForm.documents.gstName : ''
+          license: (shopForm.documents && shopForm.documents.licenseName) ? shopForm.documents.licenseName : 'Shop_License.pdf',
+          gst: (shopForm.documents && shopForm.documents.gstName) ? shopForm.documents.gstName : 'GST_Certificate.pdf'
         }
       };
 
       const updatedShops = [...currentShops, newShop];
       
-      // PERSIST FIRST
+      // Sync to shared global state for Admin/Sub-Admin access
+      const globalShops = JSON.parse(localStorage.getItem('globalShops') || '[]');
+      localStorage.setItem('globalShops', JSON.stringify([...globalShops, newShop]));
+      
+      // PERSIST AGENT SPECIFIC LIST
       localStorage.setItem('agentShops', JSON.stringify(updatedShops));
       
       // UPDATE STATE
       setShops(updatedShops);
       
-      console.log('DEBUG: Saved successfully', newShop);
-      window.alert('SUCCESS: ' + newShop.name + ' has been saved successfully! The page will now refresh to update your list.');
+      addNotification({
+        title: 'Registration Submitted',
+        message: `${newShop.name} onboarding initiated. Waiting for Sub-Admin verification.`,
+        type: 'success'
+      });
       
-      // RELOAD TO FORCE SYNC
-      window.location.reload();
+      pushGlobalNotification({
+        title: 'New Shop Registration',
+        message: `Agent ${user?.name || 'AgentHub'} has submitted a new shop: ${newShop.name}`,
+        type: 'info'
+      });
+
+      console.log('DEBUG: Saved successfully', newShop);
+      
+      setTimeout(() => {
+        setShowShopModal(false);
+        setIsProcessing(false);
+      }, 1500);
 
     } catch (error) {
       console.error('DEBUG: Save Failed', error);
@@ -1163,9 +1209,11 @@ const AgentDashboard = () => {
                         </button>
                       </div>
                     </div>
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                      shop.status === 'Active' ? 'bg-success/10 text-success' : 
-                      shop.status === 'Pending' ? 'bg-warning/10 text-warning' : 'bg-error/10 text-error'
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                      shop.status === 'Active' ? 'bg-success/10 text-success border-success/20' : 
+                      shop.status === 'Verified by Sub Admin' ? 'bg-primary-light/10 text-primary-light border-primary-light/20' : 
+                      shop.status === 'Pending Review' || shop.status === 'Pending' ? 'bg-warning/10 text-warning border-warning/20' : 
+                      'bg-error/10 text-error border-error/20'
                     }`}>{shop.status}</span>
                   </div>
                   <div>

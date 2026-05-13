@@ -46,7 +46,7 @@ const CategoryIcon = ({ iconName, size = 20, className = "" }) => {
 const AdminDashboard = () => {
   const { user, logout } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
-  const { notifications, addNotification, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const { notifications, addNotification, pushGlobalNotification, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Overview');
   const [showAddAgentModal, setShowAddAgentModal] = useState(false);
@@ -130,6 +130,67 @@ const AdminDashboard = () => {
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [showDocumentPreview, setShowDocumentPreview] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState(null);
+  const [globalShops, setGlobalShops] = useState([]);
+
+  useEffect(() => {
+    const syncGlobalShops = () => {
+      const shops = JSON.parse(localStorage.getItem('globalShops') || '[]');
+      setGlobalShops(shops);
+      
+      // Update shopTieUps state with latest global data
+      setShopTieUps(prev => {
+        const updated = [...prev];
+        shops.forEach(gs => {
+          const index = updated.findIndex(s => s.id === gs.id);
+          const normalized = {
+            id: gs.id,
+            shopName: gs.name || gs.shopName,
+            ownerName: gs.owner || gs.ownerName,
+            phone: gs.phone || '+91 00000 00000',
+            category: gs.category,
+            location: gs.location,
+            pincode: gs.pincode || 'N/A',
+            assignedAgent: gs.agent || 'AgentHub',
+            submittedBy: gs.submittedBy || (gs.agent ? `Agent ${gs.agent}` : 'AgentHub'),
+            status: gs.status,
+            docs: gs.documents ? Object.values(gs.documents) : ['GST', 'License']
+          };
+
+          if (index !== -1) {
+            // Update existing shop if status or data changed
+            updated[index] = normalized;
+          } else {
+            // Add new shop
+            updated.push(normalized);
+          }
+        });
+        return updated;
+      });
+    };
+    syncGlobalShops();
+    window.addEventListener('storage', syncGlobalShops);
+    return () => window.removeEventListener('storage', syncGlobalShops);
+  }, []);
+
+  const handleAdminApproveShop = (id) => {
+    const updatedGlobal = globalShops.map(s => 
+      s.id === id ? { ...s, status: 'Active' } : s
+    );
+    localStorage.setItem('globalShops', JSON.stringify(updatedGlobal));
+    setGlobalShops(updatedGlobal);
+    
+    // Update local shopTieUps as well
+    setShopTieUps(prev => prev.map(s => 
+      s.id === id ? { ...s, status: 'Active' } : s
+    ));
+    
+    addNotification({
+      title: 'Shop Approved',
+      message: 'Shop registration is now complete and active.',
+      type: 'success'
+    });
+    pushGlobalNotification({ title: 'Shop Registration', message: 'A new shop has been approved.', type: 'success' });
+  };
 
   const handleDownloadReport = (reportName = 'Report') => {
     addNotification({ 
@@ -811,6 +872,7 @@ const AdminDashboard = () => {
         }));
       }
       addNotification({ title: 'Document Verified', message: 'Document has been approved.', type: 'success' });
+      pushGlobalNotification({ title: 'Document Verification', message: 'A document has been verified.', type: 'info' });
     } else {
       // Approve entire entity
       setDocumentVerifications(prev => prev.map(v => 
@@ -821,6 +883,7 @@ const AdminDashboard = () => {
       setKycData(prev => prev.filter(k => k.id !== entityId));
       setVerificationData(prev => prev.filter(v => v.id !== entityId));
       addNotification({ title: 'KYC Approved', message: `Successfully verified documentation for ${name}.`, type: 'success' });
+      pushGlobalNotification({ title: 'KYC Approved', message: `KYC for ${name} has been approved.`, type: 'success' });
       
       // Update selected modal view if it matches
       if (selectedVerification?.id === entityId) {
@@ -1408,6 +1471,65 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        );
+
+      case 'Shop Approvals':
+        return (
+          <div className="p-8 space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-2xl font-black dark:text-white tracking-tight uppercase">Shop Approvals</h3>
+                <p className="text-sm text-text-secondary-light">Final review and activation of verified shops.</p>
+              </div>
+              <div className="flex items-center gap-2 px-4 py-2 bg-warning/10 text-warning rounded-xl border border-warning/20">
+                <Clock size={16} />
+                <span className="text-xs font-black uppercase tracking-widest">
+                  {shopTieUps.filter(s => s.status === 'Verified by Sub Admin').length} Pending Approval
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4">
+              {shopTieUps.filter(s => s.status === 'Verified by Sub Admin').length === 0 ? (
+                <div className="card-premium p-12 text-center flex flex-col items-center justify-center">
+                  <div className="w-16 h-16 bg-gray-100 dark:bg-secondary-dark rounded-full flex items-center justify-center mb-4 text-text-secondary-light">
+                    <Store size={32} />
+                  </div>
+                  <h4 className="text-lg font-black dark:text-white">All Clear!</h4>
+                  <p className="text-sm text-text-secondary-light">No shops are currently waiting for final approval.</p>
+                </div>
+              ) : (
+                shopTieUps.filter(s => s.status === 'Verified by Sub Admin').map((shop) => (
+                  <div key={shop.id} className="card-premium group hover:border-primary-light/30 transition-all">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-primary-light/10 text-primary-light rounded-xl flex items-center justify-center">
+                          <Store size={24} />
+                        </div>
+                        <div>
+                          <h4 className="font-black dark:text-white">{shop.shopName}</h4>
+                          <p className="text-xs text-text-secondary-light font-bold uppercase tracking-widest">{shop.category} • {shop.location}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-6">
+                        <div className="text-right">
+                          <p className="text-[10px] font-black text-text-secondary-light uppercase tracking-widest">Submitted By</p>
+                          <p className="text-xs font-bold dark:text-white">{shop.submittedBy || shop.assignedAgent}</p>
+                        </div>
+                        <div className="h-10 w-[1px] bg-border-light dark:bg-border-dark"></div>
+                        <button 
+                          onClick={() => handleAdminApproveShop(shop.id)}
+                          className="px-6 py-3 bg-success text-white rounded-xl font-black text-xs shadow-lg shadow-success/20 hover:scale-[1.05] active:scale-[0.95] transition-all flex items-center gap-2"
+                        >
+                          <CheckCircle size={14} /> Approve & Activate
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         );
@@ -3181,7 +3303,6 @@ const AdminDashboard = () => {
         );
       }
 
-      case 'Shop Approvals':
       case 'Shop Tie-Up Management': {
         const filteredShops = shopTieUps.filter(shop => {
           const matchesCategory = selectedCategory === 'All Categories' || shop.category === selectedCategory;
@@ -3192,14 +3313,13 @@ const AdminDashboard = () => {
 
         const getStatusColor = (status) => {
           switch (status) {
-            case 'Pending': return 'bg-warning/10 text-warning';
-            case 'Under Review': return 'bg-blue-500/10 text-blue-500';
-            case 'Verified by Sub Admin': return 'bg-primary-light/10 text-primary-light';
-            case 'Approved': return 'bg-success/10 text-success';
-            case 'Active': return 'bg-success text-white';
-            case 'Rejected': return 'bg-error/10 text-error';
-            case 'Need Correction': return 'bg-orange-500/10 text-orange-500';
-            default: return 'bg-gray-100 text-gray-500';
+            case 'Active': return 'bg-success/10 text-success border border-success/20';
+            case 'Pending Review': 
+            case 'Pending': return 'bg-warning/10 text-warning border border-warning/20';
+            case 'Rejected': return 'bg-error/10 text-error border border-error/20';
+            case 'Suspended': return 'bg-error/10 text-error border border-error/20';
+            case 'Verified by Sub Admin': return 'bg-primary-light/20 text-primary-light border border-primary-light/30 shadow-sm';
+            default: return 'bg-gray-100 text-gray-500 border border-gray-200';
           }
         };
 
@@ -4798,6 +4918,7 @@ const AdminDashboard = () => {
           addNotification={addNotification}
           setSelectedDocument={setSelectedDocument}
           setShowDocumentPreview={setShowDocumentPreview}
+          onApprove={handleAdminApproveShop}
         />
         <CampaignStatsModal 
           isOpen={showStatsModal} 
@@ -8451,13 +8572,18 @@ const ShopActionsModal = ({
   shopTieUps, 
   addNotification,
   setSelectedDocument,
-  setShowDocumentPreview 
+  setShowDocumentPreview,
+  onApprove
 }) => {
   if (!isOpen || !shop) return null;
 
   const handleStatusUpdate = (newStatus, message) => {
-    setShopTieUps(shopTieUps.map(s => s.id === shop.id ? { ...s, status: newStatus } : s));
-    addNotification({ title: 'Status Updated', message, type: 'success' });
+    if (newStatus === 'Active' && onApprove) {
+      onApprove(shop.id);
+    } else {
+      setShopTieUps(shopTieUps.map(s => s.id === shop.id ? { ...s, status: newStatus } : s));
+      addNotification({ title: 'Status Updated', message, type: 'success' });
+    }
     onClose();
   };
 
@@ -8584,7 +8710,7 @@ const ShopActionsModal = ({
               <div className="flex gap-4 max-w-sm mx-auto">
                 <button onClick={onClose} className="flex-1 py-4 bg-gray-100 dark:bg-secondary-dark rounded-2xl font-black text-sm dark:text-white">Cancel</button>
                 <button 
-                  onClick={() => handleStatusUpdate('Approved', `${shop.shopName} has been officially approved.`)}
+                  onClick={() => handleStatusUpdate('Active', `${shop.shopName} has been officially approved.`)}
                   className="flex-[2] py-4 bg-success text-white rounded-2xl font-black text-sm shadow-xl shadow-success/20"
                 >
                   Yes, Approve Shop
