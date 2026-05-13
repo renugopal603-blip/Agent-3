@@ -5106,9 +5106,35 @@ const AddSubAdminModal = ({ isOpen, onClose, onSuccess, initialData, subAdmins =
 
   const handleNext = (e) => {
     if (e) e.preventDefault();
+    
+    // Auto-verify if correct OTP is entered but not confirmed
+    if (step === 1) {
+      if (!isEmailVerified && emailOtp === '123456') {
+        setIsEmailVerified(true);
+        setShowEmailOtpInput(false);
+        addNotification({ title: 'Verified', message: 'Email address verified successfully.', type: 'success' });
+      }
+      if (!isPhoneVerified && phoneOtp === '123456') {
+        setIsPhoneVerified(true);
+        setShowPhoneOtpInput(false);
+        addNotification({ title: 'Verified', message: 'Phone number verified successfully.', type: 'success' });
+      }
+    }
+
+    // Now check if we can proceed
     if (step === 1 && (!isEmailVerified || !isPhoneVerified)) {
-      addNotification({ title: 'Verification Required', message: 'Please verify both Email and Phone Number before proceeding.', type: 'warning' });
-      return;
+      // Re-check after auto-verify logic
+      const emailStillUnverified = !isEmailVerified && emailOtp !== '123456';
+      const phoneStillUnverified = !isPhoneVerified && phoneOtp !== '123456';
+      
+      if (emailStillUnverified || phoneStillUnverified) {
+        addNotification({ 
+          title: 'Verification Required', 
+          message: 'Please enter the correct 6-digit code (123456) and verify before proceeding.', 
+          type: 'warning' 
+        });
+        return;
+      }
     }
     setStep(prev => prev + 1);
   };
