@@ -295,6 +295,7 @@ const AgentDashboard = () => {
   });
   const [showShopModal, setShowShopModal] = useState(false);
   const [viewingFile, setViewingFile] = useState(null);
+  const [activeDropdown, setActiveDropdown] = useState(null);
   const [settings, setSettings] = useState({
     twoFactor: true,
     emailAlerts: true,
@@ -981,8 +982,30 @@ const AgentDashboard = () => {
                             member.status === 'Active' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'
                           }`}>{member.status}</span>
                         </td>
-                        <td className="py-4 text-right">
-                          <button className="p-2 hover:bg-gray-100 dark:hover:bg-secondary-dark rounded-lg transition-colors"><MoreVertical size={16} /></button>
+                        <td className="py-4 text-right relative">
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveDropdown(activeDropdown === `member-${i}` ? null : `member-${i}`);
+                            }}
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-secondary-dark rounded-lg transition-colors"
+                          >
+                            <MoreVertical size={16} />
+                          </button>
+                          {activeDropdown === `member-${i}` && (
+                            <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-surface-dark shadow-2xl rounded-2xl z-50 border border-border-light dark:border-border-dark py-2 animate-in fade-in zoom-in-95 duration-200">
+                               <button onClick={() => setActiveDropdown(null)} className="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-secondary-dark text-xs font-bold dark:text-white flex items-center gap-3">
+                                 <User size={14} className="text-primary-light" /> View Details
+                               </button>
+                               <button onClick={() => setActiveDropdown(null)} className="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-secondary-dark text-xs font-bold dark:text-white flex items-center gap-3">
+                                 <Mail size={14} className="text-blue-500" /> Send Email
+                               </button>
+                               <div className="my-1 border-t dark:border-border-dark"></div>
+                               <button onClick={() => setActiveDropdown(null)} className="w-full text-left px-4 py-2.5 hover:bg-red-50 dark:hover:bg-red-500/10 text-xs font-bold text-red-500 flex items-center gap-3">
+                                 <Trash2 size={14} /> Remove Member
+                               </button>
+                            </div>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -2473,12 +2496,31 @@ const AgentDashboard = () => {
                     </div>
                     <p className="text-sm text-text-secondary-light mt-1">{notif.desc}</p>
                   </div>
-                  <button 
-                    onClick={() => addNotification({ title: 'Notification Action', message: `Option selected for: ${notif.title}`, type: 'info' })}
-                    className="p-2 hover:bg-gray-100 dark:hover:bg-secondary-dark rounded-xl transition-all"
-                  >
-                    <MoreVertical size={18} className="text-text-secondary-light"/>
-                  </button>
+                  <div className="relative">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveDropdown(activeDropdown === `notif-${i}` ? null : `notif-${i}`);
+                      }}
+                      className="p-2 hover:bg-gray-100 dark:hover:bg-secondary-dark rounded-xl transition-all"
+                    >
+                      <MoreVertical size={18} className="text-text-secondary-light"/>
+                    </button>
+                    {activeDropdown === `notif-${i}` && (
+                      <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-surface-dark shadow-2xl rounded-2xl z-50 border border-border-light dark:border-border-dark py-2 animate-in fade-in zoom-in-95 duration-200">
+                         <button onClick={() => setActiveDropdown(null)} className="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-secondary-dark text-xs font-bold dark:text-white flex items-center gap-3">
+                           <CheckCircle size={14} className="text-emerald-500" /> Mark as Read
+                         </button>
+                         <button onClick={() => setActiveDropdown(null)} className="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-secondary-dark text-xs font-bold dark:text-white flex items-center gap-3">
+                           <Bell size={14} className="text-blue-500" /> Mute Alerts
+                         </button>
+                         <div className="my-1 border-t dark:border-border-dark"></div>
+                         <button onClick={() => setActiveDropdown(null)} className="w-full text-left px-4 py-2.5 hover:bg-red-50 dark:hover:bg-red-500/10 text-xs font-bold text-red-500 flex items-center gap-3">
+                           <Trash2 size={14} /> Delete
+                         </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -2569,15 +2611,31 @@ const AgentDashboard = () => {
                         </td>
                         <td className="px-6 py-4 text-xs text-text-secondary-light font-bold flex items-center justify-between">
                           {ticket.activity}
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              addNotification({ title: 'Ticket Options', message: `Managing Ticket ${ticket.id}`, type: 'info' });
-                            }}
-                            className="p-1.5 hover:bg-white dark:hover:bg-surface-dark rounded-lg transition-all opacity-0 group-hover:opacity-100"
-                          >
-                            <MoreVertical size={16} />
-                          </button>
+                          <div className="relative">
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveDropdown(activeDropdown === `ticket-${i}` ? null : `ticket-${i}`);
+                              }}
+                              className="p-1.5 hover:bg-white dark:hover:bg-surface-dark rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                            >
+                              <MoreVertical size={16} />
+                            </button>
+                            {activeDropdown === `ticket-${i}` && (
+                              <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-surface-dark shadow-2xl rounded-2xl z-50 border border-border-light dark:border-border-dark py-2 animate-in fade-in zoom-in-95 duration-200 shadow-emerald-500/5">
+                                 <button onClick={() => setActiveDropdown(null)} className="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-secondary-dark text-xs font-bold dark:text-white flex items-center gap-3">
+                                   <MessageSquare size={14} className="text-primary-light" /> View Chat
+                                 </button>
+                                 <button onClick={() => setActiveDropdown(null)} className="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-secondary-dark text-xs font-bold dark:text-white flex items-center gap-3">
+                                   <ArrowUpRight size={14} className="text-orange-500" /> Escalate Ticket
+                                 </button>
+                                 <div className="my-1 border-t dark:border-border-dark"></div>
+                                 <button onClick={() => setActiveDropdown(null)} className="w-full text-left px-4 py-2.5 hover:bg-red-50 dark:hover:bg-red-500/10 text-xs font-bold text-red-500 flex items-center gap-3">
+                                   <X size={14} /> Close Ticket
+                                 </button>
+                              </div>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}
