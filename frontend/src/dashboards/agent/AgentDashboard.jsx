@@ -3261,7 +3261,12 @@ const AgentDashboard = () => {
         onClose={() => setShowCommissionModal(false)} 
         onDownload={(name) => handleDownloadFile(name, 'pdf')}
       />
-      <SupportTicketModal isOpen={showTicketModal} onClose={() => setShowTicketModal(false)} />
+      <SupportTicketModal 
+        isOpen={showTicketModal} 
+        onClose={() => setShowTicketModal(false)} 
+        pushGlobalNotification={pushGlobalNotification}
+        user={user}
+      />
       <FileViewModal 
         isOpen={!!viewingFile} 
         onClose={() => setViewingFile(null)} 
@@ -3331,7 +3336,7 @@ const FileViewModal = ({ isOpen, onClose, fileName, onDownload }) => {
   );
 };
 
-const SupportTicketModal = ({ isOpen, onClose }) => {
+const SupportTicketModal = ({ isOpen, onClose, pushGlobalNotification, user }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   if (!isOpen) return null;
 
@@ -3348,11 +3353,21 @@ const SupportTicketModal = ({ isOpen, onClose }) => {
         
         <form className="p-6 space-y-6" onSubmit={(e) => {
           e.preventDefault();
+          const subject = e.target.elements[0].value;
+          const category = e.target.elements[1].value;
+          
           setIsSubmitting(true);
           setTimeout(() => {
             setIsSubmitting(false);
             onClose();
             window.alert('Support ticket #TK-' + Math.floor(1000 + Math.random() * 9000) + ' has been created successfully.');
+            
+            // Notify Admin & Sub-Admin
+            pushGlobalNotification?.({
+              title: 'New Support Ticket',
+              message: `Agent ${user?.name || 'AgentHub'} has raised a ${category} ticket: ${subject}`,
+              type: 'info'
+            });
           }, 1500);
         }}>
           <div className="space-y-2">
