@@ -1092,7 +1092,7 @@ const AgentDashboard = () => {
                 <div className="space-y-4 mt-6">
                   {shops.slice().reverse().map((shop) => {
                     const isActive = shop.status === 'Active' || shop.status === 'Shop Active';
-                    const isPendingAdmin = shop.status === 'Pending Admin';
+                    const isVerifiedBySubAdmin = shop.status === 'Verified by Sub Admin';
                     const isPendingReview = shop.status === 'Pending Review' || shop.status === 'Pending';
                     
                     let statusColor = 'bg-warning text-warning';
@@ -1101,17 +1101,17 @@ const AgentDashboard = () => {
                     let statusText = 'Pending Review';
 
                     if (isActive) {
-                      statusColor = 'bg-success/10 text-success';
+                      statusColor = 'bg-success/10 text-success border border-success/20';
                       progressWidth = '100%';
                       progressBarColor = 'bg-success';
-                      statusText = 'Shop Active';
-                    } else if (isPendingAdmin) {
-                      statusColor = 'bg-blue-500/10 text-blue-500';
+                      statusText = 'Active & Activated';
+                    } else if (isVerifiedBySubAdmin) {
+                      statusColor = 'bg-primary-light/20 text-primary-light border border-primary-light/30 shadow-sm';
                       progressWidth = '50%';
-                      progressBarColor = 'bg-blue-500';
-                      statusText = 'Pending Admin';
+                      progressBarColor = 'bg-primary-light';
+                      statusText = 'Verified (Sub-Admin)';
                     } else {
-                      statusColor = 'bg-warning/10 text-warning';
+                      statusColor = 'bg-warning/10 text-warning border border-warning/20';
                       progressWidth = '0%';
                       progressBarColor = 'bg-warning';
                       statusText = 'Pending Review';
@@ -1134,28 +1134,24 @@ const AgentDashboard = () => {
                           
                           {/* Dot 1: Submitted */}
                           <div className={`w-3.5 h-3.5 rounded-full ring-4 ring-white dark:ring-surface-dark relative z-10 transition-colors duration-500 ${
-                            isActive || isPendingAdmin || isPendingReview ? progressBarColor : 'bg-gray-300 dark:bg-gray-600'
+                            isActive || isVerifiedBySubAdmin || isPendingReview ? 'bg-warning' : 'bg-gray-300 dark:bg-gray-600'
                           }`} title="Submitted"></div>
                           
                           {/* Dot 2: Sub Admin Review */}
                           <div className={`w-3.5 h-3.5 rounded-full ring-4 ring-white dark:ring-surface-dark relative z-10 transition-colors duration-500 ${
-                            isActive || isPendingAdmin ? progressBarColor : 'bg-gray-300 dark:bg-gray-600'
+                            isActive || isVerifiedBySubAdmin ? 'bg-primary-light' : 'bg-gray-300 dark:bg-gray-600'
                           }`} title="Sub Admin Review"></div>
                           
                           {/* Dot 3: Admin Approval */}
                           <div className={`w-3.5 h-3.5 rounded-full ring-4 ring-white dark:ring-surface-dark relative z-10 transition-colors duration-500 ${
-                            isActive ? progressBarColor : 'bg-gray-300 dark:bg-gray-600'
+                            isActive ? 'bg-success' : 'bg-gray-300 dark:bg-gray-600'
                           }`} title="Admin Approval"></div>
                         </div>
 
-                        <div className="flex justify-between text-[8px] font-black text-text-secondary-light uppercase mt-2 tracking-widest">
-                          <span className={isActive || isPendingAdmin || isPendingReview ? (isActive ? 'text-success' : isPendingAdmin ? 'text-blue-500' : 'text-warning') : ''}>Submitted</span>
-                          <span className={`text-center ${isActive || isPendingAdmin ? (isActive ? 'text-success' : 'text-blue-500') : ''}`}>
-                            {isActive || isPendingAdmin ? 'Sub Admin Verified' : 'Sub Admin Pending'}
-                          </span>
-                          <span className={`text-right ${isActive ? 'text-success' : ''}`}>
-                            {isActive ? 'Admin Approved' : 'Admin Pending'}
-                          </span>
+                        <div className="flex justify-between mt-2 px-1">
+                          <span className={`text-[8px] font-black uppercase tracking-widest ${isActive || isVerifiedBySubAdmin || isPendingReview ? 'text-warning' : 'text-text-secondary-light'}`}>Submitted</span>
+                          <span className={`text-[8px] font-black uppercase tracking-widest ${isActive || isVerifiedBySubAdmin ? 'text-primary-light' : 'text-text-secondary-light'}`}>Sub Admin Verified</span>
+                          <span className={`text-[8px] font-black uppercase tracking-widest ${isActive ? 'text-success' : 'text-text-secondary-light'}`}>Admin Approved</span>
                         </div>
                       </div>
                     );
