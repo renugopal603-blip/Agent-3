@@ -9,7 +9,7 @@ import {
   Map, PlusSquare, Store, CheckSquare, Target, ShoppingBag, CreditCard,
   Wallet, History, Award, ArrowUpRight, TrendingUp, BarChart2,
   Bell, LifeBuoy, MessageSquare, Settings, LogOut, Search, Filter,
-  ChevronRight, ArrowRight, MoreVertical, Edit, Trash2, CheckCircle, Clock, ChevronDown,
+  ChevronRight, ArrowRight, MoreVertical, Edit, Trash2, CheckCircle, Clock, ChevronDown, Send,
   FileText, PieChart, Info, AlertCircle, Globe, Download, Sun, Moon, Star, X, UserPlus, Mail, Phone, Eye, Activity
 } from 'lucide-react';
 import {
