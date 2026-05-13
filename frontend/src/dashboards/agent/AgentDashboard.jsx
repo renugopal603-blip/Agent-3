@@ -275,14 +275,14 @@ const AgentDashboard = () => {
         setShops(prev => {
           const updated = [...prev];
           globalShops.forEach(gs => {
-            const index = updated.findIndex(s => s.id === gs.id);
+            const index = updated.findIndex(s => (s._id === gs._id || s.id === gs._id || s._id === gs.id || s.id === gs.id));
             if (index !== -1) {
               // Update status and other fields from global registry
               updated[index] = {
                 ...updated[index],
                 status: gs.status,
-                name: gs.name || updated[index].name,
-                category: gs.category || updated[index].category
+                name: gs.name || gs.shopName || updated[index].name,
+                category: gs.category || gs.cat || updated[index].category
               };
             }
           });
