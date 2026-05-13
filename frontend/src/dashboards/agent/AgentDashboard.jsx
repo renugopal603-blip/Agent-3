@@ -3394,7 +3394,17 @@ const SupportTicketModal = ({ isOpen, onClose }) => {
 };
 
 const CommissionPlanModal = ({ isOpen, onClose, onDownload }) => {
+  const [selectedTier, setSelectedTier] = useState(null);
+
   if (!isOpen) return null;
+
+  const tiers = [
+    { tier: 'Standard', requirement: '0-50 Referrals', bonus: 'Base Rate', details: 'The entry-level tier for all partners. Earn standard commissions on every shop onboarded and every customer referral.', active: true },
+    { tier: 'Silver', requirement: '51-150 Referrals', bonus: '+2% Extra Commission', details: 'Unlock the Silver tier to receive a 2% bonus override on all transactional earnings across your network.', active: false },
+    { tier: 'Gold', requirement: '151-500 Referrals', bonus: '+5% Extra Commission', details: 'High-volume performers receive a 5% bonus boost. Includes exclusive access to city-wide promotional events.', active: false },
+    { tier: 'Platinum', requirement: '500+ Referrals', bonus: '+10% Extra Commission', details: 'Top-tier status. Enjoy a 10% commission override, a dedicated account manager, and early access to new features.', active: false },
+  ];
+
   return (
     <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-background-dark/90 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
@@ -3470,18 +3480,40 @@ const CommissionPlanModal = ({ isOpen, onClose, onDownload }) => {
               Performance Tiers
             </h4>
             <div className="space-y-3">
-              {[
-                { tier: 'Standard', requirement: '0-50 Referrals', bonus: 'Base Rate', active: true },
-                { tier: 'Silver', requirement: '51-150 Referrals', bonus: '+2% Extra Commission', active: false },
-                { tier: 'Gold', requirement: '151-500 Referrals', bonus: '+5% Extra Commission', active: false },
-                { tier: 'Platinum', requirement: '500+ Referrals', bonus: '+10% Extra Commission', active: false },
-              ].map((tier, i) => (
-                <div key={i} className={`p-4 rounded-2xl border flex items-center justify-between ${tier.active ? 'bg-primary-light/5 border-primary-light' : 'bg-gray-50 dark:bg-secondary-dark border-transparent'}`}>
-                  <div>
-                    <p className={`text-sm font-black ${tier.active ? 'text-primary-light' : 'dark:text-white'}`}>{tier.tier} Tier</p>
-                    <p className="text-[10px] text-text-secondary-light font-bold">{tier.requirement}</p>
+              {tiers.map((tier, i) => (
+                <div key={i} className="space-y-2">
+                  <div 
+                    onClick={() => setSelectedTier(selectedTier === i ? null : i)}
+                    className={`p-4 rounded-2xl border flex items-center justify-between cursor-pointer transition-all hover:scale-[1.01] ${
+                      selectedTier === i 
+                        ? 'bg-primary-light/10 border-primary-light shadow-lg' 
+                        : tier.active 
+                          ? 'bg-primary-light/5 border-primary-light/30' 
+                          : 'bg-gray-50 dark:bg-secondary-dark border-transparent'
+                    }`}
+                  >
+                    <div>
+                      <p className={`text-sm font-black ${tier.active || selectedTier === i ? 'text-primary-light' : 'dark:text-white'}`}>{tier.tier} Tier</p>
+                      <p className="text-[10px] text-text-secondary-light font-bold">{tier.requirement}</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className={`text-xs font-black ${tier.active || selectedTier === i ? 'text-primary-light' : 'text-text-secondary-light'}`}>{tier.bonus}</span>
+                      <div className={`transition-transform duration-300 ${selectedTier === i ? 'rotate-180' : ''}`}>
+                        <ChevronDown size={14} className={selectedTier === i ? 'text-primary-light' : 'text-text-secondary-light'} />
+                      </div>
+                    </div>
                   </div>
-                  <span className={`text-xs font-black ${tier.active ? 'text-primary-light' : 'text-text-secondary-light'}`}>{tier.bonus}</span>
+                  {selectedTier === i && (
+                    <div className="px-6 py-4 bg-primary-light/5 rounded-2xl border border-primary-light/20 animate-in slide-in-from-top-2 duration-300">
+                      <p className="text-xs text-text-secondary-light font-bold leading-relaxed">{tier.details}</p>
+                      <div className="mt-3 flex items-center gap-2">
+                        <div className="h-1.5 flex-1 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
+                          <div className={`h-full bg-primary-light transition-all duration-1000 ${tier.active ? 'w-100' : 'w-0'}`}></div>
+                        </div>
+                        <span className="text-[10px] font-black text-primary-light uppercase">{tier.active ? 'Current Status' : 'Locked'}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
