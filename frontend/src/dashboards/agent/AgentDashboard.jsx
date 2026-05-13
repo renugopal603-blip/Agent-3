@@ -506,9 +506,10 @@ const AgentDashboard = () => {
   ];
 
   const stats = [
-    { title: 'Total Earnings', value: '₹42,850', icon: <Wallet />, color: 'bg-emerald-500', trend: '+12.5%' },
-    { title: 'Shop Onboarded', value: '12', icon: <Store />, color: 'bg-orange-500', trend: '+2 this week' },
-    { title: 'Current Target', value: '85%', icon: <Target />, color: 'bg-purple-500', trend: 'In Progress' },
+    { title: 'Total Earnings', value: '₹42,850', icon: <Wallet />, color: 'bg-emerald-500', trend: '+12.5%', trendType: 'success' },
+    { title: 'Shop Onboarded', value: '12', icon: <Store />, color: 'bg-orange-500', trend: '+2 this week', trendType: 'success' },
+    { title: 'Current Target', value: '85%', icon: <Target />, color: 'bg-purple-500', trend: 'In Progress', trendType: 'info' },
+    { title: 'Network Growth', value: '124', icon: <Users />, color: 'bg-blue-500', trend: '+18% Growth', trendType: 'success' },
   ];
 
   const renderContent = () => {
@@ -519,14 +520,17 @@ const AgentDashboard = () => {
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
               {stats.map((stat) => (
-                <div key={stat.title} className="card-premium flex items-center gap-4 hover:scale-[1.02] transition-transform">
-                  <div className={`p-4 ${stat.color} text-white rounded-2xl shadow-lg`}>
-                    {React.cloneElement(stat.icon, { size: 24 })}
+                <div key={stat.title} className="card-premium flex items-center gap-5 hover:scale-[1.02] transition-all group border-b-4 border-b-transparent hover:border-b-primary-light/40">
+                  <div className={`w-14 h-14 ${stat.color} text-white rounded-2xl shadow-lg flex items-center justify-center shrink-0 transition-transform group-hover:rotate-6`}>
+                    {React.cloneElement(stat.icon, { size: 28 })}
                   </div>
-                  <div>
-                    <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">{stat.title}</p>
-                    <h3 className="text-2xl font-bold dark:text-white">{stat.value}</h3>
-                    <p className="text-xs text-success font-semibold">{stat.trend}</p>
+                  <div className="flex flex-col justify-center min-w-0">
+                    <p className="text-[11px] font-black text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-[0.1em]">{stat.title}</p>
+                    <h3 className="text-2xl font-black dark:text-white mt-0.5 tracking-tight">{stat.value}</h3>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <div className={`w-1.5 h-1.5 rounded-full ${stat.trendType === 'success' ? 'bg-emerald-500' : 'bg-blue-500'}`}></div>
+                      <p className={`text-[10px] font-bold ${stat.trendType === 'success' ? 'text-emerald-500' : 'text-blue-500'}`}>{stat.trend}</p>
+                    </div>
                   </div>
                 </div>
               ))}
