@@ -1028,7 +1028,15 @@ const AdminDashboard = () => {
                           <p className="text-xs text-text-secondary-light">{item.type}</p>
                         </div>
                       </div>
-                      <button className="text-xs font-bold text-primary-light hover:underline">Verify</button>
+                      <button 
+                        onClick={() => {
+                          setActiveTab('KYC Approvals');
+                          addNotification({ title: 'Verification', message: `Opening KYC portal for ${item.name}`, type: 'info' });
+                        }}
+                        className="text-xs font-black text-primary-light hover:scale-110 transition-transform uppercase tracking-wider"
+                      >
+                        Verify
+                      </button>
                     </div>
                   ))}
                 </div>
