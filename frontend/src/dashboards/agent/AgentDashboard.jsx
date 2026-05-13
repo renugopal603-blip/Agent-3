@@ -332,31 +332,22 @@ const AgentDashboard = () => {
       const contactNum = (shopForm.contact || '').trim();
       const shopLoc = (shopForm.location || '').trim();
 
-      if (!shopName || !ownerName || !contactNum) {
-        window.alert('Validation Error: Shop Name, Owner, and Contact are required.');
+      if (!shopName || !ownerName || !contactNum || !shopLoc) {
+        window.alert(`Validation Error: ${!shopName ? 'Shop Name, ' : ''}${!ownerName ? 'Owner Name, ' : ''}${!contactNum ? 'Contact, ' : ''}${!shopLoc ? 'Location ' : ''}are required.`);
+        setIsProcessing(false);
         return;
       }
 
       setIsProcessing(true);
 
       const currentShops = Array.isArray(shops) ? shops : [];
-      const maxId = currentShops.reduce((max, s) => {
-        const id = parseInt(s.id);
-        return !isNaN(id) ? Math.max(max, id) : max;
-      }, 0);
-      const newId = maxId + 1;
-
-      const newShop = { 
-        id: newId, 
-        name: shopName, 
-        category: shopForm.category || 'Grocery', 
-        owner: ownerName, 
+      
+      const payload = {
+        name: shopName,
+        category: shopForm.category || 'Grocery',
+        owner: ownerName,
         location: shopLoc,
         agent: user?.name || 'AgentHub',
-        sales: '₹0', 
-        status: 'Pending Review', 
-        rating: 'N/A',
-        date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
         documents: {
           license: (shopForm.documents && shopForm.documents.licenseName) ? shopForm.documents.licenseName : 'Shop_License.pdf',
           gst: (shopForm.documents && shopForm.documents.gstName) ? shopForm.documents.gstName : 'GST_Certificate.pdf'
@@ -367,54 +358,54 @@ const AgentDashboard = () => {
       let savedShop = null;
       if (user?.token) {
         const config = { headers: { Authorization: `Bearer ${user.token}` } };
-        const payload = {
-          name: shopName,
-          category: shopForm.category || 'Grocery',
-          owner: ownerName,
-          location: shopLoc,
-          agent: user?.name,
-          documents: {
-            license: (shopForm.documents && shopForm.documents.licenseName) ? shopForm.documents.licenseName : 'Shop_License.pdf',
-            gst: (shopForm.documents && shopForm.documents.gstName) ? shopForm.documents.gstName : 'GST_Certificate.pdf'
-          }
-        };
         const { data } = await axios.post('/api/shops', payload, config);
         savedShop = data;
       }
 
-      const shopToStore = savedShop || newShop;
-      const updatedShops = [...currentShops, shopToStore];
+      const shopToStore = savedShop || { ...payload, id: Date.now(), status: 'Pending Review' };
+      const updatedShops = [shopToStore, ...currentShops];
       
       // Sync to shared global state for Admin/Sub-Admin access
       const globalShops = JSON.parse(localStorage.getItem('globalShops') || '[]');
-      localStorage.setItem('globalShops', JSON.stringify([...globalShops, shopToStore]));
+      localStorage.setItem('globalShops', JSON.stringify([shopToStore, ...globalShops]));
+      localStorage.setItem('shop_updated', Date.now().toString());
       
       // UPDATE STATE
       setShops(updatedShops);
       
       addNotification({
         title: 'Registration Submitted',
-        message: `${newShop.name} onboarding initiated. Waiting for Sub-Admin verification.`,
+        message: `${shopName} onboarding initiated. Waiting for Sub-Admin verification.`,
         type: 'success'
       });
       
       pushGlobalNotification({
         title: 'New Shop Registration',
-        message: `Agent ${user?.name || 'AgentHub'} has submitted a new shop: ${newShop.name}`,
+        message: `Agent ${user?.name || 'AgentHub'} has submitted a new shop: ${shopName}`,
         type: 'info'
       });
 
-      console.log('DEBUG: Saved successfully', newShop);
+      console.log('DEBUG: Saved successfully', shopToStore);
       
       setTimeout(() => {
         setShowShopModal(false);
         setIsProcessing(false);
+        // Reset form
+        setShopForm({ 
+          name: '', category: 'Grocery', owner: '', location: '', contact: '',
+          documents: { license: null, licenseName: '', gst: null, gstName: '' }
+        });
       }, 1500);
 
     } catch (error) {
       console.error('DEBUG: Save Failed', error);
       setIsProcessing(false);
-      window.alert('CRITICAL SAVE ERROR: ' + error.message);
+      addNotification({
+        title: 'Submission Failed',
+        message: error.response?.data?.message || 'Server error occurred.',
+        type: 'error'
+      });
+      window.alert('Submission Failed: ' + (error.response?.data?.message || error.message));
     }
   };
 
@@ -2934,7 +2925,11 @@ const AgentDashboard = () => {
         <div className="fixed inset-0 z-[250] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setShowShopModal(false)}></div>
           <form 
-            onSubmit={handleSubmitShop}
+            onSubmit={(e) => {
+              console.log('DEBUG: Form onSubmit event fired');
+              handleSubmitShop(e);
+            }}
+            noValidate
             onClick={(e) => e.stopPropagation()}
             className="relative w-full max-w-2xl bg-surface-light dark:bg-surface-dark rounded-[40px] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]"
           >
