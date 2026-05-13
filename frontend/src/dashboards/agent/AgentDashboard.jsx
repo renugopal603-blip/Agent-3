@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { jsPDF } from 'jspdf';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -8,7 +9,7 @@ import {
   Wallet, History, Award, ArrowUpRight, TrendingUp, BarChart2,
   Bell, LifeBuoy, MessageSquare, Settings, LogOut, Search, Filter,
   ChevronRight, ArrowRight, MoreVertical, Edit, Trash2, CheckCircle, Clock,
-  FileText, PieChart, Info, AlertCircle, Globe, Download, Sun, Moon, Star, X, UserPlus, Mail, Phone
+  FileText, PieChart, Info, AlertCircle, Globe, Download, Sun, Moon, Star, X, UserPlus, Mail, Phone, Eye
 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -26,12 +27,15 @@ const AgentDashboard = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   
   const handleDownloadFile = (fileName = 'Document', extension = 'pdf') => {
+    if (fileName === 'Agent_ID_Card') {
+      generateIDCardPDF();
+      return;
+    }
     addNotification({ 
       title: 'Preparing Download', 
       message: `Securing ${fileName} for transfer...`, 
       type: 'info' 
     });
-    
     setTimeout(() => {
       try {
         const type = extension === 'csv' ? 'text/csv' : 'application/pdf';
@@ -45,7 +49,6 @@ const AgentDashboard = () => {
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
-        
         addNotification({ 
           title: 'Download Ready', 
           message: `${fileName} has been saved successfully.`, 
@@ -59,6 +62,126 @@ const AgentDashboard = () => {
         });
       }
     }, 1500);
+  };
+
+  const generateIDCardPDF = () => {
+    addNotification({ title: 'Generating ID Card', message: 'Building your official ID card...', type: 'info' });
+    try {
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [86, 54] });
+
+      // --- Background ---
+      doc.setFillColor(10, 25, 47); // deep navy
+      doc.rect(0, 0, 86, 54, 'F');
+
+      // --- Green accent bar (left side) ---
+      doc.setFillColor(16, 185, 129); // emerald green
+      doc.rect(0, 0, 6, 54, 'F');
+
+      // --- Watermark circle (decorative) ---
+      doc.setFillColor(16, 185, 129, 0.05);
+      doc.setDrawColor(16, 185, 129);
+      doc.setLineWidth(0.3);
+      doc.circle(68, 27, 20, 'S');
+      doc.circle(68, 27, 14, 'S');
+
+      // --- Header ---
+      doc.setFillColor(16, 185, 129);
+      doc.setTextColor(16, 185, 129);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.text('AGENT HUB', 10, 8);
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(5);
+      doc.setFont('helvetica', 'normal');
+      doc.text('OFFICIAL AGENT IDENTIFICATION CARD', 10, 12);
+
+      // --- Divider ---
+      doc.setDrawColor(16, 185, 129);
+      doc.setLineWidth(0.3);
+      doc.line(9, 14, 60, 14);
+
+      // --- Avatar circle ---
+      doc.setFillColor(16, 185, 129);
+      doc.circle(17, 23, 7, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text('A', 17, 25.5, { align: 'center' });
+
+      // --- Agent Name ---
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(255, 255, 255);
+      doc.text('AdminHub', 27, 20);
+
+      // --- Role badge ---
+      doc.setFillColor(16, 185, 129);
+      doc.roundedRect(27, 21.5, 18, 4, 1, 1, 'F');
+      doc.setFontSize(4.5);
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.text('STATE LEVEL AGENT', 36, 24.2, { align: 'center' });
+
+      // --- Info fields ---
+      const fields = [
+        { label: 'AGENT ID',    value: 'AGT-882901' },
+        { label: 'EMAIL',       value: 'agent2@agenticstore.com' },
+        { label: 'STATE',       value: 'Maharashtra' },
+        { label: 'VALID FROM',  value: 'Jan 15, 2024' },
+      ];
+      doc.setFontSize(4.2);
+      let yPos = 32;
+      fields.forEach(({ label, value }) => {
+        doc.setTextColor(100, 200, 160);
+        doc.setFont('helvetica', 'bold');
+        doc.text(label, 10, yPos);
+        doc.setTextColor(220, 230, 240);
+        doc.setFont('helvetica', 'normal');
+        doc.text(value, 30, yPos);
+        yPos += 4.5;
+      });
+
+      // --- QR-style box ---
+      doc.setDrawColor(16, 185, 129);
+      doc.setLineWidth(0.4);
+      doc.rect(63, 8, 18, 18, 'S');
+      // inner squares to mimic QR
+      doc.setFillColor(16, 185, 129);
+      doc.rect(64, 9, 4, 4, 'F');
+      doc.rect(76, 9, 4, 4, 'F');
+      doc.rect(64, 21, 4, 4, 'F');
+      doc.setFillColor(30, 60, 90);
+      doc.rect(64.5, 9.5, 3, 3, 'F');
+      doc.rect(76.5, 9.5, 3, 3, 'F');
+      doc.rect(64.5, 21.5, 3, 3, 'F');
+      doc.setFillColor(16, 185, 129);
+      doc.rect(64.5+1, 9.5+1, 1, 1, 'F');
+      doc.rect(76.5+1, 9.5+1, 1, 1, 'F');
+      doc.rect(64.5+1, 21.5+1, 1, 1, 'F');
+      // random data dots
+      const dots = [[66,14],[68,12],[70,14],[72,12],[74,14],[66,16],[70,16],[73,16],[68,18],[72,18],[75,13],[75,15],[75,21],[75,23],[66,23],[68,23],[70,22]];
+      doc.setFillColor(16, 185, 129);
+      dots.forEach(([x,y]) => doc.rect(x, y, 0.8, 0.8, 'F'));
+
+      doc.setFontSize(3.5);
+      doc.setTextColor(100, 200, 160);
+      doc.text('SCAN TO VERIFY', 72, 29, { align: 'center' });
+
+      // --- Footer bar ---
+      doc.setFillColor(16, 185, 129);
+      doc.rect(0, 49, 86, 5, 'F');
+      doc.setTextColor(10, 25, 47);
+      doc.setFontSize(4);
+      doc.setFont('helvetica', 'bold');
+      doc.text('AgentHub Platform  |  www.agenticstore.com  |  KYC VERIFIED  |  OPERATIONAL', 43, 52.2, { align: 'center' });
+
+      doc.save('Agent_ID_Card_AGT-882901.pdf');
+      addNotification({ title: 'ID Card Downloaded', message: 'Your official ID card has been saved.', type: 'success' });
+    } catch (err) {
+      console.error('ID Card generation failed:', err);
+      addNotification({ title: 'Download Failed', message: 'Could not generate ID card. Please try again.', type: 'error' });
+    }
   };
 
   const [isDownloading, setIsDownloading] = useState(false);
@@ -259,7 +382,7 @@ const AgentDashboard = () => {
                   </select>
                 </div>
                 <div className="h-[300px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                     <AreaChart data={chartData}>
                       <defs>
                         <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
@@ -1240,7 +1363,7 @@ const AgentDashboard = () => {
               <div className="card-premium space-y-6">
                 <h4 className="font-bold dark:text-white">Sales by Plan</h4>
                 <div className="h-[250px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                     <BarChart data={[
                       { name: 'Diamond', sales: 45 },
                       { name: 'Gold', sales: 78 },
@@ -1329,7 +1452,7 @@ const AgentDashboard = () => {
               <div className="card-premium space-y-6">
                 <h4 className="font-bold dark:text-white">Earnings Breakdown</h4>
                 <div className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                     <AreaChart data={chartData}>
                       <defs>
                         <linearGradient id="colorComm" x1="0" y1="0" x2="0" y2="1">
@@ -1686,7 +1809,7 @@ const AgentDashboard = () => {
               <div className="xl:col-span-2 card-premium space-y-6">
                 <h4 className="font-bold dark:text-white">Network Growth vs Sales ({analyticsTimeframe})</h4>
                 <div className="h-[350px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                     <LineChart data={currentData}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
                       <XAxis dataKey="name" fontSize={12} />
@@ -1706,7 +1829,7 @@ const AgentDashboard = () => {
               <div className="card-premium space-y-6">
                 <h4 className="font-bold dark:text-white">Category Performance</h4>
                 <div className="h-[250px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                     <RePieChart>
                       <Pie
                         data={[
