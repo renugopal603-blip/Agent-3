@@ -211,10 +211,7 @@ const AdminDashboard = () => {
     syncGlobalShops();
     window.addEventListener('storage', syncGlobalShops);
     return () => window.removeEventListener('storage', syncGlobalShops);
-      type: 'success'
-    });
-    pushGlobalNotification({ title: 'Shop Registration', message: 'A new shop has been approved.', type: 'success' });
-  };
+  }, [user?.token]);
 
   const handleDownloadReport = (reportName = 'Report') => {
     addNotification({ 
