@@ -276,6 +276,11 @@ const AgentDashboard = () => {
   const [showExpansionModal, setShowExpansionModal] = useState(false);
   const [showTicketModal, setShowTicketModal] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [supportTickets, setSupportTickets] = useState([
+    { id: '#TK-9921', sub: 'Commission payout delay for April', status: 'In Progress', priority: 'High', activity: 'Just now' },
+    { id: '#TK-9845', sub: 'Technical issue with shop upload', status: 'Pending', priority: 'Medium', activity: '5 hours ago' },
+    { id: '#TK-9721', sub: 'How to update KYC documents?', status: 'Resolved', priority: 'Low', activity: '2 days ago' }
+  ]);
   const [analyticsTimeframe, setAnalyticsTimeframe] = useState('Monthly View');
   const [paymentMethod, setPaymentMethod] = useState('UPI'); // 'UPI' or 'Manual'
   const [showOnboardModal, setShowOnboardModal] = useState(false);
@@ -2601,11 +2606,7 @@ const AgentDashboard = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y dark:divide-border-dark">
-                    {[
-                      { id: '#TK-9921', sub: 'Commission payout delay for April', status: 'In Progress', priority: 'High', activity: '1 hour ago' },
-                      { id: '#TK-9845', sub: 'Technical issue with shop upload', status: 'Pending', priority: 'Medium', activity: '5 hours ago' },
-                      { id: '#TK-9721', sub: 'How to update KYC documents?', status: 'Resolved', priority: 'Low', activity: '2 days ago' }
-                    ].map((ticket, i) => (
+                    {supportTickets.map((ticket, i) => (
                       <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/30 transition-colors cursor-pointer group">
                         <td className="px-6 py-4 text-sm font-black dark:text-white">{ticket.id}</td>
                         <td className="px-6 py-4 text-sm font-bold dark:text-white group-hover:text-primary-light transition-colors">{ticket.sub}</td>
@@ -3266,6 +3267,7 @@ const AgentDashboard = () => {
         onClose={() => setShowTicketModal(false)} 
         pushGlobalNotification={pushGlobalNotification}
         user={user}
+        setSupportTickets={setSupportTickets}
       />
       <FileViewModal 
         isOpen={!!viewingFile} 
@@ -3336,7 +3338,7 @@ const FileViewModal = ({ isOpen, onClose, fileName, onDownload }) => {
   );
 };
 
-const SupportTicketModal = ({ isOpen, onClose, pushGlobalNotification, user }) => {
+const SupportTicketModal = ({ isOpen, onClose, pushGlobalNotification, user, setSupportTickets }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   if (!isOpen) return null;
 
@@ -3355,12 +3357,22 @@ const SupportTicketModal = ({ isOpen, onClose, pushGlobalNotification, user }) =
           e.preventDefault();
           const subject = e.target.elements[0].value;
           const category = e.target.elements[1].value;
+          const priority = e.target.elements[3].value;
           
           setIsSubmitting(true);
           setTimeout(() => {
             setIsSubmitting(false);
             onClose();
-            window.alert('Support ticket #TK-' + Math.floor(1000 + Math.random() * 9000) + ' has been created successfully.');
+            
+            const ticketId = '#TK-' + Math.floor(1000 + Math.random() * 9000);
+            
+            // Add to local state
+            setSupportTickets(prev => [
+              { id: ticketId, sub: subject, status: 'Pending', priority: priority, activity: 'Just now' },
+              ...prev
+            ]);
+
+            window.alert('Support ticket ' + ticketId + ' has been created successfully.');
             
             // Notify Admin & Sub-Admin
             pushGlobalNotification?.({
