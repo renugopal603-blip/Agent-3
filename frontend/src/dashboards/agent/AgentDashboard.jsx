@@ -613,11 +613,10 @@ const AgentDashboard = () => {
                   >
                     View All History <ArrowRight size={16} />
                   </button>
-                </div>   </div>
+                </div>
               </div>
             </div>
             
-            {/* Added extra padding at the bottom to prevent clipping */}
             <div className="h-10"></div>
           </div>
         );
