@@ -210,6 +210,7 @@ const AgentDashboard = () => {
     }
   });
   const [showShopModal, setShowShopModal] = useState(false);
+  const [viewingFile, setViewingFile] = useState(null);
   const [settings, setSettings] = useState({
     twoFactor: true,
     emailAlerts: true,
@@ -717,10 +718,7 @@ const AgentDashboard = () => {
                     ].map((doc, i) => (
                       <div 
                         key={i} 
-                        onClick={() => {
-                          addNotification({ title: 'System Access', message: `Opening ${doc.name} for viewing...`, type: 'info' });
-                          setTimeout(() => addNotification({ title: 'File Viewed', message: `${doc.name} successfully retrieved.`, type: 'success' }), 2000);
-                        }}
+                        onClick={() => setViewingFile(doc.name)}
                         className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark flex items-center justify-between group cursor-pointer hover:border-primary-light transition-all active:scale-95"
                       >
                         <div>
@@ -3106,6 +3104,66 @@ const AgentDashboard = () => {
       {/* Commission Plan Modal */}
       <CommissionPlanModal isOpen={showCommissionModal} onClose={() => setShowCommissionModal(false)} />
       <SupportTicketModal isOpen={showTicketModal} onClose={() => setShowTicketModal(false)} />
+      <FileViewModal isOpen={!!viewingFile} onClose={() => setViewingFile(null)} fileName={viewingFile || ''} />
+    </div>
+  );
+};
+
+const FileViewModal = ({ isOpen, onClose, fileName }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
+      <div className="absolute inset-0" onClick={onClose}></div>
+      <div className="relative w-full max-w-lg bg-white dark:bg-surface-dark rounded-[40px] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="p-8 border-b dark:border-border-dark flex justify-between items-center bg-gray-50 dark:bg-secondary-dark/50">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-primary-light/10 rounded-2xl flex items-center justify-center text-primary-light">
+              <FileText size={24} />
+            </div>
+            <div>
+              <h3 className="text-xl font-black dark:text-white truncate max-w-[200px]">{fileName}</h3>
+              <p className="text-[10px] text-text-secondary-light font-black uppercase tracking-widest">Document Preview</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-3 hover:bg-gray-200 dark:hover:bg-surface-dark rounded-2xl transition-all"><X size={24}/></button>
+        </div>
+        
+        <div className="p-8 space-y-6">
+          <div className="aspect-[4/3] w-full bg-gray-100 dark:bg-secondary-dark rounded-3xl border-2 border-dashed border-border-light dark:border-border-dark flex flex-col items-center justify-center gap-4 relative group overflow-hidden">
+             <div className="absolute inset-0 bg-gradient-to-br from-primary-light/5 to-transparent"></div>
+             <ShieldCheck size={64} className="text-primary-light opacity-20" />
+             <div className="text-center z-10">
+               <p className="text-sm font-black dark:text-white mb-1 uppercase tracking-tight">Verified Digital Document</p>
+               <p className="text-[10px] text-text-secondary-light font-bold">This document has been verified by AgentHub Compliance.</p>
+             </div>
+             
+             {/* Mock document content */}
+             <div className="w-3/4 h-2 bg-gray-200 dark:bg-white/5 rounded-full mb-2"></div>
+             <div className="w-1/2 h-2 bg-gray-200 dark:bg-white/5 rounded-full mb-2"></div>
+             <div className="w-2/3 h-2 bg-gray-200 dark:bg-white/5 rounded-full mb-2"></div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <ProfileItem label="Upload Date" value="Jan 15, 2024" />
+            <ProfileItem label="Status" value="KYC Verified" />
+            <ProfileItem label="Security" value="Encrypted" />
+            <ProfileItem label="File Type" value={fileName.split('.').pop().toUpperCase()} />
+          </div>
+        </div>
+
+        <div className="p-8 bg-gray-50 dark:bg-secondary-dark/30 border-t dark:border-border-dark">
+          <button 
+            onClick={() => {
+              onClose();
+              window.alert('Download started for ' + fileName);
+            }}
+            className="w-full py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+          >
+            <Download size={18} />
+            Download Original File
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
