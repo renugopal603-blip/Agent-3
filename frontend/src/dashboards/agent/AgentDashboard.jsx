@@ -9,7 +9,7 @@ import {
   Wallet, History, Award, ArrowUpRight, TrendingUp, BarChart2,
   Bell, LifeBuoy, MessageSquare, Settings, LogOut, Search, Filter,
   ChevronRight, ArrowRight, MoreVertical, Edit, Trash2, CheckCircle, Clock,
-  FileText, PieChart, Info, AlertCircle, Globe, Download, Sun, Moon, Star, X, UserPlus, Mail, Phone, Eye
+  FileText, PieChart, Info, AlertCircle, Globe, Download, Sun, Moon, Star, X, UserPlus, Mail, Phone, Eye, Activity
 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -403,42 +403,56 @@ const AgentDashboard = () => {
               </div>
 
               {/* Recent Activities */}
-              <div className="card-premium space-y-6">
-                <h3 className="text-lg font-bold dark:text-white">Recent Activities</h3>
-                <div className="space-y-4">
+              <div className="card-premium flex flex-col h-full">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-bold dark:text-white">Recent Activities</h3>
+                  <div className="w-8 h-8 bg-primary-light/10 text-primary-light rounded-full flex items-center justify-center">
+                    <Activity size={16} />
+                  </div>
+                </div>
+                
+                <div className="flex-1 space-y-4">
                   {[
-                    { title: 'Shop Registration', desc: 'New Shop: Fresh Mart', time: '5h ago', icon: <Store />, color: 'text-emerald-500' },
-                    { title: 'KYC Verified', desc: 'Your KYC was approved by Admin', time: '1d ago', icon: <ShieldCheck />, color: 'text-purple-500' },
-                    { title: 'Payment Received', desc: 'Payout for April processed', time: '2d ago', icon: <Wallet />, color: 'text-blue-500' },
+                    { title: 'Shop Registration', desc: 'New Shop: Fresh Mart', time: '5h ago', icon: <Store />, color: 'text-emerald-500', bgColor: 'bg-emerald-500/10' },
+                    { title: 'KYC Verified', desc: 'Your KYC was approved by Admin', time: '1d ago', icon: <ShieldCheck />, color: 'text-purple-500', bgColor: 'bg-purple-500/10' },
+                    { title: 'Payment Received', desc: 'Payout for April processed', time: '2d ago', icon: <Wallet />, color: 'text-blue-500', bgColor: 'bg-blue-500/10' },
                   ].map((activity, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-secondary-dark rounded-xl group relative">
+                    <div key={i} className="flex items-center justify-between p-4 bg-gray-50/50 dark:bg-secondary-dark/50 rounded-2xl group transition-all hover:bg-white dark:hover:bg-secondary-dark hover:shadow-md border border-transparent hover:border-border-light dark:hover:border-border-dark">
                       <div className="flex gap-4">
-                        <div className={`p-2 rounded-lg bg-white dark:bg-surface-dark ${activity.color} shadow-sm`}>
-                          {React.cloneElement(activity.icon, { size: 18 })}
+                        <div className={`w-12 h-12 rounded-xl ${activity.bgColor} ${activity.color} flex items-center justify-center shadow-sm shrink-0`}>
+                          {React.cloneElement(activity.icon, { size: 22 })}
                         </div>
-                        <div>
-                          <p className="text-sm font-bold dark:text-white">{activity.title}</p>
-                          <p className="text-xs text-text-secondary-light">{activity.desc}</p>
-                          <p className="text-[10px] text-text-secondary-light mt-1 font-medium">{activity.time}</p>
+                        <div className="min-w-0">
+                          <p className="text-sm font-black dark:text-white truncate">{activity.title}</p>
+                          <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark font-medium line-clamp-1">{activity.desc}</p>
+                          <p className="text-[10px] text-text-secondary-light/60 dark:text-text-secondary-dark/40 mt-1 font-bold uppercase tracking-wider">{activity.time}</p>
                         </div>
                       </div>
-                      <button 
-                        onClick={() => addNotification({ title: activity.title, message: 'Activity details have been logged.', type: 'info' })}
-                        className="p-1.5 hover:bg-white dark:hover:bg-surface-dark rounded-lg transition-all opacity-0 group-hover:opacity-100"
-                      >
-                        <MoreVertical size={16} className="text-text-secondary-light" />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => addNotification({ title: activity.title, message: 'Activity details have been logged.', type: 'info' })}
+                          className="p-2 hover:bg-gray-100 dark:hover:bg-surface-dark rounded-xl transition-all opacity-0 group-hover:opacity-100 text-text-secondary-light"
+                        >
+                          <ChevronRight size={18} />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
-                <button 
-                  onClick={() => setActiveTab('Commission History')}
-                  className="w-full btn-outline py-2 text-sm hover:bg-gray-50 dark:hover:bg-secondary-dark transition-colors"
-                >
-                  View All History
-                </button>
+                
+                <div className="mt-8 pt-6 border-t dark:border-border-dark">
+                  <button 
+                    onClick={() => setActiveTab('Commission History')}
+                    className="w-full btn-outline py-3 text-sm font-black uppercase tracking-widest hover:shadow-lg hover:shadow-primary-light/10 transition-all rounded-2xl"
+                  >
+                    View All History
+                  </button>
+                </div>
               </div>
             </div>
+            
+            {/* Added extra padding at the bottom to prevent clipping */}
+            <div className="h-10"></div>
           </div>
         );
 
@@ -2123,25 +2137,55 @@ const AgentDashboard = () => {
                     <button onClick={() => setShowMap(false)} className="p-2 hover:bg-white/20 rounded-xl transition-all"><X size={24}/></button>
                   </div>
                   
-                  <div className="flex-1 relative bg-[#0F172A] p-8 overflow-hidden">
-                    {/* Simulated Map Background */}
-                    <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(#3B82F6 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
+                  <div className="flex-1 relative bg-[#0B0F1A] p-8 overflow-hidden">
+                    {/* Dynamic Background Effects */}
+                    <div className="absolute inset-0 opacity-20" style={{ 
+                      backgroundImage: 'radial-gradient(circle at 2px 2px, #3B82F6 1px, transparent 0)', 
+                      backgroundSize: '24px 24px' 
+                    }}></div>
+                    <div className="absolute inset-0 bg-gradient-to-tr from-primary-light/5 via-transparent to-emerald-500/5"></div>
                     
-                    <div className="relative w-full h-full border-2 border-white/5 rounded-[32px] flex items-center justify-center overflow-hidden">
-                       {/* SVG Map Mockup */}
-                       <svg viewBox="0 0 1000 500" className="w-full h-full opacity-40">
-                          <path d="M150,150 Q400,50 800,200 T900,400" fill="none" stroke="#3B82F6" strokeWidth="2" strokeDasharray="5,5" />
-                          <circle cx="200" cy="150" r="80" fill="#3B82F6" fillOpacity="0.1" />
-                          <circle cx="500" cy="250" r="120" fill="#10B981" fillOpacity="0.1" />
-                          <circle cx="800" cy="350" r="60" fill="#F59E0B" fillOpacity="0.1" />
+                    <div className="relative w-full h-full border border-white/10 rounded-[40px] flex items-center justify-center overflow-hidden bg-[#0F172A]/40 backdrop-blur-sm shadow-inner">
+                       {/* Premium Stylized World Map SVG */}
+                       <svg viewBox="0 0 1000 500" className="w-full h-full opacity-30 select-none pointer-events-none">
+                          <defs>
+                            <linearGradient id="mapGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                              <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.2" />
+                              <stop offset="100%" stopColor="#10B981" stopOpacity="0.2" />
+                            </linearGradient>
+                            <filter id="glow">
+                              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                              <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                              </feMerge>
+                            </filter>
+                          </defs>
+                          
+                          {/* Stylized Continent Shapes (Simplified for performance and aesthetics) */}
+                          <path d="M150,120 Q180,100 220,130 T280,110 T320,150 T280,220 T220,250 T150,200 Z" fill="url(#mapGradient)" />
+                          <path d="M450,180 Q500,150 550,180 T620,220 T580,350 T500,380 T420,320 Z" fill="url(#mapGradient)" />
+                          <path d="M750,100 Q800,80 850,120 T900,200 T850,300 T750,250 Z" fill="url(#mapGradient)" />
+                          <path d="M700,350 Q750,320 800,350 T850,420 T780,480 T700,420 Z" fill="url(#mapGradient)" />
+                          
+                          {/* Animated Connection Arcs */}
+                          <path d="M210,160 Q400,50 510,240" fill="none" stroke="#3B82F6" strokeWidth="1.5" strokeDasharray="5,5" className="animate-[dash_20s_linear_infinite]" />
+                          <path d="M510,240 Q700,100 810,130" fill="none" stroke="#10B981" strokeWidth="1.5" strokeDasharray="5,5" className="animate-[dash_25s_linear_infinite]" />
+                          <path d="M510,240 Q650,400 760,390" fill="none" stroke="#F59E0B" strokeWidth="1.5" strokeDasharray="5,5" className="animate-[dash_15s_linear_infinite]" />
                        </svg>
 
-                       {/* Map Markers */}
+                       <style dangerouslySetInnerHTML={{ __html: `
+                          @keyframes dash {
+                            to { stroke-dashoffset: -100; }
+                          }
+                       `}} />
+
+                       {/* Map Markers with Enhanced Styling */}
                        {[
-                         { x: '20%', y: '30%', label: 'North Zone', active: true, agents: 45, shops: 120 },
-                         { x: '50%', y: '50%', label: 'Central Hub', active: true, agents: 89, shops: 340 },
-                         { x: '75%', y: '70%', label: 'South Zone', active: false, agents: 12, shops: 45 },
-                         { x: '40%', y: '20%', label: 'West Region', active: true, agents: 34, shops: 110 },
+                         { x: '21%', y: '32%', label: 'North Zone', active: true, agents: 45, shops: 120, color: 'bg-blue-500' },
+                         { x: '51%', y: '48%', label: 'Central Hub', active: true, agents: 89, shops: 340, color: 'bg-emerald-500' },
+                         { x: '81%', y: '26%', label: 'East Region', active: false, agents: 12, shops: 45, color: 'bg-gray-400' },
+                         { x: '76%', y: '78%', label: 'South Zone', active: true, agents: 34, shops: 110, color: 'bg-orange-500' },
                        ].map((marker, i) => (
                          <div 
                            key={i} 
@@ -2152,32 +2196,80 @@ const AgentDashboard = () => {
                            className="absolute flex flex-col items-center group cursor-pointer transition-all hover:scale-110 z-10" 
                            style={{ left: marker.x, top: marker.y }}
                          >
-                            <div className={`w-5 h-5 rounded-full border-4 border-white shadow-xl animate-pulse ${
-                              selectedMarker?.label === marker.label ? 'bg-primary-light scale-125 ring-4 ring-primary-light/30' :
-                              marker.active ? 'bg-emerald-500' : 'bg-gray-400'
-                            }`}></div>
-                            <div className={`mt-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-lg border border-white/10 transition-all ${
+                            {/* Ripple Effect for Active Markers */}
+                            {marker.active && (
+                              <div className="absolute inset-0 -m-4">
+                                <div className={`absolute inset-0 rounded-full ${marker.color} opacity-20 animate-ping`}></div>
+                                <div className={`absolute inset-0 rounded-full ${marker.color} opacity-10 animate-pulse delay-700`}></div>
+                              </div>
+                            )}
+                            
+                            <div className={`w-6 h-6 rounded-full border-4 border-white dark:border-[#1E293B] shadow-2xl relative z-10 transition-all ${
+                              selectedMarker?.label === marker.label ? 'scale-125 ring-4 ring-primary-light/30' : ''
+                            } ${marker.color}`}></div>
+                            
+                            <div className={`mt-3 px-4 py-1.5 bg-[#1E293B]/90 backdrop-blur-md rounded-xl border border-white/10 shadow-2xl transition-all duration-300 ${
                               selectedMarker?.label === marker.label ? 'opacity-100 translate-y-0' : 'opacity-0 group-hover:opacity-100 translate-y-1'
                             }`}>
-                               <span className="text-[10px] font-black text-white whitespace-nowrap">{marker.label}</span>
+                               <span className="text-[11px] font-black text-white whitespace-nowrap tracking-wider uppercase">{marker.label}</span>
                             </div>
                          </div>
                        ))}
 
-                       <div className="absolute bottom-8 left-8 p-6 bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 max-w-xs space-y-4 animate-in slide-in-from-left-4 duration-500">
-                          <div className="flex items-center justify-between gap-4">
-                             <h4 className="text-white font-bold text-sm">{selectedMarker ? selectedMarker.label : 'Global Overview'}</h4>
-                             {selectedMarker && <button onClick={(e) => { e.stopPropagation(); setSelectedMarker(null); }} className="text-[10px] text-primary-light font-black uppercase hover:underline">Reset</button>}
+                       {/* Interactive Data Panel (Glassmorphism) */}
+                       <div className="absolute bottom-10 left-10 p-8 bg-[#1E293B]/60 backdrop-blur-2xl rounded-[32px] border border-white/10 max-w-sm w-full space-y-6 shadow-2xl animate-in slide-in-from-left-8 duration-700">
+                          <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                             <div className="flex items-center gap-3">
+                               <div className={`w-3 h-3 rounded-full ${selectedMarker ? selectedMarker.color : 'bg-primary-light'} animate-pulse`}></div>
+                               <h4 className="text-white font-black text-base tracking-tight uppercase">{selectedMarker ? selectedMarker.label : 'Global Insights'}</h4>
+                             </div>
+                             {selectedMarker && (
+                               <button 
+                                 onClick={(e) => { e.stopPropagation(); setSelectedMarker(null); }} 
+                                 className="text-[10px] text-primary-light font-black uppercase hover:text-white transition-colors"
+                               >
+                                 Reset View
+                               </button>
+                             )}
                           </div>
-                          <div className="grid grid-cols-2 gap-6">
-                             <div>
-                                <p className="text-[10px] text-white/50 uppercase font-black">{selectedMarker ? 'Active Agents' : 'Active Regions'}</p>
-                                <p className="text-xl font-bold text-white tracking-tight">{selectedMarker ? selectedMarker.agents : '12'}</p>
+                          
+                          <div className="grid grid-cols-2 gap-8">
+                             <div className="space-y-1">
+                                <p className="text-[10px] text-white/40 uppercase font-black tracking-[0.1em]">{selectedMarker ? 'Network Force' : 'Market Reach'}</p>
+                                <p className="text-2xl font-black text-white tracking-tighter">
+                                  {selectedMarker ? `${selectedMarker.agents} Agents` : '12 States'}
+                                </p>
                              </div>
-                             <div>
-                                <p className="text-[10px] text-white/50 uppercase font-black">{selectedMarker ? 'Total Shops' : 'Total Reach'}</p>
-                                <p className="text-xl font-bold text-emerald-400 tracking-tight">{selectedMarker ? selectedMarker.shops : '85%'}</p>
+                             <div className="space-y-1">
+                                <p className="text-[10px] text-white/40 uppercase font-black tracking-[0.1em]">{selectedMarker ? 'Business Hubs' : 'Avg Penetration'}</p>
+                                <p className={`text-2xl font-black tracking-tighter ${selectedMarker ? 'text-emerald-400' : 'text-primary-light'}`}>
+                                  {selectedMarker ? `${selectedMarker.shops} Shops` : '85.4%'}
+                                </p>
                              </div>
+                          </div>
+                          
+                          {!selectedMarker && (
+                            <div className="pt-4 border-t border-white/5">
+                               <p className="text-[10px] text-white/30 font-bold leading-relaxed">
+                                 Select any active node on the map to visualize detailed territory metrics and agent distribution.
+                               </p>
+                            </div>
+                          )}
+                       </div>
+
+                       {/* Legend */}
+                       <div className="absolute top-10 right-10 p-4 bg-[#1E293B]/40 backdrop-blur-md rounded-2xl border border-white/5 space-y-3">
+                          <div className="flex items-center gap-3">
+                             <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                             <span className="text-[10px] font-black text-white/60 uppercase">Operational</span>
+                          </div>
+                          <div className={`flex items-center gap-3`}>
+                             <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                             <span className="text-[10px] font-black text-white/60 uppercase">In-Pipeline</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                             <div className="w-2 h-2 rounded-full bg-gray-400"></div>
+                             <span className="text-[10px] font-black text-white/60 uppercase">Restricted</span>
                           </div>
                        </div>
                     </div>
