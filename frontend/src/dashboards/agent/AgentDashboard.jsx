@@ -317,7 +317,7 @@ const AgentDashboard = () => {
     navigate('/login');
   };
 
-  const handleSubmitShop = (e) => {
+  const handleSubmitShop = async (e) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
