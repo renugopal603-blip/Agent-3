@@ -578,13 +578,17 @@ const AgentDashboard = () => {
                 
                 <div className="flex-1 space-y-4">
                   {[
-                    { title: 'Shop Registration', desc: 'New Shop: Fresh Mart', time: '5h ago', icon: <Store />, color: 'text-emerald-500', bgColor: 'bg-emerald-500/10' },
-                    { title: 'KYC Verified', desc: 'Your KYC was approved by Admin', time: '1d ago', icon: <ShieldCheck />, color: 'text-purple-500', bgColor: 'bg-purple-500/10' },
-                    { title: 'Payment Received', desc: 'Payout for April processed', time: '2d ago', icon: <Wallet />, color: 'text-blue-500', bgColor: 'bg-blue-500/10' },
+                    { title: 'Shop Registration', desc: 'New Shop: Fresh Mart', time: '5h ago', icon: <Store />, color: 'text-emerald-500', bgColor: 'bg-emerald-500/10', target: 'Shop Tie-Up' },
+                    { title: 'KYC Verified', desc: 'Your KYC was approved by Admin', time: '1d ago', icon: <ShieldCheck />, color: 'text-purple-500', bgColor: 'bg-purple-500/10', target: 'Security Deposit' },
+                    { title: 'Payment Received', desc: 'Payout for April processed', time: '2d ago', icon: <Wallet />, color: 'text-blue-500', bgColor: 'bg-blue-500/10', target: 'Wallet / Earnings' },
                   ].map((activity, i) => (
-                    <div key={i} className="flex items-center justify-between p-4 bg-gray-50/50 dark:bg-secondary-dark/50 rounded-2xl group transition-all hover:bg-white dark:hover:bg-secondary-dark hover:shadow-md border border-transparent hover:border-border-light dark:hover:border-border-dark">
+                    <div 
+                      key={i} 
+                      onClick={() => setActiveTab(activity.target)}
+                      className="flex items-center justify-between p-4 bg-gray-50/50 dark:bg-secondary-dark/50 rounded-2xl group transition-all hover:bg-white dark:hover:bg-secondary-dark hover:shadow-md border border-transparent hover:border-border-light dark:hover:border-border-dark cursor-pointer"
+                    >
                       <div className="flex gap-4">
-                        <div className={`w-12 h-12 rounded-xl ${activity.bgColor} ${activity.color} flex items-center justify-center shadow-sm shrink-0`}>
+                        <div className={`w-12 h-12 rounded-xl ${activity.bgColor} ${activity.color} flex items-center justify-center shadow-sm shrink-0 transition-transform group-hover:scale-110`}>
                           {React.cloneElement(activity.icon, { size: 22 })}
                         </div>
                         <div className="min-w-0">
@@ -594,12 +598,9 @@ const AgentDashboard = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <button 
-                          onClick={() => addNotification({ title: activity.title, message: 'Activity details have been logged.', type: 'info' })}
-                          className="p-2 hover:bg-gray-100 dark:hover:bg-surface-dark rounded-xl transition-all opacity-0 group-hover:opacity-100 text-text-secondary-light"
-                        >
+                        <div className="p-2 bg-gray-100 dark:bg-surface-dark rounded-xl transition-all opacity-0 group-hover:opacity-100 text-text-secondary-light">
                           <ChevronRight size={18} />
-                        </button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -608,11 +609,11 @@ const AgentDashboard = () => {
                 <div className="mt-8 pt-6 border-t dark:border-border-dark">
                   <button 
                     onClick={() => setActiveTab('Commission History')}
-                    className="w-full btn-outline py-3 text-sm font-black uppercase tracking-widest hover:shadow-lg hover:shadow-primary-light/10 transition-all rounded-2xl"
+                    className="w-full btn-outline py-4 text-xs font-black uppercase tracking-[0.2em] hover:shadow-lg hover:shadow-primary-light/10 transition-all rounded-2xl flex items-center justify-center gap-3"
                   >
-                    View All History
+                    View All History <ArrowRight size={16} />
                   </button>
-                </div>
+                </div>   </div>
               </div>
             </div>
             
