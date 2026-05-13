@@ -4603,7 +4603,10 @@ const AdminDashboard = () => {
                 <h3 className="text-2xl font-black dark:text-white tracking-tight">Registration Analytics</h3>
                 <p className="text-sm text-text-secondary-light">Monitor platform growth and user acquisition.</p>
               </div>
-              <button className="btn-primary px-6 py-2.5 flex items-center gap-2">
+              <button 
+                onClick={() => handleDownloadReport('Registration_Analytics')}
+                className="btn-primary px-6 py-2.5 flex items-center gap-2"
+              >
                 <FileText size={18} /> Export Analytics
               </button>
             </div>
@@ -4625,11 +4628,43 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 card-premium space-y-6">
                 <h3 className="text-lg font-bold dark:text-white">Acquisition Funnel</h3>
-                <div className="h-[300px] w-full bg-gray-50/50 dark:bg-secondary-dark/20 rounded-2xl flex items-center justify-center border-2 border-dashed border-border-light dark:border-border-dark">
-                  <div className="text-center space-y-2">
-                    <BarChartIcon size={40} className="mx-auto text-text-secondary-light opacity-50" />
-                    <p className="text-sm font-bold text-text-secondary-light italic">Detailed acquisition chart loading...</p>
-                  </div>
+                <div className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      layout="vertical"
+                      data={[
+                        { name: 'Visitors', value: 5000, color: '#3B82F6' },
+                        { name: 'Signed Up', value: 3500, color: '#10B981' },
+                        { name: 'KYC Started', value: 2100, color: '#F59E0B' },
+                        { name: 'Verified', value: 1800, color: '#8B5CF6' }
+                      ]}
+                      margin={{ left: 20, right: 40, top: 20, bottom: 20 }}
+                    >
+                      <XAxis type="number" hide />
+                      <YAxis 
+                        dataKey="name" 
+                        type="category" 
+                        stroke="#94a3b8" 
+                        fontSize={12} 
+                        tickLine={false} 
+                        axisLine={false}
+                      />
+                      <Tooltip 
+                        cursor={{ fill: 'transparent' }}
+                        contentStyle={{ backgroundColor: '#0F172A', border: 'none', borderRadius: '12px', color: '#fff' }}
+                      />
+                      <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={32}>
+                        {[
+                          { name: 'Visitors', value: 5000, color: '#3B82F6' },
+                          { name: 'Signed Up', value: 3500, color: '#10B981' },
+                          { name: 'KYC Started', value: 2100, color: '#F59E0B' },
+                          { name: 'Verified', value: 1800, color: '#8B5CF6' }
+                        ].map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
               
