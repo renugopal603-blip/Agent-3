@@ -4457,6 +4457,8 @@ const AdminDashboard = () => {
           <SidebarSection title="User Management">
             <SidebarLink icon={<UserPlus size={18} />} label="Agent Management" active={activeTab === 'Agent Management'} onClick={() => setActiveTab('Agent Management')} />
             <SidebarLink icon={<Users size={18} />} label="Subadmin Management" active={activeTab === 'Subadmin Management'} onClick={() => setActiveTab('Subadmin Management')} />
+            <SidebarLink icon={<FileText size={18} />} label="User Applications" active={activeTab === 'User Applications'} onClick={() => setActiveTab('User Applications')} badge="8" />
+            <SidebarLink icon={<TrendingUp size={18} />} label="Registration Tracking" active={activeTab === 'Registration Tracking'} onClick={() => setActiveTab('Registration Tracking')} />
           </SidebarSection>
 
           <SidebarSection title="Business Management">
@@ -4464,6 +4466,18 @@ const AdminDashboard = () => {
             <SidebarLink icon={<Package size={18} />} label="Product Partners" active={activeTab === 'Product Partners'} onClick={() => setActiveTab('Product Partners')} />
             <SidebarLink icon={<Store size={18} />} label="Shop Approvals" active={activeTab === 'Shop Approvals'} onClick={() => setActiveTab('Shop Approvals')} />
             <SidebarLink icon={<Layout size={18} />} label="Categories" active={activeTab === 'Categories'} onClick={() => setActiveTab('Categories')} />
+          </SidebarSection>
+
+          <SidebarSection title="Marketing & Growth">
+            <SidebarLink icon={<Award size={18} />} label="Coupons & Offers" active={activeTab === 'Coupons & Offers'} onClick={() => setActiveTab('Coupons & Offers')} />
+            <SidebarLink icon={<Globe size={18} />} label="Banners & Ads" active={activeTab === 'Banners & Ads'} onClick={() => setActiveTab('Banners & Ads')} />
+            <SidebarLink icon={<Zap size={18} />} label="Campaigns" active={activeTab === 'Campaigns'} onClick={() => setActiveTab('Campaigns')} />
+          </SidebarSection>
+
+          <SidebarSection title="Finance">
+            <SidebarLink icon={<Wallet size={18} />} label="Withdrawals" active={activeTab === 'Withdrawals'} onClick={() => setActiveTab('Withdrawals')} badge="New" />
+            <SidebarLink icon={<CreditCard size={18} />} label="User Wallets" active={activeTab === 'User Wallets'} onClick={() => setActiveTab('User Wallets')} />
+            <SidebarLink icon={<History size={18} />} label="Transaction History" active={activeTab === 'Transaction History'} onClick={() => setActiveTab('Transaction History')} />
           </SidebarSection>
 
           <SidebarSection title="Area Management">
@@ -4488,15 +4502,15 @@ const AdminDashboard = () => {
             <SidebarLink icon={<Activity size={18} />} label="Area Performance" active={activeTab === 'Area Performance'} onClick={() => setActiveTab('Area Performance')} />
           </SidebarSection>
 
-          <SidebarSection title="Communication">
-            <SidebarLink icon={<Bell size={18} />} label="Notifications" active={activeTab === 'Notifications'} onClick={() => setActiveTab('Notifications')} />
-            <SidebarLink icon={<LifeBuoy size={18} />} label="Support / Tickets" active={activeTab === 'Support / Tickets'} onClick={() => setActiveTab('Support / Tickets')} />
+          <SidebarSection title="Security & Logs">
+            <SidebarLink icon={<Lock size={18} />} label="Login History" active={activeTab === 'Login History'} onClick={() => setActiveTab('Login History')} />
+            <SidebarLink icon={<ShieldCheck size={18} />} label="IP Tracking" active={activeTab === 'IP Tracking'} onClick={() => setActiveTab('IP Tracking')} />
+            <SidebarLink icon={<History size={18} />} label="Audit Logs" active={activeTab === 'Audit Logs'} onClick={() => { setActiveTab('Audit Logs'); setIsMobileMenuOpen(false); }} />
           </SidebarSection>
 
           <SidebarSection title="System">
             <SidebarLink icon={<Key size={18} />} label="Role & Permissions" active={activeTab === 'Role & Permissions'} onClick={() => { setActiveTab('Role & Permissions'); setIsMobileMenuOpen(false); }} />
             <SidebarLink icon={<Settings size={18} />} label="Settings" active={activeTab === 'Settings'} onClick={() => { setActiveTab('Settings'); setIsMobileMenuOpen(false); }} />
-            <SidebarLink icon={<History size={18} />} label="Audit Logs" active={activeTab === 'Audit Logs'} onClick={() => { setActiveTab('Audit Logs'); setIsMobileMenuOpen(false); }} />
           </SidebarSection>
         </div>
 
