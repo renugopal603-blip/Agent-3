@@ -41,26 +41,50 @@ const SubAdminDashboard = () => {
     return []; // Start empty
   });
 
-  // 1. Fetch shops from MongoDB on load
+  // 1. Fetch shops from MongoDB on load & Sync with global storage
   useEffect(() => {
-    const fetchShops = async () => {
+    const fetchAndSyncShops = async () => {
       try {
         if (!user?.token) return;
         const config = { headers: { Authorization: `Bearer ${user.token}` } };
         const { data } = await axios.get('/api/shops', config);
+        
         if (data && Array.isArray(data)) {
-          setVerifyShops(data);
+          const normalizedData = data.map(gs => ({
+            id: gs._id || gs.id,
+            name: gs.name || gs.shopName,
+            cat: gs.category || gs.cat || 'General',
+            owner: gs.owner || gs.ownerName || 'N/A',
+            loc: gs.location || gs.loc || 'N/A',
+            agent: gs.agent || 'Unknown',
+            status: gs.status || 'Pending Review',
+            date: gs.date || new Date(gs.createdAt).toLocaleDateString()
+          }));
+          
+          setVerifyShops(normalizedData);
           localStorage.setItem('globalShops', JSON.stringify(data));
         }
       } catch (error) {
         console.error('Error fetching shops from MongoDB:', error);
       }
     };
-    fetchShops();
+
+    fetchAndSyncShops();
+
+    const handleStorageChange = (e) => {
+      if (e.key === 'globalShops' || e.key === 'shop_updated') {
+        fetchAndSyncShops();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, [user?.token]);
 
   useEffect(() => {
-    localStorage.setItem('verifyShops', JSON.stringify(verifyShops));
+    if (verifyShops.length > 0) {
+      localStorage.setItem('verifyShops', JSON.stringify(verifyShops));
+    }
   }, [verifyShops]);
 
   const [systemUsers, setSystemUsers] = useState([
@@ -263,40 +287,9 @@ const SubAdminDashboard = () => {
     }, 1000);
   };
 
+  // Note: Combined with API fetch effect for reliability
   useEffect(() => {
-    const syncGlobalShops = () => {
-      const globalShops = JSON.parse(localStorage.getItem('globalShops') || '[]');
-      if (globalShops.length > 0) {
-        setVerifyShops(prev => {
-          const updated = [...prev];
-          globalShops.forEach(gs => {
-            const index = updated.findIndex(m => m.id === gs.id);
-            const normalized = {
-              id: gs.id,
-              name: gs.name || gs.shopName,
-              cat: gs.category || 'General',
-              owner: gs.owner || gs.ownerName,
-              loc: gs.location || 'N/A',
-              agent: gs.agent || 'Unknown',
-              status: gs.status || 'Pending Review',
-              date: gs.date || new Date().toLocaleDateString()
-            };
-
-            if (index !== -1) {
-              // Update existing shop status
-              updated[index] = normalized;
-            } else {
-              // Add new shop
-              updated.push(normalized);
-            }
-          });
-          return updated;
-        });
-      }
-    };
-    syncGlobalShops();
-    window.addEventListener('storage', syncGlobalShops);
-    return () => window.removeEventListener('storage', syncGlobalShops);
+    // Shared sync logic moved to main fetch effect
   }, []);
 
   const handleVerify = async (id) => {
