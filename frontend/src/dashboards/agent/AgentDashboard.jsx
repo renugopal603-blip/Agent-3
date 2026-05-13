@@ -27,40 +27,124 @@ const AgentDashboard = () => {
   const [applicationStep, setApplicationStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
   
+  const generateReportPDF = (title, fileName) => {
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      
+      // Header Background
+      doc.setFillColor(16, 185, 129);
+      doc.rect(0, 0, pageWidth, 40, 'F');
+      
+      // Header Text
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(22);
+      doc.setFont('helvetica', 'bold');
+      doc.text('AGENT HUB', 20, 20);
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text('OFFICIAL PLATFORM DOCUMENT', 20, 30);
+      
+      // Document Title
+      doc.setTextColor(31, 41, 55);
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text(title.replace(/_/g, ' ').toUpperCase(), 20, 60);
+      
+      // Divider
+      doc.setDrawColor(16, 185, 129);
+      doc.setLineWidth(0.5);
+      doc.line(20, 65, pageWidth - 20, 65);
+      
+      // Metadata
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Reference ID: AGT-DOC-${Math.floor(100000 + Math.random() * 900000)}`, 20, 75);
+      doc.text(`Issued Date: ${new Date().toLocaleDateString()}`, 20, 82);
+      doc.text(`Recipient: ${user?.name || 'Authorized Agent'}`, 20, 89);
+      doc.text(`Status: VERIFIED`, 20, 96);
+      
+      // Main Body
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Document Summary', 20, 115);
+      
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      const summary = `This official document pertains to ${title.replace(/_/g, ' ')}. It serves as a verified record within the Agent Hub ecosystem. The recipient is authorized to present this document for platform-related verifications.`;
+      const splitSummary = doc.splitTextToSize(summary, pageWidth - 40);
+      doc.text(splitSummary, 20, 125);
+      
+      // Detailed Content Table (Simulated)
+      doc.setFillColor(249, 250, 251);
+      doc.rect(20, 150, pageWidth - 40, 60, 'F');
+      doc.setDrawColor(229, 231, 235);
+      doc.rect(20, 150, pageWidth - 40, 60, 'S');
+      
+      doc.setFont('helvetica', 'bold');
+      doc.text('Key Details:', 30, 165);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`• Document Type: ${fileName.split('.').pop().toUpperCase()} Report`, 30, 175);
+      doc.text(`• Verification Authority: Agent Hub Compliance Dept.`, 30, 185);
+      doc.text(`• Validity: Active / Perpetual`, 30, 195);
+      
+      // Footer
+      doc.setFontSize(8);
+      doc.setTextColor(156, 163, 175);
+      doc.text('CONFIDENTIAL - FOR AUTHORIZED USE ONLY', pageWidth / 2, 280, { align: 'center' });
+      doc.text('© 2026 Agent Hub Platform. All rights reserved.', pageWidth / 2, 285, { align: 'center' });
+      
+      doc.save(`${fileName.replace(/\s+/g, '_')}.pdf`);
+      return true;
+    } catch (error) {
+      console.error('PDF Generation error:', error);
+      return false;
+    }
+  };
+
   const handleDownloadFile = (fileName = 'Document', extension = 'pdf') => {
     if (fileName === 'Agent_ID_Card') {
       generateIDCardPDF();
       return;
     }
+    
     addNotification({ 
-      title: 'Preparing Download', 
-      message: `Securing ${fileName} for transfer...`, 
+      title: 'Preparing Report', 
+      message: `Generating professional ${extension.toUpperCase()} document...`, 
       type: 'info' 
     });
+
     setTimeout(() => {
-      try {
-        const type = extension === 'csv' ? 'text/csv' : 'application/pdf';
-        const content = `Simulated ${extension.toUpperCase()} content for ${fileName}\nGenerated on: ${new Date().toLocaleString()}`;
-        const blob = new Blob([content], { type });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${fileName.replace(/\s+/g, '_')}.${extension}`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        addNotification({ 
-          title: 'Download Ready', 
-          message: `${fileName} has been saved successfully.`, 
-          type: 'success' 
-        });
-      } catch (error) {
-        addNotification({ 
-          title: 'Download Failed', 
-          message: 'An error occurred during file generation.', 
-          type: 'error' 
-        });
+      if (extension === 'pdf') {
+        const success = generateReportPDF(fileName, fileName);
+        if (success) {
+          addNotification({ 
+            title: 'Report Ready', 
+            message: `${fileName} has been downloaded successfully.`, 
+            type: 'success' 
+          });
+        } else {
+          addNotification({ title: 'Download Failed', message: 'PDF engine error.', type: 'error' });
+        }
+      } else {
+        // Fallback for non-PDF files
+        try {
+          const type = 'text/csv';
+          const content = `Report Title,${fileName}\nGenerated Date,${new Date().toLocaleString()}\nAgent Name,${user?.name}\nStatus,Verified`;
+          const blob = new Blob([content], { type });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `${fileName.replace(/\s+/g, '_')}.${extension}`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          addNotification({ title: 'File Ready', message: 'Download complete.', type: 'success' });
+        } catch (e) {
+          addNotification({ title: 'Error', message: 'Download failed.', type: 'error' });
+        }
       }
     }, 1500);
   };
