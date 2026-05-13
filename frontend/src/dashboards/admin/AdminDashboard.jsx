@@ -1328,8 +1328,7 @@ const AdminDashboard = () => {
                       </button>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
 
             {/* Detailed Review Modal */}
