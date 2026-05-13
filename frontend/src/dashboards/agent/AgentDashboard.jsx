@@ -276,6 +276,8 @@ const AgentDashboard = () => {
   const [showExpansionModal, setShowExpansionModal] = useState(false);
   const [showTicketModal, setShowTicketModal] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [showTicketDetails, setShowTicketDetails] = useState(false);
   const [supportTickets, setSupportTickets] = useState([
     { id: '#TK-9921', sub: 'Commission payout delay for April', status: 'In Progress', priority: 'High', activity: 'Just now' },
     { id: '#TK-9845', sub: 'Technical issue with shop upload', status: 'Pending', priority: 'Medium', activity: '5 hours ago' },
@@ -2636,14 +2638,22 @@ const AgentDashboard = () => {
                             </button>
                             {activeDropdown === `ticket-${i}` && (
                               <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-surface-dark shadow-2xl rounded-2xl z-50 border border-border-light dark:border-border-dark py-2 animate-in fade-in zoom-in-95 duration-200 shadow-emerald-500/5">
-                                 <button onClick={() => setActiveDropdown(null)} className="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-secondary-dark text-xs font-bold dark:text-white flex items-center gap-3">
+                                 <button onClick={() => { setSelectedTicket(ticket); setShowTicketDetails(true); setActiveDropdown(null); }} className="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-secondary-dark text-xs font-bold dark:text-white flex items-center gap-3">
                                    <MessageSquare size={14} className="text-primary-light" /> View Chat
                                  </button>
-                                 <button onClick={() => setActiveDropdown(null)} className="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-secondary-dark text-xs font-bold dark:text-white flex items-center gap-3">
+                                 <button onClick={() => { setSelectedTicket(ticket); setShowTicketDetails(true); setActiveDropdown(null); }} className="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-secondary-dark text-xs font-bold dark:text-white flex items-center gap-3">
                                    <ArrowUpRight size={14} className="text-orange-500" /> Escalate Ticket
                                  </button>
                                  <div className="my-1 border-t dark:border-border-dark"></div>
-                                 <button onClick={() => setActiveDropdown(null)} className="w-full text-left px-4 py-2.5 hover:bg-red-50 dark:hover:bg-red-500/10 text-xs font-bold text-red-500 flex items-center gap-3">
+                                 <button 
+                                   onClick={() => {
+                                     const updated = supportTickets.filter((_, idx) => idx !== i);
+                                     setSupportTickets(updated);
+                                     setActiveDropdown(null);
+                                     addNotification({ title: 'Ticket Closed', message: `Ticket ${ticket.id} has been removed.`, type: 'info' });
+                                   }} 
+                                   className="w-full text-left px-4 py-2.5 hover:bg-red-50 dark:hover:bg-red-500/10 text-xs font-bold text-red-500 flex items-center gap-3"
+                                 >
                                    <X size={14} /> Close Ticket
                                  </button>
                               </div>
@@ -3269,6 +3279,11 @@ const AgentDashboard = () => {
         user={user}
         setSupportTickets={setSupportTickets}
       />
+      <TicketDetailsModal 
+        isOpen={showTicketDetails} 
+        onClose={() => setShowTicketDetails(false)} 
+        ticket={selectedTicket} 
+      />
       <FileViewModal 
         isOpen={!!viewingFile} 
         onClose={() => setViewingFile(null)} 
@@ -3587,6 +3602,97 @@ const SidebarSection = ({ title, children }) => (
     </div>
   </div>
 );
+
+const TicketDetailsModal = ({ isOpen, onClose, ticket }) => {
+  if (!isOpen || !ticket) return null;
+
+  const chatLogs = [
+    { sender: 'System', message: 'Ticket created successfully.', time: '2h ago' },
+    { sender: 'Admin', message: 'We are reviewing your request. Please wait.', time: '1h ago' },
+    { sender: 'Agent', message: 'Thank you, I need this resolved urgently.', time: '30m ago' },
+  ];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+      <div className="bg-white dark:bg-surface-dark w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border border-border-light dark:border-border-dark flex flex-col max-h-[90vh]">
+        <div className="p-6 border-b dark:border-border-dark flex justify-between items-center bg-gray-50 dark:bg-secondary-dark/50">
+          <div className="flex items-center gap-4">
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-lg ${
+              ticket.status === 'Resolved' ? 'bg-emerald-500' :
+              ticket.status === 'In Progress' ? 'bg-blue-500' : 'bg-orange-500'
+            }`}>
+              <MessageSquare size={24} />
+            </div>
+            <div>
+              <h3 className="text-xl font-black dark:text-white uppercase tracking-tight">{ticket.id}</h3>
+              <p className="text-xs text-text-secondary-light font-bold truncate max-w-[300px]">{ticket.sub}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-gray-200 dark:hover:bg-surface-dark rounded-xl transition-colors"><X size={20}/></button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          <div className="grid grid-cols-3 gap-4">
+            <div className="p-4 bg-gray-50 dark:bg-secondary-dark/50 rounded-2xl border border-border-light dark:border-border-dark">
+              <p className="text-[10px] font-black text-text-secondary-light uppercase tracking-[0.1em] mb-1">Status</p>
+              <span className={`text-xs font-black px-2.5 py-1 rounded-lg ${
+                ticket.status === 'Resolved' ? 'bg-emerald-500/10 text-emerald-500' :
+                ticket.status === 'In Progress' ? 'bg-blue-500/10 text-blue-500' : 'bg-orange-500/10 text-orange-500'
+              }`}>{ticket.status}</span>
+            </div>
+            <div className="p-4 bg-gray-50 dark:bg-secondary-dark/50 rounded-2xl border border-border-light dark:border-border-dark">
+              <p className="text-[10px] font-black text-text-secondary-light uppercase tracking-[0.1em] mb-1">Priority</p>
+              <span className={`text-xs font-black ${
+                ticket.priority === 'High' ? 'text-red-500' :
+                ticket.priority === 'Medium' ? 'text-orange-500' : 'text-emerald-500'
+              }`}>{ticket.priority}</span>
+            </div>
+            <div className="p-4 bg-gray-50 dark:bg-secondary-dark/50 rounded-2xl border border-border-light dark:border-border-dark">
+              <p className="text-[10px] font-black text-text-secondary-light uppercase tracking-[0.1em] mb-1">Last Activity</p>
+              <span className="text-xs font-black dark:text-white">{ticket.activity}</span>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h4 className="text-sm font-black dark:text-white uppercase tracking-widest border-b pb-2 dark:border-border-dark">Ticket History & Chat</h4>
+            <div className="space-y-4">
+              {chatLogs.map((log, i) => (
+                <div key={i} className={`flex ${log.sender === 'Agent' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[80%] p-4 rounded-2xl ${
+                    log.sender === 'Agent' 
+                      ? 'bg-primary-light text-white rounded-tr-none' 
+                      : log.sender === 'Admin'
+                      ? 'bg-blue-600 text-white rounded-tl-none'
+                      : 'bg-gray-100 dark:bg-secondary-dark dark:text-white rounded-tl-none border dark:border-border-dark'
+                  }`}>
+                    <div className="flex items-center justify-between gap-4 mb-1">
+                      <span className="text-[10px] font-black uppercase opacity-70">{log.sender}</span>
+                      <span className="text-[10px] opacity-60 font-bold">{log.time}</span>
+                    </div>
+                    <p className="text-sm font-bold leading-relaxed">{log.message}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6 border-t dark:border-border-dark bg-gray-50 dark:bg-secondary-dark/50">
+          <div className="flex gap-4">
+            <input 
+              type="text" 
+              placeholder="Type your message..." 
+              className="flex-1 px-6 py-3 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl outline-none focus:ring-2 focus:ring-primary-light font-bold dark:text-white"
+            />
+            <button className="btn-primary px-6 rounded-2xl shadow-lg shadow-primary-light/20">
+              <Send size={18} />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const SidebarLink = ({ icon, label, active, onClick, badge }) => (
   <div 
