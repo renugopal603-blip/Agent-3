@@ -1889,13 +1889,21 @@ const AgentDashboard = () => {
                         return window.alert('Insufficient balance.');
                       }
                       setIsProcessing(true);
+                      const amount = withdrawAmount; // Capture it before reset
                       setTimeout(() => {
                         setIsProcessing(false);
                         setWithdrawAmount('');
                         addNotification({ 
                           title: 'Withdrawal Successful', 
-                          message: `₹${withdrawAmount} has been initiated to your HDFC bank account.`, 
+                          message: `₹${amount} has been initiated to your HDFC bank account.`, 
                           type: 'success' 
+                        });
+                        
+                        // Notify Admin & Sub-Admin
+                        pushGlobalNotification({
+                          title: 'New Payout Request',
+                          message: `Agent ${user?.name || 'AgentHub'} has requested a withdrawal of ₹${amount}.`,
+                          type: 'warning'
                         });
                       }, 2000);
                     }}
