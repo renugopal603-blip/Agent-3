@@ -92,13 +92,22 @@ const AdminDashboard = () => {
   const [showAddServicePartnerModal, setShowAddServicePartnerModal] = useState(false);
   const [showAddProductPartnerModal, setShowAddProductPartnerModal] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [profileData, setProfileData] = useState({
-    name: 'Super Admin',
-    email: 'admin@premium.com',
-    phone: '+91 98765 43210',
-    adminId: 'ADM-001-PRM',
     avatar: 'A'
   });
+
+  const [userApplications, setUserApplications] = useState([
+    { id: 1, name: 'Anil Kapoor', role: 'Agent', appliedOn: '2h ago', status: 'Pending', location: 'Delhi', docs: ['Aadhar', 'PAN'] },
+    { id: 2, name: 'Zoya Khan', role: 'Shop Owner', appliedOn: '5h ago', status: 'Pending', location: 'Mumbai', docs: ['GST', 'Trade License'] },
+    { id: 3, name: 'Rahul Roy', role: 'Agent', appliedOn: 'Yesterday', status: 'Pending', location: 'Pune', docs: ['Aadhar', 'PAN', 'Passbook'] },
+    { id: 4, name: 'Meera Seth', role: 'Delivery Partner', appliedOn: '2d ago', status: 'Reviewing', location: 'Bangalore', docs: ['DL', 'RC'] }
+  ]);
+
+  const registrationStats = [
+    { label: 'Today', value: '24', trend: '+12%', color: 'text-emerald-500' },
+    { label: 'This Week', value: '156', trend: '+8%', color: 'text-blue-500' },
+    { label: 'This Month', value: '642', trend: '+22%', color: 'text-purple-500' },
+    { label: 'Total Users', value: '4,820', trend: '+15%', color: 'text-orange-500' }
+  ];
   
   const [categories, setCategories] = useState([
     { id: 1, name: 'Food / Restaurant', icon: 'Utensils', count: 42, status: 'Active', color: 'bg-orange-500/10 text-orange-500' },
@@ -4396,6 +4405,149 @@ const AdminDashboard = () => {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'User Applications':
+        return (
+          <div className="p-8 space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-2xl font-black dark:text-white tracking-tight">User Applications</h3>
+                <p className="text-sm text-text-secondary-light">Review and manage new registration requests.</p>
+              </div>
+              <div className="flex gap-3">
+                <button className="btn-outline px-4 py-2 text-sm flex items-center gap-2">
+                  <Filter size={16} /> Filter
+                </button>
+                <button className="btn-primary px-4 py-2 text-sm">Download List</button>
+              </div>
+            </div>
+
+            <div className="card-premium overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="text-left border-b dark:border-border-dark bg-gray-50/50 dark:bg-secondary-dark/30">
+                      <th className="p-4 font-bold text-xs uppercase tracking-widest dark:text-white">Applicant</th>
+                      <th className="p-4 font-bold text-xs uppercase tracking-widest dark:text-white">Role / Location</th>
+                      <th className="p-4 font-bold text-xs uppercase tracking-widest dark:text-white">Documents</th>
+                      <th className="p-4 font-bold text-xs uppercase tracking-widest dark:text-white">Applied On</th>
+                      <th className="p-4 font-bold text-xs uppercase tracking-widest dark:text-white">Status</th>
+                      <th className="p-4 text-right font-bold text-xs uppercase tracking-widest dark:text-white">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y dark:divide-border-dark">
+                    {userApplications.map((app) => (
+                      <tr key={app.id} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/20 transition-colors">
+                        <td className="p-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-primary-light/10 text-primary-light rounded-xl flex items-center justify-center font-bold text-sm">{app.name[0]}</div>
+                            <span className="font-bold dark:text-white">{app.name}</span>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <p className="text-sm font-bold dark:text-white">{app.role}</p>
+                          <p className="text-[10px] text-text-secondary-light font-bold flex items-center gap-1"><MapPin size={10} /> {app.location}</p>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex gap-1">
+                            {app.docs.map(doc => (
+                              <span key={doc} className="px-1.5 py-0.5 bg-gray-100 dark:bg-secondary-dark rounded text-[9px] font-black uppercase tracking-tighter dark:text-white">{doc}</span>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="p-4 text-sm font-medium text-text-secondary-light">{app.appliedOn}</td>
+                        <td className="p-4">
+                          <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter ${
+                            app.status === 'Pending' ? 'bg-warning/10 text-warning' : 'bg-primary-light/10 text-primary-light'
+                          }`}>{app.status}</span>
+                        </td>
+                        <td className="p-4 text-right">
+                          <div className="flex justify-end gap-2">
+                            <button 
+                              onClick={() => addNotification({ title: 'Application Rejected', message: `Notified ${app.name} about the decision.`, type: 'error' })}
+                              className="p-2 text-error hover:bg-error/10 rounded-lg transition-all"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                            <button 
+                              onClick={() => addNotification({ title: 'Success', message: `${app.name}'s application approved!`, type: 'success' })}
+                              className="p-2 bg-success text-white rounded-lg shadow-lg shadow-success/20 hover:scale-105 transition-all"
+                            >
+                              <Check size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'Registration Tracking':
+        return (
+          <div className="p-8 space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-2xl font-black dark:text-white tracking-tight">Registration Analytics</h3>
+                <p className="text-sm text-text-secondary-light">Monitor platform growth and user acquisition.</p>
+              </div>
+              <button className="btn-primary px-6 py-2.5 flex items-center gap-2">
+                <FileText size={18} /> Export Analytics
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {registrationStats.map((stat) => (
+                <div key={stat.label} className="card-premium space-y-2 group hover:scale-[1.02] transition-all">
+                  <p className="text-xs font-black uppercase tracking-widest text-text-secondary-light">{stat.label}</p>
+                  <div className="flex items-end justify-between">
+                    <h4 className="text-3xl font-black dark:text-white">{stat.value}</h4>
+                    <span className={`text-xs font-bold ${stat.color} flex items-center gap-1`}>
+                      <ArrowUpRight size={14} /> {stat.trend}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 card-premium space-y-6">
+                <h3 className="text-lg font-bold dark:text-white">Acquisition Funnel</h3>
+                <div className="h-[300px] w-full bg-gray-50/50 dark:bg-secondary-dark/20 rounded-2xl flex items-center justify-center border-2 border-dashed border-border-light dark:border-border-dark">
+                  <div className="text-center space-y-2">
+                    <BarChartIcon size={40} className="mx-auto text-text-secondary-light opacity-50" />
+                    <p className="text-sm font-bold text-text-secondary-light italic">Detailed acquisition chart loading...</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="card-premium space-y-6">
+                <h3 className="text-lg font-bold dark:text-white">Top Channels</h3>
+                <div className="space-y-4">
+                  {[
+                    { name: 'Direct Search', value: 45, color: 'bg-primary-light' },
+                    { name: 'Social Media', value: 28, color: 'bg-purple-500' },
+                    { name: 'Referral', value: 15, color: 'bg-emerald-500' },
+                    { name: 'Email', value: 12, color: 'bg-orange-500' }
+                  ].map(channel => (
+                    <div key={channel.name} className="space-y-2">
+                      <div className="flex justify-between text-xs font-bold">
+                        <span className="dark:text-white">{channel.name}</span>
+                        <span className="text-text-secondary-light">{channel.value}%</span>
+                      </div>
+                      <div className="h-2 bg-gray-100 dark:bg-secondary-dark rounded-full overflow-hidden">
+                        <div className={`h-full ${channel.color}`} style={{ width: `${channel.value}%` }}></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
