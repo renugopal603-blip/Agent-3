@@ -92,6 +92,11 @@ const AdminDashboard = () => {
   const [showAddServicePartnerModal, setShowAddServicePartnerModal] = useState(false);
   const [showAddProductPartnerModal, setShowAddProductPartnerModal] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [profileData, setProfileData] = useState({
+    name: 'Super Admin',
+    email: 'admin@premium.com',
+    phone: '+91 98765 43210',
+    adminId: 'ADM-001-PRM',
     avatar: 'A'
   });
 
