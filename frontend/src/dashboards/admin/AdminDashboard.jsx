@@ -5107,30 +5107,18 @@ const AddSubAdminModal = ({ isOpen, onClose, onSuccess, initialData, subAdmins =
   const handleNext = (e) => {
     if (e) e.preventDefault();
     
-    // Auto-verify if correct OTP is entered but not confirmed
-    if (step === 1) {
-      if (!isEmailVerified && emailOtp === '123456') {
-        setIsEmailVerified(true);
-        setShowEmailOtpInput(false);
-        addNotification({ title: 'Verified', message: 'Email address verified successfully.', type: 'success' });
-      }
-      if (!isPhoneVerified && phoneOtp === '123456') {
-        setIsPhoneVerified(true);
-        setShowPhoneOtpInput(false);
-        addNotification({ title: 'Verified', message: 'Phone number verified successfully.', type: 'success' });
-      }
-    }
+    // Auto-verify if correct codes are present but not "confirmed"
+    let emailOk = isEmailVerified || (showEmailOtpInput && emailOtp === '123456');
+    let phoneOk = isPhoneVerified || (showPhoneOtpInput && phoneOtp === '123456');
 
-    // Now check if we can proceed
-    if (step === 1 && (!isEmailVerified || !isPhoneVerified)) {
-      // Re-check after auto-verify logic
-      const emailStillUnverified = !isEmailVerified && emailOtp !== '123456';
-      const phoneStillUnverified = !isPhoneVerified && phoneOtp !== '123456';
-      
-      if (emailStillUnverified || phoneStillUnverified) {
+    if (step === 1) {
+      if (emailOtp === '123456') setIsEmailVerified(true);
+      if (phoneOtp === '123456') setIsPhoneVerified(true);
+
+      if (!emailOk || !phoneOk) {
         addNotification({ 
-          title: 'Verification Required', 
-          message: 'Please enter the correct 6-digit code (123456) and verify before proceeding.', 
+          title: 'Verification Pending', 
+          message: 'Please ensure both Email and Phone are verified. Use code 123456 for testing.', 
           type: 'warning' 
         });
         return;
