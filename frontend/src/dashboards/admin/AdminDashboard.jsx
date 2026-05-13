@@ -113,6 +113,9 @@ const AdminDashboard = () => {
     { label: 'This Month', value: '642', trend: '+22%', color: 'text-purple-500' },
     { label: 'Total Users', value: '4,820', trend: '+15%', color: 'text-orange-500' }
   ];
+
+  const [selectedUserApp, setSelectedUserApp] = useState(null);
+  const [showAppDetailModal, setShowAppDetailModal] = useState(false);
   
   const [categories, setCategories] = useState([
     { id: 1, name: 'Food / Restaurant', icon: 'Utensils', count: 42, status: 'Active', color: 'bg-orange-500/10 text-orange-500' },
@@ -4424,10 +4427,18 @@ const AdminDashboard = () => {
                 <p className="text-sm text-text-secondary-light">Review and manage new registration requests.</p>
               </div>
               <div className="flex gap-3">
-                <button className="btn-outline px-4 py-2 text-sm flex items-center gap-2">
+                <button 
+                  onClick={() => addNotification({ title: 'Filters', message: 'Filter settings updated.', type: 'info' })}
+                  className="btn-outline px-4 py-2 text-sm flex items-center gap-2"
+                >
                   <Filter size={16} /> Filter
                 </button>
-                <button className="btn-primary px-4 py-2 text-sm">Download List</button>
+                <button 
+                  onClick={() => handleDownloadReport('Application_List')}
+                  className="btn-primary px-4 py-2 text-sm"
+                >
+                  Download List
+                </button>
               </div>
             </div>
 
@@ -4448,9 +4459,15 @@ const AdminDashboard = () => {
                     {userApplications.map((app) => (
                       <tr key={app.id} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/20 transition-colors">
                         <td className="p-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-primary-light/10 text-primary-light rounded-xl flex items-center justify-center font-bold text-sm">{app.name[0]}</div>
-                            <span className="font-bold dark:text-white">{app.name}</span>
+                          <div 
+                            className="flex items-center gap-3 cursor-pointer group"
+                            onClick={() => {
+                              setSelectedUserApp(app);
+                              setShowAppDetailModal(true);
+                            }}
+                          >
+                            <div className="w-10 h-10 bg-primary-light/10 text-primary-light rounded-xl flex items-center justify-center font-bold text-sm group-hover:scale-110 transition-transform">{app.name[0]}</div>
+                            <span className="font-bold dark:text-white group-hover:text-primary-light transition-colors">{app.name}</span>
                           </div>
                         </td>
                         <td className="p-4">
@@ -4473,14 +4490,22 @@ const AdminDashboard = () => {
                         <td className="p-4 text-right">
                           <div className="flex justify-end gap-2">
                             <button 
-                              onClick={() => addNotification({ title: 'Application Rejected', message: `Notified ${app.name} about the decision.`, type: 'error' })}
+                              onClick={() => {
+                                setUserApplications(userApplications.filter(a => a.id !== app.id));
+                                addNotification({ title: 'Application Rejected', message: `Notified ${app.name} about the decision.`, type: 'error' });
+                              }}
                               className="p-2 text-error hover:bg-error/10 rounded-lg transition-all"
+                              title="Reject Application"
                             >
                               <Trash2 size={16} />
                             </button>
                             <button 
-                              onClick={() => addNotification({ title: 'Success', message: `${app.name}'s application approved!`, type: 'success' })}
+                              onClick={() => {
+                                setUserApplications(userApplications.map(a => a.id === app.id ? { ...a, status: 'Approved' } : a));
+                                addNotification({ title: 'Success', message: `${app.name}'s application approved!`, type: 'success' });
+                              }}
                               className="p-2 bg-success text-white rounded-lg shadow-lg shadow-success/20 hover:scale-105 transition-all"
+                              title="Approve Application"
                             >
                               <Check size={16} />
                             </button>
@@ -4492,6 +4517,81 @@ const AdminDashboard = () => {
                 </table>
               </div>
             </div>
+
+            {/* Application Detail Modal */}
+            {showAppDetailModal && selectedUserApp && (
+              <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+                <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md" onClick={() => setShowAppDetailModal(false)}></div>
+                <div className="relative w-full max-w-2xl bg-surface-light dark:bg-surface-dark rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+                  <div className="p-6 border-b dark:border-border-dark flex justify-between items-center bg-gray-50/50 dark:bg-secondary-dark/30">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-primary-light text-white rounded-xl flex items-center justify-center font-bold text-xl">{selectedUserApp.name[0]}</div>
+                      <div>
+                        <h3 className="text-xl font-black dark:text-white">{selectedUserApp.name}</h3>
+                        <p className="text-sm text-text-secondary-light font-bold">New Registration Request</p>
+                      </div>
+                    </div>
+                    <button onClick={() => setShowAppDetailModal(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-secondary-dark rounded-full transition-all"><X size={24} className="dark:text-white" /></button>
+                  </div>
+                  
+                  <div className="p-8 space-y-6">
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light">Applying For</p>
+                        <p className="text-base font-bold dark:text-white">{selectedUserApp.role}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light">Desired Location</p>
+                        <p className="text-base font-bold dark:text-white">{selectedUserApp.location}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light">Email Address</p>
+                        <p className="text-base font-bold dark:text-white">{selectedUserApp.name.toLowerCase().replace(' ', '.')}@example.com</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light">Phone Number</p>
+                        <p className="text-base font-bold dark:text-white">+91 98XXX XXX00</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light">Uploaded Documents</p>
+                      <div className="grid grid-cols-3 gap-3">
+                        {selectedUserApp.docs.map(doc => (
+                          <div key={doc} className="p-3 bg-gray-50 dark:bg-secondary-dark rounded-xl border border-border-light dark:border-border-dark flex items-center gap-2">
+                            <FileText size={16} className="text-primary-light" />
+                            <span className="text-xs font-bold dark:text-white">{doc}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-6 bg-gray-50/50 dark:bg-secondary-dark/30 border-t dark:border-border-dark flex gap-3">
+                    <button 
+                      onClick={() => {
+                        setUserApplications(userApplications.filter(a => a.id !== selectedUserApp.id));
+                        setShowAppDetailModal(false);
+                        addNotification({ title: 'Application Rejected', message: 'Applicant notified.', type: 'error' });
+                      }}
+                      className="flex-1 py-3 bg-error/10 text-error rounded-xl font-bold text-sm hover:bg-error/20 transition-all"
+                    >
+                      Reject
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setUserApplications(userApplications.map(a => a.id === selectedUserApp.id ? { ...a, status: 'Approved' } : a));
+                        setShowAppDetailModal(false);
+                        addNotification({ title: 'Approved', message: 'Account credentials sent to user.', type: 'success' });
+                      }}
+                      className="flex-[2] py-3 bg-success text-white rounded-xl font-bold text-sm shadow-xl shadow-success/20 hover:scale-105 transition-all"
+                    >
+                      Approve & Create Account
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         );
 
