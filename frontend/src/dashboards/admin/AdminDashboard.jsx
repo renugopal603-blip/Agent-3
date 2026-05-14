@@ -11,7 +11,7 @@ import {
   Clock, Star, LogOut, ChevronRight, ChevronDown, Lock, BellRing, Palette,
   CreditCard, Percent, Truck, BarChart as BarChartIcon, LifeBuoy, Share2, Key, History,
   UserCheck, Briefcase, Megaphone, Sun, Moon, Eye, EyeOff, User, FileText, Shield, MapPin, Coins, Wallet, Trophy, Calendar, Zap, Navigation, Download, ArrowUpRight, ArrowDownRight, PieChart, Activity, FileSpreadsheet, Layout, MessageSquare, Send, Smartphone, Mail, Plus, Headset, Ticket, Paperclip, Smile, Link2, Copy, Gift, Camera, Fingerprint, Monitor, Check, Menu, FileSearch, Award,
-  Flag, Milestone, Hash, Globe, Settings2, ShieldAlert, MousePointer2, BarChart3,
+  Flag, Milestone, Hash, Globe, Settings2, ShieldAlert, MousePointer2, BarChart3, RefreshCw,
   Utensils, ShoppingBag, HeartPulse, Pill, Shirt, Scissors, GraduationCap, Wrench, MoreHorizontal, Upload
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
