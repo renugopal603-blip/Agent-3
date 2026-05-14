@@ -543,6 +543,128 @@ const AgentDashboard = () => {
   ];
 
   const renderContent = () => {
+    // LOCKDOWN: Restrict core features if agent is not active
+    if (user?.status !== 'Active') {
+      // DEV BYPASS: Commented out the strict gating to allow you to test all sidebar tabs.
+      // Uncomment this block before production to enforce the lockdown.
+      /*
+      const allowedTabs = ['Dashboard', 'My Profile', 'Notifications', 'Support / Tickets', 'Settings'];
+      
+      if (!allowedTabs.includes(activeTab)) {
+        return (
+          <div className="p-20 text-center animate-in zoom-in duration-500 flex flex-col items-center justify-center h-[60vh]">
+            <div className="w-24 h-24 bg-error/10 text-error rounded-3xl flex items-center justify-center mb-6 border border-error/20 shadow-inner">
+              <Lock size={48} />
+            </div>
+            <h3 className="text-3xl font-black dark:text-white mb-4 tracking-tighter">Feature Locked</h3>
+            <p className="text-text-secondary-light font-bold max-w-md mx-auto leading-relaxed">
+              Your account is currently under review. This feature will be unlocked once your application is formally approved by an administrator.
+            </p>
+            <button 
+              onClick={() => setActiveTab('Dashboard')}
+              className="mt-8 btn-primary px-8 py-4 rounded-2xl shadow-xl shadow-primary-light/20 font-black tracking-widest uppercase text-sm active:scale-95 transition-all"
+            >
+              Check Application Status
+            </button>
+          </div>
+        );
+      }
+      */
+
+      if (activeTab === 'Dashboard') {
+        return (
+          <div className="p-8 max-w-4xl mx-auto animate-in fade-in duration-700">
+          <div className="card-premium p-10 space-y-10 bg-white dark:bg-surface-dark border-2 border-primary-light/20 shadow-2xl rounded-[40px] relative overflow-hidden">
+            {/* Background Accent */}
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary-light/5 rounded-full blur-3xl"></div>
+            
+            <div className="text-center space-y-4">
+              <div className="w-20 h-20 bg-primary-light/10 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-inner">
+                <Clock className="text-primary-light animate-pulse" size={40} />
+              </div>
+              <h2 className="text-4xl font-black dark:text-white tracking-tighter">Application Under Review</h2>
+              <p className="text-text-secondary-light font-bold text-lg max-w-xl mx-auto">
+                Welcome to <span className="text-primary-light">AgentHub</span>! Your account is currently going through our multi-stage verification process.
+              </p>
+            </div>
+
+            <div className="relative pt-10">
+              {/* Tracker Line */}
+              <div className="absolute top-[84px] left-8 right-8 h-1.5 bg-gray-100 dark:bg-secondary-dark rounded-full"></div>
+              
+              {/* Active Progress */}
+              <div 
+                className="absolute top-[84px] left-8 h-1.5 bg-gradient-to-r from-emerald-400 to-primary-light rounded-full transition-all duration-1000 shadow-[0_0_15px_rgba(16,185,129,0.4)]" 
+                style={{ 
+                  width: user?.applicationStatus === 'Pending Review' ? '20%' : 
+                         user?.applicationStatus === 'Under Review' ? '40%' : 
+                         user?.applicationStatus === 'Verified' ? '70%' : 
+                         user?.applicationStatus === 'Approved' ? '90%' : '0%' 
+                }}
+              ></div>
+
+              <div className="flex justify-between relative z-10">
+                {[
+                  { label: 'Registration', status: 'Submitted', active: true, icon: <UserPlus size={14}/> },
+                  { label: 'KYC Review', status: ['Under Review', 'Verified', 'Approved'].includes(user?.applicationStatus) ? 'Verified' : 'In Progress', active: ['Under Review', 'Verified', 'Approved'].includes(user?.applicationStatus), icon: <ShieldCheck size={14}/> },
+                  { label: 'Payment', status: ['Verified', 'Approved'].includes(user?.applicationStatus) ? 'Confirmed' : 'Pending', active: ['Verified', 'Approved'].includes(user?.applicationStatus), icon: <CreditCard size={14}/> },
+                  { label: 'Final Review', status: user?.applicationStatus === 'Approved' ? 'Completed' : 'Queued', active: user?.applicationStatus === 'Approved', icon: <Target size={14}/> },
+                  { label: 'Activated', status: user?.status === 'Active' ? 'Live' : 'Waiting', active: user?.status === 'Active', icon: <Check size={14}/> }
+                ].map((step, i) => (
+                  <div key={i} className="flex flex-col items-center gap-4 group">
+                    <div className={`w-14 h-14 rounded-2xl border-4 border-white dark:border-surface-dark shadow-xl flex items-center justify-center transition-all duration-500 ${
+                      step.active ? 'bg-primary-light scale-110 rotate-3' : 'bg-gray-200 dark:bg-secondary-dark'
+                    }`}>
+                      {React.cloneElement(step.icon, { className: step.active ? 'text-white' : 'text-gray-400' })}
+                    </div>
+                    <div className="text-center">
+                      <p className={`text-[11px] font-black uppercase tracking-widest ${step.active ? 'text-primary-light' : 'text-text-secondary-light'}`}>{step.label}</p>
+                      <p className="text-[10px] font-bold opacity-60 uppercase">{step.status}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-gray-50 dark:bg-secondary-dark/30 p-8 rounded-[32px] border border-dashed border-border-light dark:border-border-dark mt-10">
+              <div className="flex items-center gap-3 mb-6">
+                <Activity size={18} className="text-primary-light" />
+                <h4 className="text-sm font-black uppercase tracking-widest dark:text-white">Live Tracking Log</h4>
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                  <p className="text-sm font-bold dark:text-white flex-1">Registration documents received and validated.</p>
+                  <span className="text-xs text-text-secondary-light">COMPLETED</span>
+                </div>
+                {['Under Review', 'Verified', 'Approved'].includes(user?.applicationStatus) && (
+                  <div className="flex items-center gap-4">
+                    <div className="w-2 h-2 rounded-full bg-primary-light"></div>
+                    <p className="text-sm font-bold dark:text-white flex-1">Sub-Admin is currently reviewing your territory assignment.</p>
+                    <span className="text-xs text-text-secondary-light">VERIFIED</span>
+                  </div>
+                )}
+                {user?.applicationStatus === 'Approved' && (
+                  <div className="flex items-center gap-4">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                    <p className="text-sm font-bold dark:text-white flex-1">Final Admin approval granted. Provisioning dashboard...</p>
+                    <span className="text-xs text-text-secondary-light">DONE</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-center pt-6">
+              <button onClick={() => window.location.reload()} className="btn-primary px-8 py-3 rounded-2xl flex items-center gap-2 shadow-xl shadow-primary-light/20 active:scale-95 transition-all">
+                <History size={18} /> Refresh Status
+              </button>
+            </div>
+          </div>
+        </div>
+        );
+      }
+    }
+
     switch (activeTab) {
       case 'Dashboard':
         return (
@@ -1781,68 +1903,134 @@ const AgentDashboard = () => {
 
       case 'Commission History':
         return (
-          <div className="p-8 space-y-8 animate-in slide-in-from-bottom-4 duration-500">
-            <div className="flex justify-between items-center">
+          <div className="p-8 max-w-7xl mx-auto space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b dark:border-border-dark pb-6">
               <div>
-                <h3 className="text-2xl font-bold dark:text-white">Commission Ledger</h3>
-                <p className="text-sm text-text-secondary-light">Detailed breakdown of all earnings.</p>
+                <h3 className="text-3xl font-black dark:text-white tracking-tight">Commission Ledger</h3>
+                <p className="text-sm text-text-secondary-light font-bold mt-1">Comprehensive record of all your earnings and payouts.</p>
               </div>
-              <button 
-                onClick={() => {
-                  const csvContent = "data:text/csv;charset=utf-8," 
-                    + "Source,Type,Date,Order Value,Rate,Earning\n"
-                    + "Fresh Mart,Shop Sale,May 02 2026,₹1250,5%,₹62.50\n"
-                    + "Anjali G.,Membership,May 02 2026,₹9999,10%,₹999.90\n"
-                    + "Electro World,Shop Sale,May 01 2026,₹45000,5%,₹2250.00\n"
-                    + "Gourmet Kitchen,Shop Sale,Apr 30 2026,₹2800,5%,₹140.00\n"
-                    + "System,Referral Bonus,Apr 28 2026,N/A,Flat,₹500.00";
-                  const encodedUri = encodeURI(csvContent);
-                  const link = document.createElement("a");
-                  link.setAttribute("href", encodedUri);
-                  link.setAttribute("download", "Commission_Statement.csv");
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                  addNotification({ title: 'Statement Downloaded', message: 'Your commission statement is ready.', type: 'success' });
-                }}
-                className="btn-outline px-4 py-2 text-sm flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-secondary-dark transition-all active:scale-95 shadow-sm"
-              >
-                <Download size={18} /> Download Statement
-              </button>
+              <div className="flex gap-3">
+                <button className="btn-outline px-4 py-2 flex items-center gap-2 text-sm font-bold bg-white dark:bg-surface-dark border-2 border-border-light dark:border-border-dark rounded-xl">
+                  <Filter size={16} /> Filter
+                </button>
+                <button className="btn-outline px-4 py-2 flex items-center gap-2 text-sm font-bold bg-white dark:bg-surface-dark border-2 border-border-light dark:border-border-dark rounded-xl">
+                  <Download size={16} /> Export CSV
+                </button>
+              </div>
             </div>
 
-            <div className="card-premium">
+            {/* Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="card-premium border-l-4 border-emerald-500 bg-emerald-500/5">
+                <div className="flex justify-between items-start">
+                  <div className="p-3 bg-emerald-500/10 text-emerald-600 rounded-xl">
+                    <CheckCircle size={24} />
+                  </div>
+                  <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-500/10 px-2 py-1 rounded-lg">Available</span>
+                </div>
+                <div className="mt-4">
+                  <p className="text-xs font-bold text-text-secondary-light uppercase tracking-wider mb-1">Cleared Earnings</p>
+                  <h4 className="text-3xl font-black dark:text-white tracking-tight">₹32,450.00</h4>
+                </div>
+              </div>
+
+              <div className="card-premium border-l-4 border-orange-500 bg-orange-500/5">
+                <div className="flex justify-between items-start">
+                  <div className="p-3 bg-orange-500/10 text-orange-600 rounded-xl">
+                    <Clock size={24} />
+                  </div>
+                  <span className="text-[10px] font-black text-orange-600 uppercase tracking-widest bg-orange-500/10 px-2 py-1 rounded-lg">Pending</span>
+                </div>
+                <div className="mt-4">
+                  <p className="text-xs font-bold text-text-secondary-light uppercase tracking-wider mb-1">Awaiting Clearance</p>
+                  <h4 className="text-3xl font-black dark:text-white tracking-tight">₹4,200.00</h4>
+                </div>
+              </div>
+
+              <div className="card-premium border-l-4 border-blue-500 bg-blue-500/5">
+                <div className="flex justify-between items-start">
+                  <div className="p-3 bg-blue-500/10 text-blue-600 rounded-xl">
+                    <Wallet size={24} />
+                  </div>
+                  <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest bg-blue-500/10 px-2 py-1 rounded-lg">Lifetime</span>
+                </div>
+                <div className="mt-4">
+                  <p className="text-xs font-bold text-text-secondary-light uppercase tracking-wider mb-1">Total Generated</p>
+                  <h4 className="text-3xl font-black dark:text-white tracking-tight">₹128,900.00</h4>
+                </div>
+              </div>
+            </div>
+
+            {/* Transaction Table */}
+            <div className="card-premium overflow-hidden p-0 border border-border-light dark:border-border-dark shadow-2xl">
+              <div className="p-6 bg-gray-50 dark:bg-secondary-dark border-b border-border-light dark:border-border-dark flex justify-between items-center">
+                <h4 className="font-black dark:text-white uppercase tracking-widest text-sm flex items-center gap-2">
+                  <History size={18} className="text-primary-light" /> Recent Transactions
+                </h4>
+                <div className="relative">
+                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary-light" />
+                  <input type="text" placeholder="Search by ID or Shop..." className="pl-10 pr-4 py-2 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl text-sm font-bold dark:text-white outline-none focus:ring-2 focus:ring-primary-light/50 transition-all" />
+                </div>
+              </div>
+              
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="text-left border-b border-border-light dark:border-border-dark">
-                      <th className="pb-4 font-bold dark:text-white">Source</th>
-                      <th className="pb-4 font-bold dark:text-white">Type</th>
-                      <th className="pb-4 font-bold dark:text-white">Date</th>
-                      <th className="pb-4 font-bold dark:text-white">Order Value</th>
-                      <th className="pb-4 font-bold dark:text-white">Rate</th>
-                      <th className="pb-4 font-bold dark:text-white">Earning</th>
+                <table className="w-full text-left border-collapse">
+                  <thead className="bg-white dark:bg-surface-dark border-b border-border-light dark:border-border-dark">
+                    <tr>
+                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text-secondary-light">Transaction ID</th>
+                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text-secondary-light">Date</th>
+                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text-secondary-light">Source / Description</th>
+                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text-secondary-light">Type</th>
+                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text-secondary-light">Amount</th>
+                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-text-secondary-light">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border-light dark:divide-border-dark">
+                  <tbody className="divide-y divide-border-light dark:divide-border-dark bg-white dark:bg-surface-dark">
                     {[
-                      { source: 'Fresh Mart', type: 'Shop Sale', date: 'May 02, 2026', val: '₹1,250', rate: '5%', earn: '₹62.50' },
-                      { source: 'Anjali G.', type: 'Membership', date: 'May 02, 2026', val: '₹9,999', rate: '10%', earn: '₹999.90' },
-                      { source: 'Electro World', type: 'Shop Sale', date: 'May 01, 2026', val: '₹45,000', rate: '5%', earn: '₹2,250.00' },
-                      { source: 'Gourmet Kitchen', type: 'Shop Sale', date: 'Apr 30, 2026', val: '₹2,800', rate: '5%', earn: '₹140.00' },
-                      { source: 'System', type: 'Referral Bonus', date: 'Apr 28, 2026', val: 'N/A', rate: 'Flat', earn: '₹500.00' },
-                    ].map((row, i) => (
-                      <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50 transition-colors">
-                        <td className="py-4 font-bold dark:text-white text-sm">{row.source}</td>
-                        <td className="py-4 text-xs font-semibold text-text-secondary-light">{row.type}</td>
-                        <td className="py-4 text-sm text-text-secondary-light">{row.date}</td>
-                        <td className="py-4 text-sm dark:text-white">{row.val}</td>
-                        <td className="py-4 text-sm text-text-secondary-light">{row.rate}</td>
-                        <td className="py-4 font-black text-emerald-500 text-sm">{row.earn}</td>
+                      { id: 'TXN-99821A', date: 'May 14, 2026', desc: 'Shop Onboarding Bonus - Fresh Mart', type: 'Credit', amount: '+₹500.00', status: 'Cleared', color: 'emerald' },
+                      { id: 'TXN-99820A', date: 'May 12, 2026', desc: 'Sales Commission - 15 Orders', type: 'Credit', amount: '+₹1,240.00', status: 'Cleared', color: 'emerald' },
+                      { id: 'TXN-99795B', date: 'May 10, 2026', desc: 'Sub-Agent Recruitment Bonus', type: 'Credit', amount: '+₹200.00', status: 'Pending', color: 'orange' },
+                      { id: 'TXN-99750C', date: 'May 05, 2026', desc: 'Bank Payout Withdrawal', type: 'Debit', amount: '-₹8,500.00', status: 'Processed', color: 'blue' },
+                      { id: 'TXN-99710A', date: 'May 01, 2026', desc: 'Monthly Performance Bonus (Gold Tier)', type: 'Credit', amount: '+₹2,500.00', status: 'Cleared', color: 'emerald' },
+                    ].map((txn, i) => (
+                      <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark transition-colors group">
+                        <td className="px-6 py-5">
+                          <span className="text-xs font-black dark:text-white bg-gray-100 dark:bg-secondary-dark px-2 py-1 rounded-md">{txn.id}</span>
+                        </td>
+                        <td className="px-6 py-5 text-xs font-bold text-text-secondary-light">{txn.date}</td>
+                        <td className="px-6 py-5">
+                          <p className="text-sm font-bold dark:text-white">{txn.desc}</p>
+                        </td>
+                        <td className="px-6 py-5">
+                          <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md ${
+                            txn.type === 'Credit' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'
+                          }`}>
+                            {txn.type}
+                          </span>
+                        </td>
+                        <td className="px-6 py-5">
+                          <span className={`text-sm font-black ${txn.type === 'Credit' ? 'text-emerald-500' : 'text-red-500'}`}>
+                            {txn.amount}
+                          </span>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-2 h-2 rounded-full bg-${txn.color}-500 shadow-[0_0_8px_rgba(var(--color-${txn.color}-500),0.5)]`}></div>
+                            <span className="text-xs font-bold dark:text-white">{txn.status}</span>
+                          </div>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+              </div>
+              
+              <div className="p-4 bg-gray-50 dark:bg-secondary-dark border-t border-border-light dark:border-border-dark flex justify-between items-center">
+                <span className="text-xs font-bold text-text-secondary-light">Showing 5 of 124 transactions</span>
+                <div className="flex gap-2">
+                  <button className="px-3 py-1 rounded-lg border border-border-light dark:border-border-dark text-xs font-bold hover:bg-white dark:hover:bg-surface-dark transition-colors disabled:opacity-50">Prev</button>
+                  <button className="px-3 py-1 rounded-lg bg-primary-light text-white text-xs font-bold hover:bg-primary-dark transition-colors">Next</button>
+                </div>
               </div>
             </div>
           </div>

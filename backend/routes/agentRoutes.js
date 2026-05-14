@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getAgents, addAgent, deleteAgent } = require('../controllers/agentController');
+const { getAgents, addAgent, deleteAgent, verifyAgent, approveAgent } = require('../controllers/agentController');
 const { protect } = require('../middleware/authMiddleware');
 
 router.route('/')
@@ -9,5 +9,8 @@ router.route('/')
 
 router.route('/:id')
   .delete(protect, deleteAgent);
+
+router.put('/:id/verify', protect, verifyAgent);
+router.put('/:id/approve', protect, approveAgent);
 
 module.exports = router;

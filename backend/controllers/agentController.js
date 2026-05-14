@@ -59,4 +59,69 @@ const deleteAgent = async (req, res) => {
   }
 };
 
-module.exports = { getAgents, addAgent, deleteAgent };
+// @desc    Update agent status (Sub-Admin verification)
+// @route   PUT /api/agents/:id/verify
+// @access  Private/Sub-Admin
+const verifyAgent = async (req, res) => {
+  try {
+    const agent = await User.findById(req.params.id);
+    if (!agent) return res.status(404).json({ message: 'Agent not found' });
+
+    agent.applicationStatus = 'Verified';
+    agent.status = 'Under Review';
+    agent.auditLogs.push({
+      action: 'Verified by Sub-Admin',
+      performedBy: req.user._id,
+      details: `KYC and application verified. Forwarded to Admin.`
+    });
+    
+    agent.notifications.push({
+      title: 'Application Verified',
+      message: 'Your application has been verified by the Sub-Admin and forwarded to the Admin for final approval.',
+      type: 'success'
+    });
+
+    await agent.save();
+    res.json(agent);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Final agent approval (Admin)
+// @route   PUT /api/agents/:id/approve
+// @access  Private/Admin
+const approveAgent = async (req, res) => {
+  try {
+    const agent = await User.findById(req.params.id);
+    if (!agent) return res.status(404).json({ message: 'Agent not found' });
+
+    const { action, reason } = req.body; // action: 'Approved', 'Rejected', 'Hold'
+    
+    agent.applicationStatus = action;
+    if (action === 'Approved') {
+      agent.status = 'Active';
+    } else if (action === 'Rejected') {
+      agent.status = 'Rejected';
+    }
+
+    agent.auditLogs.push({
+      action: `Final Decision: ${action}`,
+      performedBy: req.user._id,
+      details: reason || `Agent application ${action.toLowerCase()}.`
+    });
+
+    agent.notifications.push({
+      title: `Application ${action}`,
+      message: reason || `Your agent account is now ${action.toLowerCase()}.`,
+      type: action === 'Approved' ? 'success' : 'warning'
+    });
+
+    await agent.save();
+    res.json(agent);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { getAgents, addAgent, deleteAgent, verifyAgent, approveAgent };

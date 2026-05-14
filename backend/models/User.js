@@ -51,8 +51,30 @@ const userSchema = new mongoose.Schema({
     amount: Number,
     date: Date
   },
-  applicationStatus: { type: String, enum: ['Not Applied', 'Pending Review', 'Approved', 'Rejected', 'Request Correction'], default: 'Not Applied' },
-  status: { type: String, enum: ['Active', 'Inactive', 'Suspended'], default: 'Inactive' },
+  applicationStatus: { 
+    type: String, 
+    enum: ['Not Applied', 'Pending Review', 'Under Review', 'Verified', 'Approved', 'Rejected', 'Request Correction'], 
+    default: 'Not Applied' 
+  },
+  status: { 
+    type: String, 
+    enum: ['Active', 'Inactive', 'Suspended', 'Pending', 'Under Review', 'Verified', 'Approved', 'Rejected'], 
+    default: 'Inactive' 
+  },
+  // Audit & Notifications
+  auditLogs: [{
+    action: String,
+    performedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    details: String,
+    timestamp: { type: Date, default: Date.now }
+  }],
+  notifications: [{
+    title: String,
+    message: String,
+    type: { type: String, enum: ['info', 'success', 'warning', 'error'], default: 'info' },
+    read: { type: Boolean, default: false },
+    timestamp: { type: Date, default: Date.now }
+  }],
   // Sub-Admin Specific Fields
   employeeId: { type: String },
   accessLevel: { type: String },

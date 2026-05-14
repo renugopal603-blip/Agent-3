@@ -9,8 +9,8 @@ const shopSchema = new mongoose.Schema({
   sales: { type: String, default: '₹0' },
   status: { 
     type: String, 
-    enum: ['Pending Review', 'Verified by Sub Admin', 'Active', 'Rejected'], 
-    default: 'Pending Review' 
+    enum: ['Pending', 'Under Review', 'Verified', 'Approved', 'Rejected', 'Active', 'Inactive'], 
+    default: 'Pending' 
   },
   rating: { type: String, default: 'N/A' },
   date: { type: String, default: () => new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) },
