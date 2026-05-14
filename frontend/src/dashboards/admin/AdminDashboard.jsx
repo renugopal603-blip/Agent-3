@@ -112,6 +112,9 @@ const AdminDashboard = () => {
     avatar: 'A'
   });
 
+  const [is2FAEnabled, setIs2FAEnabled] = useState(false);
+  const [selected2FAMethod, setSelected2FAMethod] = useState('Authenticator App');
+
   const [userApplications, setUserApplications] = useState([
     { id: 1, name: 'Anil Kapoor', role: 'Agent', appliedOn: '2h ago', status: 'Pending', location: 'Delhi', docs: ['Aadhar', 'PAN'] },
     { id: 2, name: 'Zoya Khan', role: 'Shop Owner', appliedOn: '5h ago', status: 'Pending', location: 'Mumbai', docs: ['GST', 'Trade License'] },
@@ -5775,6 +5778,11 @@ const AdminDashboard = () => {
         <TwoFAModal 
           isOpen={showTwoFAModal}
           onClose={() => setShowTwoFAModal(false)}
+          is2FAEnabled={is2FAEnabled}
+          setIs2FAEnabled={setIs2FAEnabled}
+          selected2FAMethod={selected2FAMethod}
+          setSelected2FAMethod={setSelected2FAMethod}
+          addNotification={addNotification}
         />
         <SessionsModal 
           isOpen={showSessionsModal}
@@ -8803,11 +8811,11 @@ const PasswordModal = ({ isOpen, onClose, addNotification }) => {
 };
 
 
-const TwoFAModal = ({ isOpen, onClose }) => {
+const TwoFAModal = ({ isOpen, onClose, is2FAEnabled, setIs2FAEnabled, selected2FAMethod, setSelected2FAMethod, addNotification }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
       
       <div className="relative w-full max-w-lg bg-surface-light dark:bg-surface-dark rounded-[32px] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col">
@@ -8829,39 +8837,65 @@ const TwoFAModal = ({ isOpen, onClose }) => {
         <div className="p-8 space-y-6">
           <div className="flex items-center justify-between p-6 bg-purple-500/5 border border-purple-500/20 rounded-[32px]">
             <div className="flex-1">
-              <p className="text-xs font-black dark:text-white">Status: Currently Disabled</p>
+              <p className="text-xs font-black dark:text-white">Status: {is2FAEnabled ? 'Currently Enabled' : 'Currently Disabled'}</p>
               <p className="text-[10px] text-text-secondary-light font-bold mt-1">Add an extra layer of security to your admin account.</p>
             </div>
-            <div className="w-14 h-7 bg-gray-200 dark:bg-background-dark rounded-full relative p-1 cursor-pointer">
-              <div className="w-5 h-5 bg-white rounded-full absolute left-1 shadow-md"></div>
+            <div 
+              onClick={() => {
+                const newState = !is2FAEnabled;
+                setIs2FAEnabled(newState);
+                addNotification({
+                  title: newState ? '2FA Enabled' : '2FA Disabled',
+                  message: newState ? 'Your account is now protected with multi-factor authentication.' : '2FA protection has been removed from your account.',
+                  type: newState ? 'success' : 'warning'
+                });
+              }}
+              className={`w-14 h-7 rounded-full relative p-1 cursor-pointer transition-all duration-300 ${is2FAEnabled ? 'bg-success' : 'bg-gray-200 dark:bg-background-dark'}`}
+            >
+              <div className={`w-5 h-5 bg-white rounded-full absolute shadow-md transition-all duration-300 ${is2FAEnabled ? 'left-8' : 'left-1'}`}></div>
             </div>
           </div>
 
           <div className="space-y-4">
             <h4 className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light ml-1">Available Methods</h4>
             {[
-              { title: 'Authenticator App', desc: 'Google Authenticator, Authy, etc.', icon: <Smartphone size={16} />, active: true },
+              { title: 'Authenticator App', desc: 'Google Authenticator, Authy, etc.', icon: <Smartphone size={16} /> },
               { title: 'SMS Verification', desc: 'Codes sent via text message.', icon: <MessageSquare size={16} /> },
               { title: 'Biometric Login', desc: 'FaceID or Fingerprint (TouchID)', icon: <Fingerprint size={16} /> }
-            ].map((method, i) => (
-              <div key={i} className={`p-4 rounded-2xl border-2 transition-all cursor-pointer ${method.active ? 'border-primary-light bg-primary-light/5' : 'border-transparent bg-gray-50 dark:bg-secondary-dark hover:border-gray-200 dark:hover:border-border-dark'}`}>
-                <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${method.active ? 'bg-primary-light text-white' : 'bg-gray-100 dark:bg-background-dark text-text-secondary-light'}`}>
-                    {method.icon}
+            ].map((method) => {
+              const isActive = selected2FAMethod === method.title;
+              return (
+                <div 
+                  key={method.title} 
+                  onClick={() => setSelected2FAMethod(method.title)}
+                  className={`p-4 rounded-2xl border-2 transition-all cursor-pointer ${isActive ? 'border-primary-light bg-primary-light/5' : 'border-transparent bg-gray-50 dark:bg-secondary-dark hover:border-gray-200 dark:hover:border-border-dark'}`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isActive ? 'bg-primary-light text-white' : 'bg-gray-100 dark:bg-background-dark text-text-secondary-light'}`}>
+                      {method.icon}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs font-black dark:text-white">{method.title}</p>
+                      <p className="text-[10px] text-text-secondary-light font-bold">{method.desc}</p>
+                    </div>
+                    {isActive && <CheckCircle size={18} className="text-primary-light animate-in zoom-in duration-300" />}
                   </div>
-                  <div className="flex-1">
-                    <p className="text-xs font-black dark:text-white">{method.title}</p>
-                    <p className="text-[10px] text-text-secondary-light font-bold">{method.desc}</p>
-                  </div>
-                  {method.active && <CheckCircle size={18} className="text-primary-light" />}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
         <div className="p-8 border-t dark:border-border-dark bg-gray-50/50 dark:bg-secondary-dark/30">
-          <button className="w-full py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] active:scale-[0.98] transition-all">Configure 2FA Method</button>
+          <button 
+            onClick={() => {
+              addNotification({ title: '2FA Configured', message: `Primary method set to ${selected2FAMethod}.`, type: 'success' });
+              onClose();
+            }}
+            className="w-full py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+          >
+            Configure {selected2FAMethod}
+          </button>
         </div>
       </div>
     </div>
