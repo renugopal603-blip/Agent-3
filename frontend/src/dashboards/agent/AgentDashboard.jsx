@@ -377,19 +377,19 @@ const AgentDashboard = () => {
       if (globalShops.length > 0) {
         setShops(prev => {
           const updated = [...prev];
+          let hasChanged = false;
           globalShops.forEach(gs => {
             const index = updated.findIndex(s => (s._id === gs._id || s.id === gs._id || s._id === gs.id || s.id === gs.id));
-            if (index !== -1) {
-              // Update status and other fields from global registry
-              updated[index] = {
-                ...updated[index],
-                status: gs.status,
-                name: gs.name || gs.shopName || updated[index].name,
-                category: gs.category || gs.cat || updated[index].category
-              };
+            if (index !== -1 && updated[index].status !== gs.status) {
+              updated[index] = { ...updated[index], ...gs };
+              hasChanged = true;
+            } else if (index === -1) {
+              // If it's in global registry but not in local state, add it
+              updated.unshift(gs);
+              hasChanged = true;
             }
           });
-          return updated;
+          return hasChanged ? updated : prev;
         });
       }
     };
@@ -454,7 +454,8 @@ const AgentDashboard = () => {
         documents: {
           license: (shopForm.documents && shopForm.documents.licenseName) ? shopForm.documents.licenseName : 'Shop_License.pdf',
           gst: (shopForm.documents && shopForm.documents.gstName) ? shopForm.documents.gstName : 'GST_Certificate.pdf'
-        }
+        },
+        status: 'Pending Review' // Force initial status
       };
 
       // 1. API Call to save to MongoDB
