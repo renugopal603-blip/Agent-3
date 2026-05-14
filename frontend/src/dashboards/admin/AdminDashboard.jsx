@@ -3957,13 +3957,32 @@ const AdminDashboard = () => {
                       </div>
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button 
-                          onClick={() => addNotification({ title: 'Previewing Asset', message: `Opening ${item.title}...`, type: 'info' })}
-                          className="p-2 text-text-secondary-light hover:text-primary-light"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPreviewDoc({ name: item.title, id: `ASSET-${i+1}`, size: item.size });
+                          }}
+                          className="p-2 text-text-secondary-light hover:text-primary-light hover:bg-primary-light/10 rounded-lg transition-all"
                         >
                           <Eye size={16} />
                         </button>
                         <button 
-                          onClick={() => addNotification({ title: 'Asset Download', message: 'Downloading brand asset package...', type: 'info' })}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            addNotification({ title: 'Download Started', message: `Downloading ${item.title}...`, type: 'info' });
+                            setTimeout(() => {
+                              const content = `Simulated asset content for ${item.title}`;
+                              const blob = new Blob([content], { type: 'text/plain' });
+                              const url = URL.createObjectURL(blob);
+                              const link = document.createElement('a');
+                              link.href = url;
+                              link.download = `${item.title.replace(/\s+/g, '_')}.txt`;
+                              document.body.appendChild(link);
+                              link.click();
+                              document.body.removeChild(link);
+                              URL.revokeObjectURL(url);
+                              addNotification({ title: 'Download Complete', message: `${item.title} saved to your device.`, type: 'success' });
+                            }, 1000);
+                          }}
                           className="p-2 text-text-secondary-light hover:text-primary-light rounded-lg hover:bg-gray-100 transition-all"
                         >
                           <Download size={16} />
@@ -10368,6 +10387,58 @@ const CampaignStatsModal = ({ isOpen, onClose, campaign }) => {
               This campaign was successfully delivered via {campaign.channel} channels. The read rate is currently 4.2% higher than your average for this audience segment.
             </p>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const UploadMaterialModal = ({ isOpen, onClose, addNotification }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[160] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md" onClick={onClose}></div>
+      <div className="relative w-full max-w-lg bg-surface-light dark:bg-surface-dark rounded-[2.5rem] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="p-8 border-b dark:border-border-dark bg-primary-light text-white flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
+              <Upload size={24} />
+            </div>
+            <div>
+              <h3 className="text-xl font-black tracking-tight uppercase">Upload Brand Asset</h3>
+              <p className="text-[10px] font-black uppercase opacity-80 tracking-widest">Marketing & Brand Identity</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-3 hover:bg-white/10 rounded-2xl transition-all"><X size={24} /></button>
+        </div>
+        
+        <div className="p-8 space-y-6">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-text-secondary-light tracking-widest ml-1">Asset Title</label>
+            <input type="text" placeholder="e.g. Winter Catalog 2024" className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all" />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-text-secondary-light tracking-widest ml-1">Select File</label>
+            <label className="flex flex-col items-center justify-center p-12 border-2 border-dashed border-border-light dark:border-border-dark rounded-[2rem] cursor-pointer hover:bg-primary-light/5 hover:border-primary-light/50 transition-all group">
+              <div className="w-16 h-16 bg-gray-50 dark:bg-secondary-dark rounded-3xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-sm">
+                <FilePlus size={32} className="text-text-secondary-light group-hover:text-primary-light" />
+              </div>
+              <p className="text-sm font-black dark:text-white">Click to select asset</p>
+              <p className="text-[10px] font-bold text-text-secondary-light uppercase mt-1">PDF, ZIP, or Video (Max 500MB)</p>
+              <input type="file" className="hidden" />
+            </label>
+          </div>
+
+          <button 
+            onClick={() => {
+              addNotification({ title: 'Upload Successful', message: 'The asset has been added to the brand library.', type: 'success' });
+              onClose();
+            }}
+            className="w-full py-5 bg-primary-light text-white rounded-3xl font-black text-sm shadow-2xl shadow-primary-light/30 hover:scale-[1.02] active:scale-[0.98] transition-all"
+          >
+            Upload to Brand Library
+          </button>
         </div>
       </div>
     </div>
