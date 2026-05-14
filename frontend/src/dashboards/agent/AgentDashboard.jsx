@@ -3611,13 +3611,39 @@ const SidebarSection = ({ title, children }) => (
 );
 
 const TicketDetailsModal = ({ isOpen, onClose, ticket }) => {
-  if (!isOpen || !ticket) return null;
-
-  const chatLogs = [
+  const [message, setMessage] = useState('');
+  const [chatLogs, setChatLogs] = useState([
     { sender: 'System', message: 'Ticket created successfully.', time: '2h ago' },
     { sender: 'Admin', message: 'We are reviewing your request. Please wait.', time: '1h ago' },
     { sender: 'Agent', message: 'Thank you, I need this resolved urgently.', time: '30m ago' },
-  ];
+  ]);
+  const chatEndRef = React.useRef(null);
+
+  const scrollToBottom = () => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      scrollToBottom();
+    }
+  }, [isOpen, chatLogs]);
+
+  if (!isOpen || !ticket) return null;
+
+  const handleSend = (e) => {
+    e.preventDefault();
+    if (!message.trim()) return;
+
+    const newMsg = {
+      sender: 'Agent',
+      message: message.trim(),
+      time: 'Just now'
+    };
+
+    setChatLogs([...chatLogs, newMsg]);
+    setMessage('');
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
@@ -3667,35 +3693,42 @@ const TicketDetailsModal = ({ isOpen, onClose, ticket }) => {
                 <div key={i} className={`flex ${log.sender === 'Agent' ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[80%] p-4 rounded-2xl ${
                     log.sender === 'Agent' 
-                      ? 'bg-primary-light text-white rounded-tr-none' 
+                      ? 'bg-primary-light text-white rounded-tr-none shadow-lg shadow-primary-light/20' 
                       : log.sender === 'Admin'
-                      ? 'bg-blue-600 text-white rounded-tl-none'
-                      : 'bg-gray-100 dark:bg-secondary-dark dark:text-white rounded-tl-none border dark:border-border-dark'
+                      ? 'bg-blue-600 text-white rounded-tl-none shadow-lg shadow-blue-500/20'
+                      : 'bg-gray-100 dark:bg-secondary-dark dark:text-white rounded-tl-none border dark:border-border-dark shadow-sm'
                   }`}>
                     <div className="flex items-center justify-between gap-4 mb-1">
-                      <span className="text-[10px] font-black uppercase opacity-70">{log.sender}</span>
-                      <span className="text-[10px] opacity-60 font-bold">{log.time}</span>
+                      <span className="text-[10px] font-black uppercase opacity-70 tracking-widest">{log.sender}</span>
+                      <span className="text-[10px] opacity-60 font-bold uppercase">{log.time}</span>
                     </div>
                     <p className="text-sm font-bold leading-relaxed">{log.message}</p>
                   </div>
                 </div>
               ))}
+              <div ref={chatEndRef} />
             </div>
           </div>
         </div>
 
-        <div className="p-6 border-t dark:border-border-dark bg-gray-50 dark:bg-secondary-dark/50">
+        <form onSubmit={handleSend} className="p-6 border-t dark:border-border-dark bg-gray-50 dark:bg-secondary-dark/50 shrink-0">
           <div className="flex gap-4">
             <input 
               type="text" 
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
               placeholder="Type your message..." 
-              className="flex-1 px-6 py-3 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl outline-none focus:ring-2 focus:ring-primary-light font-bold dark:text-white"
+              className="flex-1 px-6 py-3 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl outline-none focus:ring-2 focus:ring-primary-light font-bold dark:text-white transition-all shadow-inner"
             />
-            <button className="btn-primary px-6 rounded-2xl shadow-lg shadow-primary-light/20">
+            <button 
+              type="submit"
+              disabled={!message.trim()}
+              className="btn-primary px-6 rounded-2xl shadow-lg shadow-primary-light/20 flex items-center justify-center hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:scale-100 disabled:hover:scale-100"
+            >
               <Send size={18} />
             </button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );
