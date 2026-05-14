@@ -91,6 +91,16 @@ const AdminDashboard = () => {
   const [showCreateRoleModal, setShowCreateRoleModal] = useState(false);
   const [showPermissionsModal, setShowPermissionsModal] = useState(false);
   const [showManageAccessModal, setShowManageAccessModal] = useState(false);
+  const [customRoles, setCustomRoles] = useState([
+    { id: 'ROLE-001', name: 'Finance Manager', description: 'Handles all payouts and commission audits.', modules: ['Financial Records', 'System Logs'], status: 'Active' },
+    { id: 'ROLE-002', name: 'Support Lead', description: 'Manages support desk and user verifications.', modules: ['Support Desk', 'User Verification'], status: 'Active' }
+  ]);
+
+  const [newRoleData, setNewRoleData] = useState({
+    name: '',
+    description: '',
+    modules: []
+  });
   const [showAddServicePartnerModal, setShowAddServicePartnerModal] = useState(false);
   const [showAddProductPartnerModal, setShowAddProductPartnerModal] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -947,6 +957,16 @@ const AdminDashboard = () => {
   const handleHoldWithdrawal = (id) => {
     setWithdrawals(prev => prev.map(w => w.id === id ? { ...w, status: 'Held' } : w));
     addNotification({ title: 'Request Held', message: 'The withdrawal is now under review.', type: 'warning' });
+  };
+
+  const handleSaveRole = (roleData) => {
+    const newRole = {
+      ...roleData,
+      id: `ROLE-00${customRoles.length + 1}`,
+      status: 'Active'
+    };
+    setCustomRoles([newRole, ...customRoles]);
+    addNotification({ title: 'Role Created', message: `${roleData.name} has been added to system roles.`, type: 'success' });
   };
 
   useEffect(() => {
@@ -5172,6 +5192,56 @@ const AdminDashboard = () => {
           </div>
         );
 
+      case 'Role & Permissions':
+        return (
+          <div className="p-8 space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-2xl font-black dark:text-white tracking-tight">Role & Permissions</h3>
+                <p className="text-sm text-text-secondary-light">Define and manage administrative access levels.</p>
+              </div>
+              <button 
+                onClick={() => setShowCreateRoleModal(true)}
+                className="btn-primary px-6 py-2.5 flex items-center gap-2 hover:scale-105 transition-all shadow-lg shadow-primary-light/20"
+              >
+                <Plus size={18} /> Create Custom Role
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {customRoles.map((role) => (
+                <div key={role.id} className="card-premium space-y-6 group hover:border-primary-light/50 transition-all relative overflow-hidden">
+                  <div className="flex justify-between items-start">
+                    <div className="w-12 h-12 bg-primary-light/10 text-primary-light rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Shield size={24} />
+                    </div>
+                    <span className="px-2 py-1 bg-success/10 text-success rounded text-[10px] font-black uppercase tracking-widest">{role.status}</span>
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-black dark:text-white">{role.name}</h4>
+                    <p className="text-xs text-text-secondary-light font-bold uppercase tracking-widest">ID: {role.id}</p>
+                  </div>
+                  <p className="text-xs text-text-secondary-light leading-relaxed line-clamp-2">{role.description}</p>
+                  
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-black uppercase text-text-secondary-light tracking-widest">Assigned Modules</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {role.modules.map(mod => (
+                        <span key={mod} className="px-2 py-0.5 bg-gray-100 dark:bg-secondary-dark rounded text-[9px] font-bold dark:text-white uppercase">{mod}</span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t dark:border-border-dark flex justify-between items-center">
+                    <button className="text-xs font-black text-primary-light hover:underline uppercase tracking-widest">Edit Permissions</button>
+                    <button className="p-2 text-error hover:bg-error/10 rounded-lg transition-all"><Trash2 size={14} /></button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
       default:
         return (
           <div className="p-20 text-center animate-in zoom-in duration-500">
@@ -5407,6 +5477,12 @@ const AdminDashboard = () => {
           isOpen={showBlocklistModal}
           onClose={() => setShowBlocklistModal(false)}
           addNotification={addNotification}
+        />
+        <CreateCustomRoleModal 
+          isOpen={showCreateRoleModal}
+          onClose={() => setShowCreateRoleModal(false)}
+          addNotification={addNotification}
+          onSave={handleSaveRole}
         />
         <BulkPayoutModal 
           isOpen={showBulkPayoutModal}
@@ -10869,6 +10945,122 @@ const BlocklistModal = ({ isOpen, onClose, addNotification }) => {
 
         <div className="p-8 border-t dark:border-border-dark bg-gray-50/50 dark:bg-secondary-dark/30">
           <button onClick={onClose} className="w-full py-4 border-2 border-border-light dark:border-border-dark dark:text-white rounded-2xl font-black text-sm hover:bg-gray-100 dark:hover:bg-secondary-dark transition-all">Close Security Manager</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const CreateCustomRoleModal = ({ isOpen, onClose, addNotification, onSave }) => {
+  const [roleData, setRoleData] = useState({
+    name: '',
+    description: '',
+    modules: []
+  });
+
+  if (!isOpen) return null;
+
+  const modules = [
+    'Inventory Management', 'Financial Records',
+    'User Verification', 'Support Desk',
+    'Marketing Tools', 'System Logs'
+  ];
+
+  const toggleModule = (mod) => {
+    setRoleData(prev => ({
+      ...prev,
+      modules: prev.modules.includes(mod) 
+        ? prev.modules.filter(m => m !== mod) 
+        : [...prev.modules, mod]
+    }));
+  };
+
+  const handleGenerate = () => {
+    if (!roleData.name || !roleData.description || roleData.modules.length === 0) {
+      addNotification({ title: 'Missing Information', message: 'Please fill all details and select at least one module.', type: 'warning' });
+      return;
+    }
+    onSave(roleData);
+    setRoleData({ name: '', description: '', modules: [] });
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
+      <div className="relative w-full max-w-2xl bg-surface-light dark:bg-surface-dark rounded-[2.5rem] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
+        <div className="p-8 border-b dark:border-border-dark bg-emerald-600 text-white flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
+              <Shield size={24} />
+            </div>
+            <div>
+              <h3 className="text-xl font-black">Create Custom Role</h3>
+              <p className="text-xs font-bold uppercase opacity-80">Define System Permissions</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-3 hover:bg-white/10 rounded-2xl transition-all"><X size={24} /></button>
+        </div>
+
+        <div className="p-8 overflow-y-auto custom-scrollbar flex-1 space-y-8">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase text-text-secondary-light tracking-widest ml-1">Role Name</label>
+              <input 
+                type="text" 
+                value={roleData.name}
+                onChange={(e) => setRoleData({...roleData, name: e.target.value})}
+                placeholder="e.g. Regional Supervisor" 
+                className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-emerald-500 outline-none dark:text-white font-bold transition-all"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase text-text-secondary-light tracking-widest ml-1">Role Description</label>
+              <textarea 
+                value={roleData.description}
+                onChange={(e) => setRoleData({...roleData, description: e.target.value})}
+                placeholder="Describe what this role manages..." 
+                rows="3"
+                className="w-full px-6 py-4 rounded-3xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-emerald-500 outline-none dark:text-white font-bold transition-all resize-none text-base leading-relaxed"
+              ></textarea>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <label className="text-[10px] font-black uppercase text-text-secondary-light tracking-widest ml-1">Core Access Modules</label>
+            <div className="grid grid-cols-2 gap-4">
+              {modules.map(mod => (
+                <label key={mod} className={`flex items-center gap-4 p-4 rounded-2xl border-2 transition-all cursor-pointer group ${
+                  roleData.modules.includes(mod) 
+                    ? 'bg-emerald-500/10 border-emerald-500' 
+                    : 'bg-gray-50 dark:bg-secondary-dark border-transparent hover:border-gray-200 dark:hover:border-gray-700'
+                }`}>
+                  <input 
+                    type="checkbox" 
+                    className="hidden" 
+                    checked={roleData.modules.includes(mod)}
+                    onChange={() => toggleModule(mod)}
+                  />
+                  <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
+                    roleData.modules.includes(mod) ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-gray-300 dark:border-gray-600'
+                  }`}>
+                    {roleData.modules.includes(mod) && <Check size={14} />}
+                  </div>
+                  <span className={`text-sm font-bold transition-colors ${roleData.modules.includes(mod) ? 'text-emerald-600 dark:text-emerald-400' : 'text-text-secondary-light group-hover:text-gray-900 dark:group-hover:text-white'}`}>{mod}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="p-8 border-t dark:border-border-dark bg-gray-50/50 dark:bg-secondary-dark/30 flex gap-4">
+          <button onClick={onClose} className="flex-1 py-4 bg-white dark:bg-surface-dark border-2 border-border-light dark:border-border-dark dark:text-white rounded-2xl font-black text-sm hover:bg-gray-100 dark:hover:bg-secondary-dark transition-all">Cancel</button>
+          <button 
+            onClick={handleGenerate}
+            className="flex-[2] py-4 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+          >
+            Generate Custom Role
+          </button>
         </div>
       </div>
     </div>
