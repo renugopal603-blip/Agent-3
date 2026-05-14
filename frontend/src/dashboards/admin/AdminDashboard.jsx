@@ -115,6 +115,9 @@ const AdminDashboard = () => {
   const [is2FAEnabled, setIs2FAEnabled] = useState(false);
   const [selected2FAMethod, setSelected2FAMethod] = useState('Authenticator App');
 
+  const [showConfigModal, setShowConfigModal] = useState(false);
+  const [configType, setConfigType] = useState('');
+
   const [userApplications, setUserApplications] = useState([
     { id: 1, name: 'Anil Kapoor', role: 'Agent', appliedOn: '2h ago', status: 'Pending', location: 'Delhi', docs: ['Aadhar', 'PAN'] },
     { id: 2, name: 'Zoya Khan', role: 'Shop Owner', appliedOn: '5h ago', status: 'Pending', location: 'Mumbai', docs: ['GST', 'Trade License'] },
@@ -2289,14 +2292,14 @@ const AdminDashboard = () => {
                   { name: 'Active Sessions', action: () => setShowSessionsModal(true) }
                 ]},
                 { title: 'Notifications', icon: <BellRing />, desc: 'Configure email and system alerts', items: [
-                  { name: 'KYC Alerts', action: () => addNotification({ title: 'Alert Config', message: 'Configuring KYC Alerts...', type: 'info' }) },
-                  { name: 'New Shop Registrations', action: () => addNotification({ title: 'Alert Config', message: 'Configuring Shop Alerts...', type: 'info' }) },
-                  { name: 'Revenue Milestones', action: () => addNotification({ title: 'Alert Config', message: 'Configuring Revenue Alerts...', type: 'info' }) }
+                  { name: 'KYC Alerts', action: () => { setConfigType('KYC Alerts'); setShowConfigModal(true); } },
+                  { name: 'New Shop Registrations', action: () => { setConfigType('New Shop Registrations'); setShowConfigModal(true); } },
+                  { name: 'Revenue Milestones', action: () => { setConfigType('Revenue Milestones'); setShowConfigModal(true); } }
                 ]},
                 { title: 'System Appearance', icon: <Palette />, desc: 'Customize dashboard look and feel', items: [
-                  { name: 'Dark Mode Toggle', action: () => addNotification({ title: 'Theme Settings', message: 'Use the moon icon in the header to toggle dark mode.', type: 'info' }) },
-                  { name: 'Primary Brand Color', action: () => addNotification({ title: 'Theme Settings', message: 'Brand color customization coming soon.', type: 'info' }) },
-                  { name: 'Sidebar Layout', action: () => addNotification({ title: 'Theme Settings', message: 'Sidebar layout presets coming soon.', type: 'info' }) }
+                  { name: 'Dark Mode Toggle', action: () => { setConfigType('Dark Mode Toggle'); setShowConfigModal(true); } },
+                  { name: 'Primary Brand Color', action: () => { setConfigType('Primary Brand Color'); setShowConfigModal(true); } },
+                  { name: 'Sidebar Layout', action: () => { setConfigType('Sidebar Layout'); setShowConfigModal(true); } }
                 ]},
               ].map((group) => (
                 <div key={group.title} className="card-premium space-y-4">
@@ -5834,6 +5837,14 @@ const AdminDashboard = () => {
           onClose={() => setShowProductPartnerModal(false)}
           partner={selectedProductPartner}
           type={productPartnerModalType}
+        />
+        <ConfigModal 
+          isOpen={showConfigModal}
+          onClose={() => setShowConfigModal(false)}
+          type={configType}
+          addNotification={addNotification}
+          isDarkMode={isDarkMode}
+          toggleTheme={toggleTheme}
         />
       </main>
     </div>
@@ -11096,6 +11107,151 @@ const CreateCustomRoleModal = ({ isOpen, onClose, addNotification, onSave }) => 
             Generate Custom Role
           </button>
         </div>
+      </div>
+    </div>
+  );
+};
+
+const ConfigModal = ({ isOpen, onClose, type, addNotification, isDarkMode, toggleTheme }) => {
+  const [settings, setSettings] = useState({
+    email: true,
+    push: true,
+    sms: false,
+    color: '#10B981',
+    layout: 'Standard Expanded'
+  });
+
+  if (!isOpen) return null;
+
+  const handleSave = () => {
+    addNotification({ title: 'Settings Saved', message: `${type} preferences have been updated.`, type: 'success' });
+    onClose();
+  };
+
+  const renderConfig = () => {
+    switch(type) {
+      case 'KYC Alerts':
+      case 'New Shop Registrations':
+      case 'Revenue Milestones':
+        return (
+          <div className="space-y-6">
+            <p className="text-xs text-text-secondary-light font-bold leading-relaxed">Choose how you want to be notified when a {type.toLowerCase().replace('alerts', '').trim()} event occurs.</p>
+            <div className="space-y-4">
+              {[
+                { id: 'email', label: 'Email Notifications', icon: <Mail size={18} /> },
+                { id: 'push', label: 'Push Notifications', icon: <BellRing size={18} /> },
+                { id: 'sms', label: 'SMS Alerts', icon: <Smartphone size={18} /> }
+              ].map(opt => (
+                <div key={opt.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-transparent hover:border-primary-light/30 transition-all cursor-pointer" onClick={() => setSettings({...settings, [opt.id]: !settings[opt.id]})}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-white dark:bg-background-dark rounded-xl flex items-center justify-center text-primary-light">{opt.icon}</div>
+                    <span className="text-sm font-bold dark:text-white">{opt.label}</span>
+                  </div>
+                  <div className={`w-12 h-6 rounded-full relative p-1 transition-all ${settings[opt.id] ? 'bg-success' : 'bg-gray-300 dark:bg-background-dark'}`}>
+                    <div className={`w-4 h-4 bg-white rounded-full absolute shadow-sm transition-all ${settings[opt.id] ? 'left-7' : 'left-1'}`}></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      
+      case 'Dark Mode Toggle':
+        return (
+          <div className="space-y-6 text-center py-4">
+            <div className="w-20 h-20 bg-primary-light/10 text-primary-light rounded-3xl flex items-center justify-center mx-auto mb-4 animate-bounce">
+              {isDarkMode ? <Moon size={40} /> : <Sun size={40} />}
+            </div>
+            <div>
+              <h4 className="text-lg font-black dark:text-white">Switch to {isDarkMode ? 'Light' : 'Dark'} Mode</h4>
+              <p className="text-xs text-text-secondary-light mt-2 leading-relaxed px-8">Toggle the system-wide theme for a more comfortable viewing experience.</p>
+            </div>
+            <button 
+              onClick={() => { toggleTheme(); handleSave(); }}
+              className="w-full py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+            >
+              Apply {isDarkMode ? 'Light' : 'Dark'} Theme
+            </button>
+          </div>
+        );
+
+      case 'Primary Brand Color':
+        return (
+          <div className="space-y-6">
+            <p className="text-xs text-text-secondary-light font-bold leading-relaxed text-center">Select your preferred accent color for the dashboard interface.</p>
+            <div className="grid grid-cols-4 gap-4">
+              {['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899', '#6366F1', '#06B6D4'].map(c => (
+                <div 
+                  key={c} 
+                  onClick={() => setSettings({...settings, color: c})}
+                  className={`aspect-square rounded-2xl cursor-pointer transition-all border-4 ${settings.color === c ? 'border-white ring-2 ring-primary-light shadow-lg scale-110' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                  style={{ backgroundColor: c }}
+                ></div>
+              ))}
+            </div>
+            <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-dashed border-border-light dark:border-border-dark">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold dark:text-white uppercase tracking-widest">Selected HEX</span>
+                <span className="text-sm font-black text-primary-light mono">{settings.color}</span>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'Sidebar Layout':
+        return (
+          <div className="space-y-4">
+            <p className="text-xs text-text-secondary-light font-bold leading-relaxed mb-6">Choose how the main navigation sidebar should behave.</p>
+            {['Standard Expanded', 'Minimal Icons', 'Auto-hide (Hover)', 'Top Navigation'].map(layout => (
+              <div 
+                key={layout}
+                onClick={() => setSettings({...settings, layout})}
+                className={`p-5 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between ${settings.layout === layout ? 'border-primary-light bg-primary-light/5' : 'border-transparent bg-gray-50 dark:bg-secondary-dark'}`}
+              >
+                <span className={`text-sm font-bold ${settings.layout === layout ? 'text-primary-light' : 'text-text-secondary-light dark:text-white'}`}>{layout}</span>
+                {settings.layout === layout && <CheckCircle size={18} className="text-primary-light" />}
+              </div>
+            ))}
+          </div>
+        );
+
+      default:
+        return <div className="p-12 text-center text-text-secondary-light font-bold">Configuration module for {type} coming soon.</div>;
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
+      <div className="relative w-full max-w-lg bg-surface-light dark:bg-surface-dark rounded-[2.5rem] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col">
+        <div className="p-8 border-b dark:border-border-dark bg-secondary-dark text-white flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
+              <Settings2 size={24} />
+            </div>
+            <div>
+              <h3 className="text-xl font-black">{type}</h3>
+              <p className="text-xs font-bold uppercase opacity-80 tracking-widest">Configuration Center</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-3 hover:bg-white/10 rounded-2xl transition-all"><X size={24} /></button>
+        </div>
+
+        <div className="p-8 overflow-y-auto custom-scrollbar flex-1">
+          {renderConfig()}
+        </div>
+
+        {type !== 'Dark Mode Toggle' && (
+          <div className="p-8 border-t dark:border-border-dark bg-gray-50/50 dark:bg-secondary-dark/30 flex gap-4">
+            <button onClick={onClose} className="flex-1 py-4 bg-white dark:bg-surface-dark border-2 border-border-light dark:border-border-dark dark:text-white rounded-2xl font-black text-sm hover:bg-gray-100 dark:hover:bg-secondary-dark transition-all">Cancel</button>
+            <button 
+              onClick={handleSave}
+              className="flex-[2] py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+            >
+              Save Configuration
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
