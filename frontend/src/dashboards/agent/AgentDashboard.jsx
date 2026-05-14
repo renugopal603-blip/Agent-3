@@ -2916,10 +2916,7 @@ const AgentDashboard = () => {
             <p className="text-xs text-text-secondary-light font-medium">Agent ID: AGT-882901 — Welcome back, {user?.name?.split(' ')[0]}!</p>
           </div>
           <div className="flex items-center space-x-6">
-            <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-              <span className="text-xs font-bold text-emerald-500">Live Status</span>
-            </div>
+            {/* Live Status Removed */}
             
             <div className="h-8 w-px bg-border-light dark:border-border-dark"></div>
 
