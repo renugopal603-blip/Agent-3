@@ -1271,7 +1271,7 @@ const AgentDashboard = () => {
                             isVerified ? 'bg-primary-light/10 text-primary-light border border-primary-light/20' : 
                             'bg-warning/10 text-warning border border-warning/20'
                           }`}>
-                            {isActive ? 'Active & Activated' : isVerified ? 'Verified (Sub-Admin)' : 'Awaiting Review'}
+                            {isActive ? 'Active & Activated' : isVerified ? 'Verified by Sub-Admin' : 'Pending Sub-Admin Review'}
                           </span>
                         </div>
                         
@@ -1295,7 +1295,7 @@ const AgentDashboard = () => {
                               </div>
                               <span className={`text-[9px] font-black uppercase tracking-tighter transition-colors ${
                                 isActive || isVerified || isPending ? 'text-warning' : 'text-text-secondary-light'
-                              }`}>Submitted</span>
+                              }`}>1. Submitted</span>
                             </div>
                             
                             {/* Step 2: Sub Admin Verified */}
@@ -1307,7 +1307,7 @@ const AgentDashboard = () => {
                               </div>
                               <span className={`text-[9px] font-black uppercase tracking-tighter transition-colors ${
                                 isActive || isVerified ? 'text-primary-light' : 'text-text-secondary-light'
-                              }`}>Sub Admin Verified</span>
+                              }`}>2. Sub-Admin Verified</span>
                             </div>
                             
                             {/* Step 3: Admin Approved */}
@@ -1319,7 +1319,7 @@ const AgentDashboard = () => {
                               </div>
                               <span className={`text-[9px] font-black uppercase tracking-tighter transition-colors ${
                                 isActive ? 'text-success' : 'text-text-secondary-light'
-                              }`}>Admin Approved</span>
+                              }`}>3. Final Admin Approved</span>
                             </div>
                           </div>
                         </div>
