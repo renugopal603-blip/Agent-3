@@ -10743,18 +10743,47 @@ const UploadMaterialModal = ({ isOpen, onClose, addNotification }) => {
 export default AdminDashboard;
 
 const BlocklistModal = ({ isOpen, onClose, addNotification }) => {
-  if (!isOpen) return null;
-
-  const blockedIps = [
+  const [ipList, setIpList] = useState([
     { ip: '45.12.88.3', reason: 'Brute force attempts', date: '2h ago' },
     { ip: '190.22.11.5', reason: 'Bot activity detected', date: '1d ago' },
     { ip: '22.44.11.90', reason: 'DDoS pattern match', date: '3d ago' }
-  ];
+  ]);
+  const [newIp, setNewIp] = useState('');
+  const [authPin, setAuthPin] = useState('');
+  const [showPinInput, setShowPinInput] = useState(false);
+
+  if (!isOpen) return null;
+
+  const handleBlockIp = () => {
+    if (!newIp) {
+      addNotification({ title: 'Invalid IP', message: 'Please enter a valid IP address.', type: 'error' });
+      return;
+    }
+    if (!showPinInput) {
+      setShowPinInput(true);
+      return;
+    }
+    // Simple demo validation - in production this would be a backend check
+    if (authPin === '1234') {
+      setIpList([{ ip: newIp, reason: 'Manual Block', date: 'Just now' }, ...ipList]);
+      setNewIp('');
+      setAuthPin('');
+      setShowPinInput(false);
+      addNotification({ title: 'IP Blocked', message: `${newIp} has been restricted.`, type: 'success' });
+    } else {
+      addNotification({ title: 'Invalid PIN', message: 'Authorization failed. Please check your admin PIN.', type: 'error' });
+    }
+  };
+
+  const handleUnblock = (ip) => {
+    setIpList(ipList.filter(item => item.ip !== ip));
+    addNotification({ title: 'IP Unblocked', message: `The restriction on ${ip} has been lifted.`, type: 'info' });
+  };
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
-      <div className="relative w-full max-w-xl bg-surface-light dark:bg-surface-dark rounded-[2.5rem] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[80vh]">
+      <div className="relative w-full max-w-xl bg-surface-light dark:bg-surface-dark rounded-[2.5rem] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[85vh]">
         <div className="p-8 border-b dark:border-border-dark bg-error text-white flex justify-between items-center">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
@@ -10769,19 +10798,56 @@ const BlocklistModal = ({ isOpen, onClose, addNotification }) => {
         </div>
 
         <div className="p-8 overflow-y-auto custom-scrollbar flex-1 space-y-6">
-          <div className="flex gap-4">
-            <input 
-              type="text" 
-              placeholder="Enter IP Address to block..." 
-              className="flex-1 px-4 py-3.5 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-error outline-none dark:text-white font-bold transition-all text-sm"
-            />
-            <button className="px-6 bg-error text-white rounded-2xl font-black text-sm hover:scale-105 active:scale-95 transition-all shadow-lg shadow-error/20">Block IP</button>
+          <div className="space-y-4">
+            <div className="flex gap-4">
+              <input 
+                type="text" 
+                value={newIp}
+                onChange={(e) => setNewIp(e.target.value)}
+                placeholder="Enter IP Address to block..." 
+                className="flex-1 px-4 py-3.5 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-error outline-none dark:text-white font-bold transition-all text-sm"
+              />
+              {!showPinInput && (
+                <button 
+                  onClick={handleBlockIp}
+                  className="px-6 bg-error text-white rounded-2xl font-black text-sm hover:scale-105 active:scale-95 transition-all shadow-lg shadow-error/20"
+                >
+                  Block IP
+                </button>
+              )}
+            </div>
+
+            {showPinInput && (
+              <div className="p-6 bg-error/5 border-2 border-error/20 rounded-3xl animate-in slide-in-from-top-4 duration-300 space-y-4">
+                <div className="flex items-center gap-3 text-error">
+                  <Lock size={18} />
+                  <p className="text-xs font-black uppercase tracking-widest">Admin Authorization Required</p>
+                </div>
+                <div className="flex gap-3">
+                  <input 
+                    type="password" 
+                    value={authPin}
+                    onChange={(e) => setAuthPin(e.target.value)}
+                    placeholder="Enter 4-digit PIN" 
+                    maxLength={4}
+                    className="flex-1 px-4 py-3.5 rounded-xl bg-white dark:bg-secondary-dark border-2 border-transparent focus:border-error outline-none dark:text-white font-black transition-all text-center tracking-[1em]"
+                  />
+                  <button 
+                    onClick={handleBlockIp}
+                    className="px-8 bg-error text-white rounded-xl font-black text-sm hover:scale-105 active:scale-95 transition-all shadow-lg shadow-error/20"
+                  >
+                    Confirm Block
+                  </button>
+                </div>
+                <p className="text-[10px] text-text-secondary-light font-bold text-center">Standard Admin PIN: 1234 (Demo Mode)</p>
+              </div>
+            )}
           </div>
 
           <div className="space-y-3">
-            <h4 className="text-[10px] font-black uppercase text-text-secondary-light tracking-widest ml-1">Currently Blocked</h4>
-            {blockedIps.map((item, i) => (
-              <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark group">
+            <h4 className="text-[10px] font-black uppercase text-text-secondary-light tracking-widest ml-1">Currently Blocked ({ipList.length})</h4>
+            {ipList.map((item, i) => (
+              <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark group animate-in fade-in duration-300">
                 <div className="flex items-center gap-4">
                   <div className="w-2 h-2 rounded-full bg-error animate-pulse"></div>
                   <div>
@@ -10790,8 +10856,9 @@ const BlocklistModal = ({ isOpen, onClose, addNotification }) => {
                   </div>
                 </div>
                 <button 
-                  onClick={() => addNotification({ title: 'IP Unblocked', message: `The restriction on ${item.ip} has been lifted.`, type: 'info' })}
+                  onClick={() => handleUnblock(item.ip)}
                   className="p-2 hover:bg-success/10 text-success rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                  title="Remove Restriction"
                 >
                   <RefreshCw size={16} />
                 </button>
