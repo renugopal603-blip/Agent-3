@@ -34,7 +34,7 @@ const seedAdmin = async () => {
         name: 'Demo Agent 2',
         email: 'agent2@agenticstore.com',
         phone: '1111111111',
-        password: '123456',
+        password: 'agent123',
         role: 'Agent',
         status: 'Active',
         applicationStatus: 'Approved'
