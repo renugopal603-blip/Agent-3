@@ -24,8 +24,18 @@ const AgentDashboard = () => {
   const { notifications, addNotification, pushGlobalNotification, markAsRead, markAllAsRead, unreadCount } = useNotifications();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Dashboard');
+  const [activeDropdown, setActiveDropdown] = useState(null);
   const [applicationStep, setApplicationStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = () => setActiveDropdown(null);
+    if (activeDropdown) {
+      window.addEventListener('click', handleClickOutside);
+    }
+    return () => window.removeEventListener('click', handleClickOutside);
+  }, [activeDropdown]);
   
   const generateReportPDF = (title, fileName) => {
     try {
@@ -302,7 +312,7 @@ const AgentDashboard = () => {
   });
   const [showShopModal, setShowShopModal] = useState(false);
   const [viewingFile, setViewingFile] = useState(null);
-  const [activeDropdown, setActiveDropdown] = useState(null);
+
   const [settings, setSettings] = useState({
     twoFactor: true,
     emailAlerts: true,
@@ -968,7 +978,7 @@ const AgentDashboard = () => {
                       { name: 'Meera Rajput', id: 'MBR-102', plan: 'Gold', date: 'Oct 15, 2023', earning: '₹8,200', status: 'Active' },
                       { name: 'Sameer Khan', id: 'MBR-103', plan: 'Silver', date: 'Nov 02, 2023', earning: '₹4,500', status: 'Pending' },
                       { name: 'Anjali Gupta', id: 'MBR-104', plan: 'Diamond', date: 'Dec 05, 2023', earning: '₹15,000', status: 'Active' },
-                    ].map((member) => (
+                    ].map((member, i) => (
                       <tr key={member.id} className="hover:bg-gray-50 dark:hover:bg-secondary-dark/50 transition-colors">
                         <td className="py-4 flex items-center gap-3">
                           <div className="w-10 h-10 bg-primary-light/10 text-primary-light rounded-xl flex items-center justify-center font-bold">{member.name[0]}</div>
