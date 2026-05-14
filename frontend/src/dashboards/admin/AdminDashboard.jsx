@@ -4901,8 +4901,18 @@ const AdminDashboard = () => {
                 <p className="text-sm text-text-secondary-light">Monitor digital wallet balances and account health.</p>
               </div>
               <div className="flex gap-3">
-                <button className="btn-outline px-4 py-2 text-sm flex items-center gap-2"><Filter size={16} /> Filter</button>
-                <button className="btn-primary px-4 py-2 text-sm">Bulk Action</button>
+                <button 
+                  onClick={() => addNotification({ title: 'Wallet Filters', message: 'Showing wallet filter options...', type: 'info' })}
+                  className="btn-outline px-4 py-2 text-sm flex items-center gap-2 hover:bg-primary-light hover:text-white transition-all"
+                >
+                  <Filter size={16} /> Filter
+                </button>
+                <button 
+                  onClick={() => addNotification({ title: 'Bulk Action', message: 'Select wallets to perform bulk operations.', type: 'info' })}
+                  className="btn-primary px-4 py-2 text-sm hover:scale-105 transition-all shadow-lg shadow-primary-light/20"
+                >
+                  Bulk Action
+                </button>
               </div>
             </div>
 
@@ -4925,7 +4935,15 @@ const AdminDashboard = () => {
                   </div>
                   <div className="flex justify-between items-center pt-2">
                     <p className="text-[10px] font-bold text-text-secondary-light">Last Activity: {wallet.lastTxn}</p>
-                    <button className="text-xs font-black text-primary-light hover:underline uppercase tracking-widest">View History</button>
+                    <button 
+                      onClick={() => {
+                        setActiveTab('Transaction History');
+                        addNotification({ title: 'Loading History', message: `Fetching transaction logs for ${wallet.user}...`, type: 'info' });
+                      }}
+                      className="text-xs font-black text-primary-light hover:underline uppercase tracking-widest hover:text-primary-dark transition-colors"
+                    >
+                      View History
+                    </button>
                   </div>
                 </div>
               ))}
