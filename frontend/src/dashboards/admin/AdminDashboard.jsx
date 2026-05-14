@@ -116,6 +116,7 @@ const AdminDashboard = () => {
 
   const [selectedUserApp, setSelectedUserApp] = useState(null);
   const [showAppDetailModal, setShowAppDetailModal] = useState(false);
+  const [dashboardDateRange, setDashboardDateRange] = useState('Last 7 Days');
   
   const [categories, setCategories] = useState([
     { id: 1, name: 'Food / Restaurant', icon: 'Utensils', count: 42, status: 'Active', color: 'bg-orange-500/10 text-orange-500' },
@@ -952,7 +953,7 @@ const AdminDashboard = () => {
     { title: 'Active Partners', value: '24', icon: <Briefcase />, color: 'bg-purple-500', trend: '+2.5%' },
   ];
 
-  const registrationTrendData = [
+  const trendData7Days = [
     { name: 'Mon', agents: 12, shops: 45 },
     { name: 'Tue', agents: 18, shops: 38 },
     { name: 'Wed', agents: 15, shops: 52 },
@@ -961,6 +962,15 @@ const AdminDashboard = () => {
     { name: 'Sat', agents: 25, shops: 58 },
     { name: 'Sun', agents: 28, shops: 72 },
   ];
+
+  const trendData30Days = [
+    { name: 'Week 1', agents: 80, shops: 240 },
+    { name: 'Week 2', agents: 95, shops: 280 },
+    { name: 'Week 3', agents: 110, shops: 310 },
+    { name: 'Week 4', agents: 130, shops: 350 },
+  ];
+
+  const registrationTrendData = dashboardDateRange === 'Last 7 Days' ? trendData7Days : trendData30Days;
 
   const chartData = [
     { name: 'Jan', revenue: 45000 },
@@ -1004,7 +1014,11 @@ const AdminDashboard = () => {
               <div className="xl:col-span-2 card-premium space-y-6">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-bold dark:text-white">Registration Trends</h3>
-                  <select className="bg-gray-100 dark:bg-secondary-dark border-none rounded-lg text-sm dark:text-white px-3 py-1">
+                  <select 
+                    value={dashboardDateRange}
+                    onChange={(e) => setDashboardDateRange(e.target.value)}
+                    className="bg-gray-100 dark:bg-secondary-dark border-none rounded-lg text-sm dark:text-white px-3 py-1 outline-none cursor-pointer hover:bg-gray-200 dark:hover:bg-secondary-dark/80 transition-all"
+                  >
                     <option>Last 7 Days</option>
                     <option>Last 30 Days</option>
                   </select>
