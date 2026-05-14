@@ -1810,6 +1810,73 @@ const SubAdminDashboard = () => {
           </div>
         );
 
+      case 'Notifications':
+        return (
+          <div className="p-8 space-y-8 animate-in fade-in duration-500">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-2xl font-black dark:text-white tracking-tight uppercase">Notifications Centre</h3>
+                <p className="text-sm text-text-secondary-light">System-wide alerts, agent updates, and territory logs.</p>
+              </div>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => {
+                    notifications.forEach(n => markAsRead(n.id));
+                    addNotification({ title: 'Success', message: 'All marked as read', type: 'success' });
+                  }}
+                  className="px-4 py-2 bg-primary-light/10 text-primary-light border border-primary-light/20 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-primary-light hover:text-white transition-all"
+                >
+                  Mark All Read
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {notifications.length > 0 ? (
+                notifications.map((n) => (
+                  <div 
+                    key={n.id} 
+                    className={`p-6 rounded-3xl border transition-all hover:scale-[1.01] flex items-center justify-between ${n.read ? 'bg-white dark:bg-surface-dark border-border-light dark:border-border-dark opacity-60' : 'bg-primary-light/5 border-primary-light/20 dark:bg-primary-light/5 shadow-lg shadow-primary-light/5'}`}
+                  >
+                    <div className="flex items-center gap-6">
+                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${
+                        n.type === 'success' ? 'bg-success/10 text-success' : 
+                        n.type === 'error' ? 'bg-error/10 text-error' : 
+                        n.type === 'warning' ? 'bg-warning/10 text-warning' : 'bg-primary-light/10 text-primary-light'
+                      }`}>
+                        <Bell size={24} />
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-black dark:text-white">{n.title}</h4>
+                        <p className="text-sm text-text-secondary-light mt-1 max-w-2xl">{n.message}</p>
+                        <p className="text-[10px] font-bold text-text-secondary-light uppercase tracking-widest mt-2">{n.time || 'New Update'}</p>
+                      </div>
+                    </div>
+                    {!n.read && (
+                      <button 
+                        onClick={() => markAsRead(n.id)}
+                        className="px-4 py-2 bg-white dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-primary-light transition-all"
+                      >
+                        Dismiss
+                      </button>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className="p-20 text-center space-y-6 bg-white dark:bg-surface-dark rounded-[40px] border border-border-light dark:border-border-dark">
+                  <div className="w-24 h-24 bg-gray-50 dark:bg-secondary-dark rounded-[40px] flex items-center justify-center mx-auto text-text-secondary-light opacity-50">
+                    <BellRing size={48} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black dark:text-white uppercase tracking-tight">Zero Alerts</h3>
+                    <p className="text-sm text-text-secondary-light mt-2">You're all caught up! No new notifications at the moment.</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+
       default:
         return (
           <div className="p-20 text-center animate-in zoom-in duration-500">
@@ -2143,6 +2210,8 @@ const SubAdminDashboard = () => {
         <AppearanceSettingsModal 
           isOpen={showAppearanceSettingsModal}
           onClose={() => setShowAppearanceSettingsModal(false)}
+          isSidebarCollapsed={isSidebarCollapsed}
+          setIsSidebarCollapsed={setIsSidebarCollapsed}
           onSave={() => {
             addNotification({ title: 'Appearance Saved', message: 'System theme and colors have been updated.', type: 'info' });
             setShowAppearanceSettingsModal(false);
@@ -2983,7 +3052,19 @@ const SessionsModal = ({ isOpen, onClose }) => {
 
 
 const NotificationSettingsModal = ({ isOpen, onClose, onSave }) => {
+  const [settings, setSettings] = useState({
+    'Task Reminders': true,
+    'Agent Activity Alerts': true,
+    'Weekly Territory Digest': false,
+    'System Updates': true
+  });
+
   if (!isOpen) return null;
+
+  const toggleSetting = (label) => {
+    setSettings(prev => ({ ...prev, [label]: !prev[label] }));
+  };
+
   return (
     <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
@@ -2996,11 +3077,14 @@ const NotificationSettingsModal = ({ isOpen, onClose, onSave }) => {
           <button onClick={onClose} className="p-3 hover:bg-white/10 rounded-2xl transition-all"><X size={24}/></button>
         </div>
         <div className="p-8 space-y-6">
-          {['Task Reminders', 'Agent Activity Alerts', 'Weekly Territory Digest', 'System Updates'].map(label => (
+          {Object.keys(settings).map(label => (
             <div key={label} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl">
               <span className="text-sm font-bold dark:text-white">{label}</span>
-              <div className="w-12 h-6 bg-blue-500 rounded-full relative cursor-pointer">
-                <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+              <div 
+                onClick={() => toggleSetting(label)}
+                className={`w-12 h-6 rounded-full relative cursor-pointer transition-all duration-300 ${settings[label] ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-700'}`}
+              >
+                <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 ${settings[label] ? 'right-1' : 'left-1'}`}></div>
               </div>
             </div>
           ))}
@@ -3011,7 +3095,7 @@ const NotificationSettingsModal = ({ isOpen, onClose, onSave }) => {
   );
 };
 
-const AppearanceSettingsModal = ({ isOpen, onClose, onSave }) => {
+const AppearanceSettingsModal = ({ isOpen, onClose, onSave, isSidebarCollapsed, setIsSidebarCollapsed }) => {
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
