@@ -1738,28 +1738,51 @@ const AdminDashboard = () => {
               ) : (
                 shopTieUps.filter(s => s.status === 'Verified by Sub Admin').map((shop) => (
                   <div key={shop.id} className="card-premium group hover:border-primary-light/30 transition-all">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-primary-light/10 text-primary-light rounded-xl flex items-center justify-center">
-                          <Store size={24} />
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                      <div className="flex items-center gap-5">
+                        <div className="w-14 h-14 bg-primary-light/10 text-primary-light rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                          <Store size={28} />
                         </div>
                         <div>
-                          <h4 className="font-black dark:text-white">{shop.shopName}</h4>
-                          <p className="text-xs text-text-secondary-light font-bold uppercase tracking-widest">{shop.category} • {shop.location}</p>
+                          <h4 className="font-black dark:text-white text-lg tracking-tight">{shop.shopName}</h4>
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
+                            <p className="text-[10px] font-black text-text-secondary-light uppercase tracking-widest flex items-center gap-1.5">
+                              <Layout size={12} className="text-primary-light" /> {shop.category}
+                            </p>
+                            <p className="text-[10px] font-black text-text-secondary-light uppercase tracking-widest flex items-center gap-1.5">
+                              <MapPin size={12} className="text-primary-light" /> {shop.location}
+                            </p>
+                          </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-6">
-                        <div className="text-right">
-                          <p className="text-[10px] font-black text-text-secondary-light uppercase tracking-widest">Submitted By</p>
-                          <p className="text-xs font-bold dark:text-white">{shop.submittedBy || shop.assignedAgent}</p>
+
+                      <div className="flex flex-wrap items-center gap-8 lg:border-l lg:border-border-light dark:lg:border-border-dark lg:pl-8">
+                        <div className="space-y-1">
+                          <p className="text-[10px] font-black text-text-secondary-light uppercase tracking-widest">Owner Details</p>
+                          <p className="text-xs font-bold dark:text-white flex items-center gap-2">
+                            <User size={12} className="text-primary-light" /> {shop.ownerName}
+                          </p>
+                          <p className="text-[10px] font-bold text-text-secondary-light flex items-center gap-2">
+                            <Phone size={10} /> {shop.phone}
+                          </p>
                         </div>
-                        <div className="h-10 w-[1px] bg-border-light dark:bg-border-dark"></div>
-                        <button 
-                          onClick={() => handleAdminApproveShop(shop.id)}
-                          className="px-6 py-3 bg-success text-white rounded-xl font-black text-xs shadow-lg shadow-success/20 hover:scale-[1.05] active:scale-[0.95] transition-all flex items-center gap-2"
-                        >
-                          <CheckCircle size={14} /> Approve & Activate
-                        </button>
+
+                        <div className="space-y-1">
+                          <p className="text-[10px] font-black text-text-secondary-light uppercase tracking-widest">Submitted By</p>
+                          <p className="text-xs font-bold dark:text-white flex items-center gap-2">
+                            <ShieldCheck size={12} className="text-success" /> {shop.submittedBy || shop.assignedAgent}
+                          </p>
+                          <p className="text-[10px] font-bold text-text-secondary-light uppercase tracking-widest">Role: Sub-Admin</p>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => handleAdminApproveShop(shop.id)}
+                            className="px-6 py-3 bg-success text-white rounded-xl font-black text-xs shadow-lg shadow-success/20 hover:scale-[1.05] active:scale-[0.95] transition-all flex items-center gap-2"
+                          >
+                            <CheckCircle size={14} /> Approve & Activate
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
