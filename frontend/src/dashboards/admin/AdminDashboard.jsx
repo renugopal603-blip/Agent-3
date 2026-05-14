@@ -5054,7 +5054,27 @@ const AdminDashboard = () => {
                 <p className="text-sm text-text-secondary-light">Audit trail of all administrative and partner access.</p>
               </div>
               <div className="flex gap-3">
-                <button className="btn-outline px-4 py-2 text-sm flex items-center gap-2"><Download size={16} /> Export Logs</button>
+                <button 
+                  onClick={() => {
+                    addNotification({ title: 'Export Started', message: 'Generating login history report (CSV)...', type: 'info' });
+                    setTimeout(() => {
+                      const csvContent = "data:text/csv;charset=utf-8," + 
+                        "User,Role,IP Address,Device,Time,Status\n" + 
+                        loginHistory.map(l => `${l.user},${l.role},${l.ip},${l.device},${l.time},${l.status}`).join("\n");
+                      const encodedUri = encodeURI(csvContent);
+                      const link = document.createElement("a");
+                      link.setAttribute("href", encodedUri);
+                      link.setAttribute("download", "login_history_report.csv");
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      addNotification({ title: 'Export Complete', message: 'Report has been downloaded successfully.', type: 'success' });
+                    }, 1500);
+                  }}
+                  className="btn-outline px-4 py-2 text-sm flex items-center gap-2 hover:bg-primary-light hover:text-white transition-all shadow-sm"
+                >
+                  <Download size={16} /> Export Logs
+                </button>
               </div>
             </div>
 
@@ -5100,7 +5120,12 @@ const AdminDashboard = () => {
                 <h3 className="text-2xl font-black dark:text-white tracking-tight">IP Activity & Tracking</h3>
                 <p className="text-sm text-text-secondary-light">Monitor geographic distribution and suspicious IP behavior.</p>
               </div>
-              <button className="btn-primary px-6 py-2.5 bg-error text-white shadow-lg shadow-error/20">Manage Blocklist</button>
+              <button 
+                onClick={() => addNotification({ title: 'Access Denied', message: 'You need Super Admin permissions to modify the global blocklist.', type: 'error' })}
+                className="btn-primary px-6 py-2.5 bg-error text-white shadow-lg shadow-error/20 hover:scale-105 active:scale-95 transition-all"
+              >
+                Manage Blocklist
+              </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -5127,7 +5152,15 @@ const AdminDashboard = () => {
                 <div className="space-y-4 text-center md:text-left">
                   <h3 className="text-2xl font-black tracking-tight italic">Security Insight</h3>
                   <p className="text-sm text-gray-400 max-w-md">We've detected a significant increase in failed login attempts from decentralized IP ranges. Recommend enabling mandatory 2FA for all sub-admins.</p>
-                  <button className="btn-primary px-6 py-3 bg-white text-background-dark font-black hover:bg-gray-100 transition-all">Enable Enhanced Security</button>
+                  <button 
+                    onClick={() => {
+                      addNotification({ title: 'Security Updated', message: 'Enhanced 2FA requirement has been broadcasted to all staff.', type: 'success' });
+                      setActiveTab('Settings');
+                    }}
+                    className="btn-primary px-6 py-3 bg-white text-background-dark font-black hover:bg-gray-100 transition-all shadow-xl shadow-white/10"
+                  >
+                    Enable Enhanced Security
+                  </button>
                 </div>
                 <div className="w-32 h-32 bg-primary-light/20 rounded-full flex items-center justify-center animate-bounce shadow-2xl shadow-primary-light/20">
                   <ShieldAlert size={64} className="text-primary-light" />
