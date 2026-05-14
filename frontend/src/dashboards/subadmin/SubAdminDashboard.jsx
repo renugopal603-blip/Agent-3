@@ -128,6 +128,7 @@ const SubAdminDashboard = () => {
   const [showAgentFilters, setShowAgentFilters] = useState(false);
   const [showShopFilters, setShowShopFilters] = useState(false);
   const [showKYCFilters, setShowKYCFilters] = useState(false);
+  const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
   const [agentRoleFilter, setAgentRoleFilter] = useState('All');
   const [agentStatusFilter, setAgentStatusFilter] = useState('All');
   const [shopStatusFilter, setShopStatusFilter] = useState('All');
@@ -1913,10 +1914,80 @@ const SubAdminDashboard = () => {
               {isDarkMode ? <Sun size={20} className="text-yellow-500" /> : <Moon size={20} className="text-blue-600" />}
             </button>
 
-            <button className="p-2.5 text-text-secondary-light dark:text-text-secondary-dark relative hover:bg-gray-100 dark:hover:bg-secondary-dark rounded-xl transition-all hover:scale-110">
-              <Bell size={20} />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full ring-2 ring-surface-light dark:ring-surface-dark"></span>
-            </button>
+            <div className="relative">
+              <button 
+                onClick={() => setShowNotificationDropdown(!showNotificationDropdown)}
+                className={`p-2.5 relative rounded-xl transition-all hover:scale-110 active:scale-95 ${showNotificationDropdown ? 'bg-primary-light text-white shadow-lg shadow-primary-light/20' : 'text-text-secondary-light dark:text-text-secondary-dark hover:bg-gray-100 dark:hover:bg-secondary-dark'}`}
+              >
+                <Bell size={20} />
+                {unreadCount > 0 && (
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full ring-2 ring-surface-light dark:ring-surface-dark animate-pulse"></span>
+                )}
+              </button>
+
+              {showNotificationDropdown && (
+                <div className="absolute right-0 mt-4 w-96 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-[32px] shadow-2xl z-[150] overflow-hidden animate-in slide-in-from-top-4 duration-300">
+                  <div className="p-6 bg-gray-50/50 dark:bg-secondary-dark/30 border-b dark:border-border-dark flex justify-between items-center">
+                    <div>
+                      <h4 className="font-black dark:text-white text-lg">Notifications</h4>
+                      <p className="text-[10px] font-bold text-text-secondary-light uppercase tracking-widest mt-0.5">Recent Updates</p>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        notifications.forEach(n => markAsRead(n.id));
+                        addNotification({ title: 'Success', message: 'All notifications marked as read', type: 'success' });
+                      }}
+                      className="text-[10px] font-black text-primary-light hover:underline uppercase tracking-widest"
+                    >
+                      Mark all as read
+                    </button>
+                  </div>
+
+                  <div className="max-h-[400px] overflow-y-auto custom-scrollbar p-2">
+                    {notifications.length > 0 ? (
+                      notifications.slice(0, 5).map((n) => (
+                        <div key={n.id} className="p-4 hover:bg-gray-50 dark:hover:bg-secondary-dark/50 rounded-2xl transition-all cursor-pointer group mb-1 last:mb-0">
+                          <div className="flex gap-4">
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                              n.type === 'success' ? 'bg-success/10 text-success' : 
+                              n.type === 'error' ? 'bg-error/10 text-error' : 'bg-primary-light/10 text-primary-light'
+                            }`}>
+                              <Bell size={18} />
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex justify-between items-start">
+                                <p className="text-sm font-black dark:text-white leading-tight">{n.title}</p>
+                                <span className="text-[10px] font-bold text-text-secondary-light whitespace-nowrap ml-2">{n.time || 'Just now'}</span>
+                              </div>
+                              <p className="text-xs text-text-secondary-light mt-1 line-clamp-2 leading-relaxed">{n.message}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-12 text-center space-y-4">
+                        <div className="w-16 h-16 bg-gray-50 dark:bg-secondary-dark rounded-3xl flex items-center justify-center mx-auto text-text-secondary-light opacity-50">
+                          <BellRing size={32} />
+                        </div>
+                        <p className="text-sm font-bold text-text-secondary-light">No new notifications</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-4 border-t dark:border-border-dark bg-gray-50/50 dark:bg-secondary-dark/30">
+                    <button 
+                      onClick={() => {
+                        setActiveTab('Notifications');
+                        setShowNotificationDropdown(false);
+                      }}
+                      className="w-full py-3 bg-white dark:bg-surface-dark border-2 border-border-light dark:border-border-dark rounded-xl text-xs font-black dark:text-white hover:bg-gray-100 transition-all uppercase tracking-widest"
+                    >
+                      View All Notifications
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
             
             <div className="flex items-center gap-3 pl-2 border-l border-border-light dark:border-border-dark">
               <div className="text-right hidden sm:block">
