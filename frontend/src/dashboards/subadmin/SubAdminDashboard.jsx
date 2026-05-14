@@ -2976,7 +2976,25 @@ const ChangePasswordModal = ({ isOpen, onClose, onSuccess }) => {
 };
 
 const TwoFAModal = ({ isOpen, onClose, onUpdate }) => {
+  const [isEnabled, setIsEnabled] = useState(true);
+  const { addNotification } = useNotifications();
+
   if (!isOpen) return null;
+
+  const handleToggle = () => {
+    const newState = !isEnabled;
+    setIsEnabled(newState);
+    if (onUpdate) onUpdate(newState);
+  };
+
+  const handleViewBackupCodes = () => {
+    addNotification({
+      title: 'Backup Codes',
+      message: 'Generating secure backup codes... Please save them in a safe place.',
+      type: 'info'
+    });
+  };
+
   return (
     <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
@@ -2989,20 +3007,26 @@ const TwoFAModal = ({ isOpen, onClose, onUpdate }) => {
           <button onClick={onClose} className="p-3 hover:bg-white/10 rounded-2xl transition-all"><X size={24}/></button>
         </div>
         <div className="p-8 space-y-8">
-          <div className="flex items-center justify-between p-4 bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-500/20 rounded-2xl">
+          <div className="flex items-center justify-between p-6 bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-500/20 rounded-2xl transition-all">
             <div>
               <p className="text-sm font-black dark:text-white">Authenticator App</p>
               <p className="text-[10px] text-text-secondary-light font-bold">Use Google or Microsoft Authenticator</p>
             </div>
-            <div className="w-12 h-6 bg-emerald-500 rounded-full relative cursor-pointer" onClick={() => onUpdate(false)}>
-              <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+            <div 
+              onClick={handleToggle}
+              className={`w-14 h-7 rounded-full relative cursor-pointer transition-all duration-300 ${isEnabled ? 'bg-emerald-500 shadow-lg shadow-emerald-500/30' : 'bg-gray-300 dark:bg-gray-700'}`}
+            >
+              <div className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-all duration-300 shadow-sm ${isEnabled ? 'right-1' : 'left-1'}`}></div>
             </div>
           </div>
           <div className="space-y-4">
             <p className="text-xs text-text-secondary-light leading-relaxed text-center font-medium">Protect your account with an extra layer of security. We will ask for a verification code when you login.</p>
-            <div className="p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-dashed border-border-light dark:border-border-dark text-center">
-              <span className="text-[10px] font-black text-primary-light uppercase tracking-widest cursor-pointer hover:underline">View Backup Codes</span>
-            </div>
+            <button 
+              onClick={handleViewBackupCodes}
+              className="w-full p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border-2 border-dashed border-border-light dark:border-border-dark text-center hover:border-emerald-500 transition-all group"
+            >
+              <span className="text-[10px] font-black text-primary-light uppercase tracking-widest group-hover:text-emerald-500">View Backup Codes</span>
+            </button>
           </div>
         </div>
       </div>
