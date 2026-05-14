@@ -2235,111 +2235,311 @@ const CommissionPlanModal = ({ isOpen, onClose }) => {
   );
 };
 
+const TERRITORY_DATA = {
+  "Maharashtra": {
+    "Pune": {
+      "Pune Central": ["411001", "411002", "411005"],
+      "Pune North": ["411015", "411016", "411032"],
+      "Pune South": ["411037", "411048", "411060"]
+    },
+    "Mumbai": {
+      "Mumbai South": ["400001", "400002", "400003"],
+      "Mumbai West": ["400050", "400051", "400052"],
+      "Mumbai East": ["400070", "400071", "400072"]
+    },
+    "Nagpur": {
+      "Nagpur North": ["440001", "440002"],
+      "Nagpur South": ["440010", "440011"]
+    }
+  },
+  "Karnataka": {
+    "Bangalore": {
+      "Bangalore East": ["560001", "560002", "560038"],
+      "Bangalore North": ["560064", "560065", "560092"],
+      "Bangalore South": ["560041", "560076", "560078"]
+    },
+    "Mysuru": {
+      "Mysuru City": ["570001", "570002"],
+      "Mysuru Rural": ["570010", "570011"]
+    }
+  },
+  "Delhi": {
+    "New Delhi": {
+      "Central Delhi": ["110001", "110002"],
+      "South Delhi": ["110011", "110012"]
+    }
+  }
+};
+
 const AddAgentModal = ({ isOpen, onClose, onAdd }) => {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     email: '',
     role: 'District Agent',
-    territory: 'Pune Central'
+    state: '',
+    district: '',
+    division: '',
+    pincode: ''
   });
   const [documents, setDocuments] = useState({});
+  const [availability, setAvailability] = useState(null);
+
+  // Availability Mock Check Logic
+  useEffect(() => {
+    const checkAvailability = () => {
+      const { role, state, district, division, pincode } = formData;
+      let isReady = false;
+      
+      if (role === 'State Agent' && state) isReady = true;
+      else if (role === 'District Agent' && state && district) isReady = true;
+      else if (role === 'Divisional Agent' && state && district && division) isReady = true;
+      else if (role === 'Pincode Agent' && state && district && division && pincode) isReady = true;
+
+      if (isReady) {
+        setAvailability('Checking...');
+        setTimeout(() => {
+          const statuses = ['Available', 'Available', 'Available', 'Already Assigned', 'Pending Approval'];
+          setAvailability(statuses[Math.floor(Math.random() * statuses.length)]);
+        }, 800);
+      } else {
+        setAvailability(null);
+      }
+    };
+
+    checkAvailability();
+  }, [formData.role, formData.state, formData.district, formData.division, formData.pincode]);
 
   if (!isOpen) return null;
 
+  const handleRoleChange = (role) => {
+    setFormData({
+      ...formData,
+      role,
+      state: '',
+      district: '',
+      division: '',
+      pincode: ''
+    });
+    setAvailability(null);
+  };
+
+  const handleStateChange = (state) => {
+    setFormData({
+      ...formData,
+      state,
+      district: '',
+      division: '',
+      pincode: ''
+    });
+  };
+
+  const handleDistrictChange = (district) => {
+    setFormData({
+      ...formData,
+      district,
+      division: '',
+      pincode: ''
+    });
+  };
+
+  const handleDivisionChange = (division) => {
+    setFormData({
+      ...formData,
+      division,
+      pincode: ''
+    });
+  };
+
   const handleSubmit = () => {
-    if (!formData.name || !formData.phone) {
-      alert('Please fill in Name and Phone number');
+    if (!formData.name || !formData.phone || !formData.state) {
+      alert('Please fill in required basic and territory fields');
       return;
     }
+    
+    // Final Validation based on role
+    const { role, district, division, pincode } = formData;
+    if (role !== 'State Agent' && !district) { alert('District is required'); return; }
+    if ((role === 'Divisional Agent' || role === 'Pincode Agent') && !division) { alert('Division is required'); return; }
+    if (role === 'Pincode Agent' && !pincode) { alert('Pincode is required'); return; }
+
     onAdd({
       ...formData,
       documents,
       id: Date.now(),
       status: 'Active',
       lastLogin: 'Never',
-      riskLevel: 'Low'
+      riskLevel: 'Low',
+      territory: pincode || division || district || formData.state
     });
-    setFormData({ name: '', phone: '', email: '', role: 'District Agent', territory: 'Pune Central' });
+    
+    // Reset
+    setFormData({ name: '', phone: '', email: '', role: 'District Agent', state: '', district: '', division: '', pincode: '' });
     setDocuments({});
+    setAvailability(null);
   };
+
+  const states = Object.keys(TERRITORY_DATA);
+  const districts = formData.state ? Object.keys(TERRITORY_DATA[formData.state] || {}) : [];
+  const divisions = (formData.state && formData.district) ? Object.keys(TERRITORY_DATA[formData.state][formData.district] || {}) : [];
+  const pincodes = (formData.state && formData.district && formData.division) ? TERRITORY_DATA[formData.state][formData.district][formData.division] : [];
 
   return (
     <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
-      <div className="relative w-full max-w-2xl bg-surface-light dark:bg-surface-dark rounded-[32px] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
+      <div className="relative w-full max-w-2xl bg-surface-light dark:bg-surface-dark rounded-[40px] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[95vh]">
         <div className="p-8 border-b dark:border-border-dark flex justify-between items-center bg-primary-light text-white">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center"><Users size={24}/></div>
+            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center shadow-inner"><Users size={24}/></div>
             <div>
               <h3 className="text-xl font-black">Register New Agent</h3>
-              <p className="text-xs font-bold uppercase opacity-80">Agent Onboarding Form</p>
+              <p className="text-xs font-bold uppercase opacity-80 tracking-widest">Agent Onboarding Form</p>
             </div>
           </div>
           <button onClick={onClose} className="p-3 hover:bg-white/10 rounded-2xl transition-all"><X size={24}/></button>
         </div>
-        <div className="p-8 overflow-y-auto custom-scrollbar space-y-6">
-          <div className="grid grid-cols-2 gap-4">
+
+        <div className="p-8 overflow-y-auto custom-scrollbar space-y-8">
+          {/* Basic Info */}
+          <div className="space-y-4">
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-primary-light border-b-2 border-primary-light/10 pb-2">Basic Information</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Full Name</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. Rahul Sharma" 
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all" 
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Phone Number</label>
+                <input 
+                  type="tel" 
+                  placeholder="+91 98765 43210" 
+                  value={formData.phone}
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all" 
+                />
+              </div>
+            </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase text-text-secondary-light">Full Name</label>
+              <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Email Address</label>
               <input 
-                type="text" 
-                placeholder="John Doe" 
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" 
+                type="email" 
+                placeholder="agent@example.com" 
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all" 
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase text-text-secondary-light">Phone Number</label>
-              <input 
-                type="tel" 
-                placeholder="+91 00000 00000" 
-                value={formData.phone}
-                onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" 
-              />
+          </div>
+
+          {/* Role & Territory */}
+          <div className="space-y-4">
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-primary-light border-b-2 border-primary-light/10 pb-2">Role & Dynamic Territory</h4>
+            <div className="grid grid-cols-1 gap-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Assigned Role</label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  {['State Agent', 'District Agent', 'Divisional Agent', 'Pincode Agent'].map(r => (
+                    <button
+                      key={r}
+                      onClick={() => handleRoleChange(r)}
+                      className={`px-3 py-3 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all border-2 ${formData.role === r ? 'bg-primary-light border-primary-light text-white shadow-lg' : 'bg-gray-50 dark:bg-secondary-dark border-transparent dark:text-white hover:border-primary-light/30'}`}
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in slide-in-from-top-2 duration-300">
+                {/* State Dropdown - Always Shown */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Select State</label>
+                  <select 
+                    value={formData.state}
+                    onChange={(e) => handleStateChange(e.target.value)}
+                    className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold appearance-none cursor-pointer"
+                  >
+                    <option value="">-- Choose State --</option>
+                    {states.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+
+                {/* District Dropdown */}
+                {['District Agent', 'Divisional Agent', 'Pincode Agent'].includes(formData.role) && (
+                  <div className="space-y-2 animate-in fade-in zoom-in-95 duration-300">
+                    <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Select District</label>
+                    <select 
+                      value={formData.district}
+                      onChange={(e) => handleDistrictChange(e.target.value)}
+                      disabled={!formData.state}
+                      className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold appearance-none cursor-pointer disabled:opacity-50"
+                    >
+                      <option value="">-- Choose District --</option>
+                      {districts.map(d => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  </div>
+                )}
+
+                {/* Division Dropdown */}
+                {['Divisional Agent', 'Pincode Agent'].includes(formData.role) && (
+                  <div className="space-y-2 animate-in fade-in zoom-in-95 duration-300">
+                    <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Select Division</label>
+                    <select 
+                      value={formData.division}
+                      onChange={(e) => handleDivisionChange(e.target.value)}
+                      disabled={!formData.district}
+                      className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold appearance-none cursor-pointer disabled:opacity-50"
+                    >
+                      <option value="">-- Choose Division --</option>
+                      {divisions.map(dv => <option key={dv} value={dv}>{dv}</option>)}
+                    </select>
+                  </div>
+                )}
+
+                {/* Pincode Dropdown */}
+                {formData.role === 'Pincode Agent' && (
+                  <div className="space-y-2 animate-in fade-in zoom-in-95 duration-300">
+                    <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Select Pincode</label>
+                    <select 
+                      value={formData.pincode}
+                      onChange={(e) => setFormData({...formData, pincode: e.target.value})}
+                      disabled={!formData.division}
+                      className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold appearance-none cursor-pointer disabled:opacity-50"
+                    >
+                      <option value="">-- Choose Pincode --</option>
+                      {pincodes.map(p => <option key={p} value={p}>{p}</option>)}
+                    </select>
+                  </div>
+                )}
+              </div>
+
+              {/* Availability Status Badge */}
+              {availability && (
+                <div className={`p-4 rounded-2xl flex items-center justify-between border-2 animate-in fade-in duration-500 ${
+                  availability === 'Available' ? 'bg-success/5 border-success/20 text-success' :
+                  availability === 'Checking...' ? 'bg-primary-light/5 border-primary-light/20 text-primary-light' :
+                  'bg-error/5 border-error/20 text-error'
+                }`}>
+                  <div className="flex items-center gap-3">
+                    <Zap size={16} className={availability === 'Checking...' ? 'animate-pulse' : ''} />
+                    <span className="text-xs font-black uppercase tracking-widest">Territory Status</span>
+                  </div>
+                  <span className="text-xs font-black uppercase">{availability}</span>
+                </div>
+              )}
             </div>
           </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase text-text-secondary-light">Email Address</label>
-            <input 
-              type="email" 
-              placeholder="agent@example.com" 
-              value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
-              className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold" 
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase text-text-secondary-light">Assigned Role</label>
-              <select 
-                value={formData.role}
-                onChange={(e) => setFormData({...formData, role: e.target.value})}
-                className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold appearance-none"
-              >
-                <option>District Agent</option>
-                <option>Pincode Agent</option>
-                <option>Divisional Agent</option>
-              </select>
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase text-text-secondary-light">Territory / Zone</label>
-              <select 
-                value={formData.territory}
-                onChange={(e) => setFormData({...formData, territory: e.target.value})}
-                className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold appearance-none"
-              >
-                <option>Pune Central</option>
-                <option>Mumbai South</option>
-                <option>Delhi NCR Zone A</option>
-              </select>
-            </div>
-          </div>
-          <div className="space-y-4 pt-4">
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light">Document Verification</h4>
-            <div className="grid grid-cols-2 gap-3">
+
+          {/* Document Verification */}
+          <div className="space-y-4">
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light border-b-2 border-primary-light/10 pb-2">Document Verification</h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {['Aadhar Card', 'PAN Card', 'Address Proof', 'Profile Photo'].map(doc => (
                 <label key={doc} className={`p-4 rounded-2xl border-2 border-dashed flex flex-col items-center gap-2 cursor-pointer transition-all ${documents[doc] ? 'bg-success/5 border-success/30' : 'bg-gray-50 dark:bg-secondary-dark border-border-light dark:border-border-dark hover:border-primary-light'}`}>
                   <input type="file" className="hidden" onChange={(e) => {
@@ -2347,20 +2547,27 @@ const AddAgentModal = ({ isOpen, onClose, onAdd }) => {
                       setDocuments(prev => ({...prev, [doc]: e.target.files[0]}));
                     }
                   }} />
-                  <div className={`p-2 rounded-xl ${documents[doc] ? 'bg-success/10 text-success' : 'bg-primary-light/10 text-primary-light'}`}>
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${documents[doc] ? 'bg-success/10 text-success' : 'bg-primary-light/10 text-primary-light'}`}>
                     {documents[doc] ? <CheckCircle size={20}/> : <Plus size={20}/>}
                   </div>
-                  <span className="text-[10px] font-black dark:text-white text-center w-full truncate">
-                    {documents[doc] ? documents[doc].name : doc}
+                  <span className="text-[8px] font-black dark:text-white text-center w-full truncate px-1">
+                    {documents[doc] ? documents[doc].name : doc.toUpperCase()}
                   </span>
                 </label>
               ))}
             </div>
           </div>
         </div>
+
         <div className="p-8 border-t dark:border-border-dark bg-gray-50/50 dark:bg-secondary-dark/30 flex gap-4">
-          <button onClick={onClose} className="flex-1 py-4 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl font-black text-sm dark:text-white hover:bg-gray-100 transition-all">Cancel</button>
-          <button onClick={handleSubmit} className="flex-[2] py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] transition-all">Complete Registration</button>
+          <button onClick={onClose} className="flex-1 py-4 bg-white dark:bg-surface-dark border-2 border-border-light dark:border-border-dark rounded-2xl font-black text-xs dark:text-white hover:bg-gray-100 transition-all uppercase tracking-widest">Cancel</button>
+          <button 
+            onClick={handleSubmit} 
+            disabled={availability !== 'Available'}
+            className="flex-[2] py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed uppercase tracking-widest"
+          >
+            Complete Registration
+          </button>
         </div>
       </div>
     </div>

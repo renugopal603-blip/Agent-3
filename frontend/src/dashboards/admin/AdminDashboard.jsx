@@ -6519,199 +6519,308 @@ const INDIAN_LOCATIONS = {
   "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Nellore", "Kurnool", "Rajahmundry", "Tirupati", "Kakinada", "Kadapa", "Anantapur"]
 };
 
+const TERRITORY_DATA = {
+  "Maharashtra": {
+    "Pune": {
+      "Pune Central": ["411001", "411002", "411005"],
+      "Pune North": ["411015", "411016", "411032"],
+      "Pune South": ["411037", "411048", "411060"]
+    },
+    "Mumbai": {
+      "Mumbai South": ["400001", "400002", "400003"],
+      "Mumbai West": ["400050", "400051", "400052"],
+      "Mumbai East": ["400070", "400071", "400072"]
+    },
+    "Nagpur": {
+      "Nagpur North": ["440001", "440002"],
+      "Nagpur South": ["440010", "440011"]
+    }
+  },
+  "Karnataka": {
+    "Bangalore": {
+      "Bangalore East": ["560001", "560002", "560038"],
+      "Bangalore North": ["560064", "560065", "560092"],
+      "Bangalore South": ["560041", "560076", "560078"]
+    },
+    "Mysuru": {
+      "Mysuru City": ["570001", "570002"],
+      "Mysuru Rural": ["570010", "570011"]
+    }
+  },
+  "Delhi": {
+    "New Delhi": {
+      "Central Delhi": ["110001", "110002"],
+      "South Delhi": ["110011", "110012"]
+    }
+  }
+};
+
 const AddAgentModal = ({ isOpen, onClose, onAdd, initialData }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    role: 'Pincode Agent',
+    role: 'District Agent',
     state: '',
     district: '',
+    division: '',
     pincode: ''
   });
+  const [availability, setAvailability] = useState(null);
 
   useEffect(() => {
     if (initialData) {
-      // Try to parse territory string if it exists: "State, District - Pincode"
-      let state = '', district = '', pincode = '';
-      if (initialData.territory) {
-        const parts = initialData.territory.split(', ');
-        if (parts.length >= 2) {
-          state = parts[0];
-          const distPart = parts[1].split(' - ');
-          district = distPart[0];
-          pincode = distPart[1] || '';
-        } else {
-          state = initialData.territory;
-        }
-      }
-
       setFormData({
         name: initialData.name || '',
         email: initialData.email || '',
         phone: initialData.phone || '',
-        role: initialData.role || 'Pincode Agent',
-        state: state,
-        district: district,
-        pincode: pincode
+        role: initialData.role || 'District Agent',
+        state: initialData.state || '',
+        district: initialData.district || '',
+        division: initialData.division || '',
+        pincode: initialData.pincode || ''
       });
     } else {
       setFormData({
         name: '',
         email: '',
         phone: '',
-        role: 'Pincode Agent',
+        role: 'District Agent',
         state: '',
         district: '',
+        division: '',
         pincode: ''
       });
     }
+    setAvailability(null);
   }, [initialData, isOpen]);
+
+  // Availability Mock Check Logic
+  useEffect(() => {
+    const checkAvailability = () => {
+      const { role, state, district, division, pincode } = formData;
+      let isReady = false;
+      
+      if (role === 'State Agent' && state) isReady = true;
+      else if (role === 'District Agent' && state && district) isReady = true;
+      else if (role === 'Divisional Agent' && state && district && division) isReady = true;
+      else if (role === 'Pincode Agent' && state && district && division && pincode) isReady = true;
+
+      if (isReady) {
+        setAvailability('Checking...');
+        setTimeout(() => {
+          const statuses = ['Available', 'Available', 'Available', 'Already Assigned', 'Pending Approval'];
+          setAvailability(statuses[Math.floor(Math.random() * statuses.length)]);
+        }, 800);
+      } else {
+        setAvailability(null);
+      }
+    };
+
+    checkAvailability();
+  }, [formData.role, formData.state, formData.district, formData.division, formData.pincode]);
 
   if (!isOpen) return null;
 
+  const handleRoleChange = (role) => {
+    setFormData({ ...formData, role, state: '', district: '', division: '', pincode: '' });
+    setAvailability(null);
+  };
+
+  const handleStateChange = (state) => {
+    setFormData({ ...formData, state, district: '', division: '', pincode: '' });
+  };
+
+  const handleDistrictChange = (district) => {
+    setFormData({ ...formData, district, division: '', pincode: '' });
+  };
+
+  const handleDivisionChange = (division) => {
+    setFormData({ ...formData, division, pincode: '' });
+  };
+
+  const states = Object.keys(TERRITORY_DATA);
+  const districts = formData.state ? Object.keys(TERRITORY_DATA[formData.state] || {}) : [];
+  const divisions = (formData.state && formData.district) ? Object.keys(TERRITORY_DATA[formData.state][formData.district] || {}) : [];
+  const pincodes = (formData.state && formData.district && formData.division) ? TERRITORY_DATA[formData.state][formData.district][formData.division] : [];
+
+  const handleSubmit = (e) => {
+    if (e) e.preventDefault();
+    
+    if (!formData.name || !formData.phone || !formData.state) {
+      alert('Please fill in required basic and territory fields');
+      return;
+    }
+
+    const { role, district, division, pincode } = formData;
+    if (role !== 'State Agent' && !district) { alert('District is required'); return; }
+    if ((role === 'Divisional Agent' || role === 'Pincode Agent') && !division) { alert('Division is required'); return; }
+    if (role === 'Pincode Agent' && !pincode) { alert('Pincode is required'); return; }
+
+    onAdd({
+      ...formData,
+      territory: pincode || division || district || formData.state
+    });
+  };
+
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-      <div 
-        className="absolute inset-0 bg-background-dark/60 backdrop-blur-sm animate-in fade-in duration-300"
-        onClick={onClose}
-      ></div>
-      
-      <div className="relative w-full max-w-2xl bg-surface-light dark:bg-surface-dark rounded-3xl shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300">
-        <div className="p-8 border-b border-border-light dark:border-border-dark flex justify-between items-center bg-gray-50/50 dark:bg-secondary-dark/30">
-          <div>
-            <h3 className="text-2xl font-black dark:text-white tracking-tight">{initialData ? 'Edit Agent Profile' : 'Register New Agent'}</h3>
-            <p className="text-sm text-text-secondary-light mt-1">{initialData ? 'Update the details for this agent.' : 'Fill in the details to add a new agent to the network.'}</p>
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
+      <div className="relative w-full max-w-2xl bg-surface-light dark:bg-surface-dark rounded-[40px] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[95vh]">
+        <div className="p-8 border-b dark:border-border-dark flex justify-between items-center bg-primary-light text-white">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center shadow-inner"><Users size={24}/></div>
+            <div>
+              <h3 className="text-xl font-black uppercase tracking-tight">Register New Agent</h3>
+              <p className="text-xs font-bold uppercase opacity-80 tracking-widest">Agent Onboarding Form</p>
+            </div>
           </div>
-          <button 
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-secondary-dark rounded-xl transition-all hover:rotate-90"
-          >
-            <X size={20} className="dark:text-white" />
-          </button>
+          <button onClick={onClose} className="p-3 hover:bg-white/10 rounded-2xl transition-all"><X size={24}/></button>
         </div>
 
-        <form className="p-8 grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={(e) => {
-          e.preventDefault();
-          const submissionData = {
-            ...formData,
-            territory: `${formData.state}, ${formData.district} - ${formData.pincode}`
-          };
-          onAdd(submissionData);
-        }}>
-          <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-widest text-text-secondary-light ml-1">Full Name</label>
-            <div className="relative group">
+        <div className="p-8 overflow-y-auto custom-scrollbar space-y-8">
+          <div className="space-y-4">
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-primary-light border-b-2 border-primary-light/10 pb-2">Basic Information</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Full Name</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. rahul sharma"
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  className="w-full px-5 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Phone Number</label>
+                <input 
+                  type="tel" 
+                  placeholder="9876765667"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  className="w-full px-5 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Email Address</label>
               <input 
-                type="text" 
-                placeholder="John Doe"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                required
-                className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light focus:bg-white dark:focus:bg-background-dark transition-all outline-none dark:text-white font-medium"
+                type="email" 
+                placeholder="naresh@gmail.com"
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                className="w-full px-5 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all"
               />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-widest text-text-secondary-light ml-1">Email Address</label>
-            <input 
-              type="email" 
-              placeholder="john@example.com"
-              value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
-              required
-              className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light focus:bg-white dark:focus:bg-background-dark transition-all outline-none dark:text-white font-medium"
-            />
-          </div>
+          <div className="space-y-4">
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-primary-light border-b-2 border-primary-light/10 pb-2">Role & Dynamic Territory</h4>
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Assigned Role</label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  {['State Agent', 'District Agent', 'Divisional Agent', 'Pincode Agent'].map(r => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => handleRoleChange(r)}
+                      className={`px-3 py-3 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all border-2 ${formData.role === r ? 'bg-primary-light border-primary-light text-white shadow-lg' : 'bg-gray-50 dark:bg-secondary-dark border-transparent dark:text-white hover:border-primary-light/30'}`}
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-          <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-widest text-text-secondary-light ml-1">Phone Number</label>
-            <input 
-              type="tel" 
-              placeholder="+91 98765 43210"
-              value={formData.phone}
-              onChange={(e) => setFormData({...formData, phone: e.target.value})}
-              required
-              className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light focus:bg-white dark:focus:bg-background-dark transition-all outline-none dark:text-white font-medium"
-            />
-          </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in slide-in-from-top-2 duration-300">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">State</label>
+                  <select 
+                    value={formData.state}
+                    onChange={(e) => handleStateChange(e.target.value)}
+                    className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold appearance-none cursor-pointer"
+                  >
+                    <option value="">-- Choose State --</option>
+                    {states.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
 
-          <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-widest text-text-secondary-light ml-1">Agent Role</label>
-            <select 
-              value={formData.role}
-              onChange={(e) => setFormData({...formData, role: e.target.value})}
-              className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light focus:bg-white dark:focus:bg-background-dark transition-all outline-none dark:text-white font-medium appearance-none"
-            >
-              <option>Pincode Agent</option>
-              <option>Divisional Agent</option>
-              <option>District Agent</option>
-              <option>State Agent</option>
-            </select>
-          </div>
+                {['District Agent', 'Divisional Agent', 'Pincode Agent'].includes(formData.role) && (
+                  <div className="space-y-2 animate-in fade-in duration-300">
+                    <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">District</label>
+                    <select 
+                      value={formData.district}
+                      onChange={(e) => handleDistrictChange(e.target.value)}
+                      disabled={!formData.state}
+                      className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold appearance-none cursor-pointer disabled:opacity-50"
+                    >
+                      <option value="">-- Choose District --</option>
+                      {districts.map(d => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  </div>
+                )}
 
-          <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-widest text-text-secondary-light ml-1">State</label>
-            <select 
-              value={formData.state}
-              onChange={(e) => setFormData({...formData, state: e.target.value, district: ''})}
-              required
-              className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light focus:bg-white dark:focus:bg-background-dark transition-all outline-none dark:text-white font-medium appearance-none"
-            >
-              <option value="">Select State</option>
-              {Object.keys(INDIAN_LOCATIONS).map(state => (
-                <option key={state} value={state}>{state}</option>
-              ))}
-            </select>
-          </div>
+                {['Divisional Agent', 'Pincode Agent'].includes(formData.role) && (
+                  <div className="space-y-2 animate-in fade-in duration-300">
+                    <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Division</label>
+                    <select 
+                      value={formData.division}
+                      onChange={(e) => handleDivisionChange(e.target.value)}
+                      disabled={!formData.district}
+                      className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold appearance-none cursor-pointer disabled:opacity-50"
+                    >
+                      <option value="">-- Choose Division --</option>
+                      {divisions.map(dv => <option key={dv} value={dv}>{dv}</option>)}
+                    </select>
+                  </div>
+                )}
 
-          <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-widest text-text-secondary-light ml-1">District</label>
-            <select 
-              value={formData.district}
-              onChange={(e) => setFormData({...formData, district: e.target.value})}
-              required
-              disabled={!formData.state}
-              className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light focus:bg-white dark:focus:bg-background-dark transition-all outline-none dark:text-white font-medium appearance-none disabled:opacity-50"
-            >
-              <option value="">Select District</option>
-              {formData.state && INDIAN_LOCATIONS[formData.state].map(district => (
-                <option key={district} value={district}>{district}</option>
-              ))}
-            </select>
-          </div>
+                {formData.role === 'Pincode Agent' && (
+                  <div className="space-y-2 animate-in fade-in duration-300">
+                    <label className="text-[10px] font-black uppercase text-text-secondary-light ml-1">Pincode</label>
+                    <select 
+                      value={formData.pincode}
+                      onChange={(e) => setFormData({...formData, pincode: e.target.value})}
+                      disabled={!formData.division}
+                      className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold appearance-none cursor-pointer disabled:opacity-50"
+                    >
+                      <option value="">-- Choose Pincode --</option>
+                      {pincodes.map(p => <option key={p} value={p}>{p}</option>)}
+                    </select>
+                  </div>
+                )}
+              </div>
 
-          <div className="space-y-2 md:col-span-2">
-            <label className="text-xs font-black uppercase tracking-widest text-text-secondary-light ml-1">Pincode</label>
-            <input 
-              type="text" 
-              placeholder="e.g. 411001"
-              value={formData.pincode}
-              onChange={(e) => setFormData({...formData, pincode: e.target.value})}
-              required
-              maxLength={6}
-              pattern="[0-9]{6}"
-              className="w-full px-4 py-3 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light focus:bg-white dark:focus:bg-background-dark transition-all outline-none dark:text-white font-medium"
-            />
+              {availability && (
+                <div className={`p-4 rounded-2xl flex items-center justify-between border-2 animate-in fade-in duration-500 ${
+                  availability === 'Available' ? 'bg-success/5 border-success/20 text-success' :
+                  availability === 'Checking...' ? 'bg-primary-light/5 border-primary-light/20 text-primary-light' :
+                  'bg-error/5 border-error/20 text-error'
+                }`}>
+                  <div className="flex items-center gap-3">
+                    <Zap size={16} className={availability === 'Checking...' ? 'animate-pulse' : ''} />
+                    <span className="text-xs font-black uppercase tracking-widest">Territory Status</span>
+                  </div>
+                  <span className="text-xs font-black uppercase">{availability}</span>
+                </div>
+              )}
+            </div>
           </div>
+        </div>
 
-          <div className="md:col-span-2 pt-4 flex gap-4">
-            <button 
-              type="button"
-              onClick={onClose}
-              className="flex-1 py-4 rounded-2xl font-black text-sm border-2 border-border-light dark:border-border-dark dark:text-white hover:bg-gray-50 dark:hover:bg-secondary-dark transition-all"
-            >
-              Cancel
-            </button>
-            <button 
-              type="submit"
-              className="flex-[2] py-4 rounded-2xl bg-primary-light text-white font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
-            >
-              {initialData ? 'Save Changes' : 'Create Agent Profile'}
-            </button>
-          </div>
-        </form>
+        <div className="p-8 border-t dark:border-border-dark bg-gray-50/50 dark:bg-secondary-dark/30 flex gap-4">
+          <button type="button" onClick={onClose} className="flex-1 py-4 bg-white dark:bg-surface-dark border-2 border-border-light dark:border-border-dark rounded-2xl font-black text-xs dark:text-white hover:bg-gray-100 transition-all uppercase tracking-widest">Cancel</button>
+          <button 
+            type="button"
+            onClick={handleSubmit} 
+            disabled={availability !== 'Available'}
+            className="flex-[2] py-4 bg-primary-light text-white rounded-2xl font-black text-sm shadow-xl shadow-primary-light/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed uppercase tracking-widest"
+          >
+            {initialData ? 'Save Changes' : 'Complete Registration'}
+          </button>
+        </div>
       </div>
     </div>
   );
