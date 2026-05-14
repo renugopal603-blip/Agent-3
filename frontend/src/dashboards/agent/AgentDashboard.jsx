@@ -1247,67 +1247,86 @@ const AgentDashboard = () => {
                 <div className="space-y-4 mt-6">
                   {shops.slice().reverse().map((shop) => {
                     const isActive = shop.status === 'Active' || shop.status === 'Shop Active';
-                    const isVerifiedBySubAdmin = shop.status === 'Verified by Sub Admin';
-                    const isPendingReview = shop.status === 'Pending Review' || shop.status === 'Pending';
+                    const isVerified = shop.status === 'Verified by Sub Admin';
+                    const isPending = !isActive && !isVerified;
                     
-                    let statusColor = 'bg-warning text-warning';
                     let progressWidth = '0%';
-                    let progressBarColor = 'bg-gray-200 dark:bg-gray-700';
-                    let statusText = 'Pending Review';
-
-                    if (isActive) {
-                      statusColor = 'bg-success/10 text-success border border-success/20';
-                      progressWidth = '100%';
-                      progressBarColor = 'bg-success';
-                      statusText = 'Active & Activated';
-                    } else if (isVerifiedBySubAdmin) {
-                      statusColor = 'bg-primary-light/20 text-primary-light border border-primary-light/30 shadow-sm';
-                      progressWidth = '50%';
-                      progressBarColor = 'bg-primary-light';
-                      statusText = 'Verified (Sub-Admin)';
-                    } else {
-                      statusColor = 'bg-warning/10 text-warning border border-warning/20';
-                      progressWidth = '0%';
-                      progressBarColor = 'bg-warning';
-                      statusText = 'Pending Review';
-                    }
+                    if (isVerified) progressWidth = '50%';
+                    if (isActive) progressWidth = '100%';
 
                     return (
-                      <div key={shop.id} className="p-4 bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark shadow-sm animate-in slide-in-from-right duration-500">
-                        <div className="flex justify-between items-start mb-4">
-                          <div>
-                            <h4 className="font-bold dark:text-white">{shop.name}</h4>
-                            <p className="text-[10px] text-text-secondary-light">Submitted on {shop.date || 'Today'}</p>
+                      <div key={shop.id} className="p-6 bg-white dark:bg-surface-dark rounded-3xl border border-border-light dark:border-border-dark shadow-sm hover:shadow-xl hover:scale-[1.01] transition-all duration-300">
+                        <div className="flex justify-between items-center mb-8">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-primary-light/10 text-primary-light rounded-xl flex items-center justify-center">
+                              <Store size={20} />
+                            </div>
+                            <div>
+                              <h4 className="font-black dark:text-white text-lg">{shop.name}</h4>
+                              <p className="text-xs text-text-secondary-light font-bold">Submitted on {shop.date || new Date().toLocaleDateString()}</p>
+                            </div>
                           </div>
-                          <span className={`px-2 py-1 ${statusColor} text-[10px] font-bold rounded-md uppercase tracking-wider`}>
-                            {statusText}
+                          <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${
+                            isActive ? 'bg-success/10 text-success border border-success/20' : 
+                            isVerified ? 'bg-primary-light/10 text-primary-light border border-primary-light/20' : 
+                            'bg-warning/10 text-warning border border-warning/20'
+                          }`}>
+                            {isActive ? 'Active & Activated' : isVerified ? 'Verified (Sub-Admin)' : 'Awaiting Review'}
                           </span>
                         </div>
                         
-                        <div className="flex items-center gap-1 w-full justify-between relative before:absolute before:top-1/2 before:-translate-y-1/2 before:w-full before:h-0.5 before:bg-gray-200 dark:before:bg-gray-700">
-                          <div className={`absolute top-1/2 -translate-y-1/2 h-0.5 ${progressBarColor} transition-all duration-1000`} style={{ width: progressWidth }}></div>
+                        <div className="relative px-2">
+                          {/* Background Line */}
+                          <div className="absolute top-1/2 -translate-y-1/2 left-4 right-4 h-1 bg-gray-100 dark:bg-secondary-dark rounded-full"></div>
                           
-                          {/* Dot 1: Submitted */}
-                          <div className={`w-3.5 h-3.5 rounded-full ring-4 ring-white dark:ring-surface-dark relative z-10 transition-colors duration-500 ${
-                            isActive || isVerifiedBySubAdmin || isPendingReview ? 'bg-warning' : 'bg-gray-300 dark:bg-gray-600'
-                          }`} title="Submitted"></div>
+                          {/* Active Progress Line */}
+                          <div 
+                            className="absolute top-1/2 -translate-y-1/2 left-4 h-1 bg-gradient-to-r from-warning via-primary-light to-success rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(16,185,129,0.3)]" 
+                            style={{ width: `calc(${progressWidth} - 32px)` }}
+                          ></div>
                           
-                          {/* Dot 2: Sub Admin Review */}
-                          <div className={`w-3.5 h-3.5 rounded-full ring-4 ring-white dark:ring-surface-dark relative z-10 transition-colors duration-500 ${
-                            isActive || isVerifiedBySubAdmin ? 'bg-primary-light' : 'bg-gray-300 dark:bg-gray-600'
-                          }`} title="Sub Admin Review"></div>
-                          
-                          {/* Dot 3: Admin Approval */}
-                          <div className={`w-3.5 h-3.5 rounded-full ring-4 ring-white dark:ring-surface-dark relative z-10 transition-colors duration-500 ${
-                            isActive ? 'bg-success' : 'bg-gray-300 dark:bg-gray-600'
-                          }`} title="Admin Approval"></div>
+                          <div className="flex items-center justify-between relative z-10">
+                            {/* Step 1: Submitted */}
+                            <div className="flex flex-col items-center gap-3">
+                              <div className={`w-5 h-5 rounded-full border-4 border-white dark:border-surface-dark shadow-md transition-all duration-500 ${
+                                isActive || isVerified || isPending ? 'bg-warning scale-110' : 'bg-gray-300'
+                              }`}>
+                                {(isActive || isVerified || isPending) && <div className="w-full h-full rounded-full animate-ping bg-warning/30"></div>}
+                              </div>
+                              <span className={`text-[9px] font-black uppercase tracking-tighter transition-colors ${
+                                isActive || isVerified || isPending ? 'text-warning' : 'text-text-secondary-light'
+                              }`}>Submitted</span>
+                            </div>
+                            
+                            {/* Step 2: Sub Admin Verified */}
+                            <div className="flex flex-col items-center gap-3">
+                              <div className={`w-5 h-5 rounded-full border-4 border-white dark:border-surface-dark shadow-md transition-all duration-500 ${
+                                isActive || isVerified ? 'bg-primary-light scale-110' : 'bg-gray-300'
+                              }`}>
+                                {isVerified && <div className="w-full h-full rounded-full animate-ping bg-primary-light/30"></div>}
+                              </div>
+                              <span className={`text-[9px] font-black uppercase tracking-tighter transition-colors ${
+                                isActive || isVerified ? 'text-primary-light' : 'text-text-secondary-light'
+                              }`}>Sub Admin Verified</span>
+                            </div>
+                            
+                            {/* Step 3: Admin Approved */}
+                            <div className="flex flex-col items-center gap-3">
+                              <div className={`w-5 h-5 rounded-full border-4 border-white dark:border-surface-dark shadow-md transition-all duration-500 ${
+                                isActive ? 'bg-success scale-110' : 'bg-gray-300'
+                              }`}>
+                                {isActive && <div className="w-full h-full rounded-full animate-ping bg-success/30"></div>}
+                              </div>
+                              <span className={`text-[9px] font-black uppercase tracking-tighter transition-colors ${
+                                isActive ? 'text-success' : 'text-text-secondary-light'
+                              }`}>Admin Approved</span>
+                            </div>
+                          </div>
                         </div>
-
-                        <div className="flex justify-between mt-2 px-1">
-                          <span className={`text-[8px] font-black uppercase tracking-widest ${isActive || isVerifiedBySubAdmin || isPendingReview ? 'text-warning' : 'text-text-secondary-light'}`}>Submitted</span>
-                          <span className={`text-[8px] font-black uppercase tracking-widest ${isActive || isVerifiedBySubAdmin ? 'text-primary-light' : 'text-text-secondary-light'}`}>Sub Admin Verified</span>
-                          <span className={`text-[8px] font-black uppercase tracking-widest ${isActive ? 'text-success' : 'text-text-secondary-light'}`}>Admin Approved</span>
-                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
                       </div>
                     );
                   })}
