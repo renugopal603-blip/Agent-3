@@ -1327,10 +1327,6 @@ const AgentDashboard = () => {
                     );
                   })}
                 </div>
-                      </div>
-                    );
-                  })}
-                </div>
               </div>
             </div>
           </div>
