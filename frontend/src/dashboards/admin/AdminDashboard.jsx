@@ -81,6 +81,7 @@ const AdminDashboard = () => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showWalletFilters, setShowWalletFilters] = useState(false);
+  const [showBlocklistModal, setShowBlocklistModal] = useState(false);
 
   const [docFilter, setDocFilter] = useState('Pending');
   const [showTwoFAModal, setShowTwoFAModal] = useState(false);
@@ -5121,7 +5122,7 @@ const AdminDashboard = () => {
                 <p className="text-sm text-text-secondary-light">Monitor geographic distribution and suspicious IP behavior.</p>
               </div>
               <button 
-                onClick={() => addNotification({ title: 'Access Denied', message: 'You need Super Admin permissions to modify the global blocklist.', type: 'error' })}
+                onClick={() => setShowBlocklistModal(true)}
                 className="btn-primary px-6 py-2.5 bg-error text-white shadow-lg shadow-error/20 hover:scale-105 active:scale-95 transition-all"
               >
                 Manage Blocklist
@@ -5401,6 +5402,11 @@ const AdminDashboard = () => {
           onApprove={handleApproveVerification}
           onReject={handleRejectVerification}
           setPreviewDoc={setPreviewDoc}
+        />
+        <BlocklistModal 
+          isOpen={showBlocklistModal}
+          onClose={() => setShowBlocklistModal(false)}
+          addNotification={addNotification}
         />
         <BulkPayoutModal 
           isOpen={showBulkPayoutModal}
@@ -10735,6 +10741,72 @@ const UploadMaterialModal = ({ isOpen, onClose, addNotification }) => {
 };
 
 export default AdminDashboard;
+
+const BlocklistModal = ({ isOpen, onClose, addNotification }) => {
+  if (!isOpen) return null;
+
+  const blockedIps = [
+    { ip: '45.12.88.3', reason: 'Brute force attempts', date: '2h ago' },
+    { ip: '190.22.11.5', reason: 'Bot activity detected', date: '1d ago' },
+    { ip: '22.44.11.90', reason: 'DDoS pattern match', date: '3d ago' }
+  ];
+
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
+      <div className="relative w-full max-w-xl bg-surface-light dark:bg-surface-dark rounded-[2.5rem] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[80vh]">
+        <div className="p-8 border-b dark:border-border-dark bg-error text-white flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
+              <ShieldAlert size={24} />
+            </div>
+            <div>
+              <h3 className="text-xl font-black">Global Blocklist</h3>
+              <p className="text-xs font-bold uppercase opacity-80">Restricted IP Management</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-3 hover:bg-white/10 rounded-2xl transition-all"><X size={24} /></button>
+        </div>
+
+        <div className="p-8 overflow-y-auto custom-scrollbar flex-1 space-y-6">
+          <div className="flex gap-4">
+            <input 
+              type="text" 
+              placeholder="Enter IP Address to block..." 
+              className="flex-1 px-4 py-3.5 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-error outline-none dark:text-white font-bold transition-all text-sm"
+            />
+            <button className="px-6 bg-error text-white rounded-2xl font-black text-sm hover:scale-105 active:scale-95 transition-all shadow-lg shadow-error/20">Block IP</button>
+          </div>
+
+          <div className="space-y-3">
+            <h4 className="text-[10px] font-black uppercase text-text-secondary-light tracking-widest ml-1">Currently Blocked</h4>
+            {blockedIps.map((item, i) => (
+              <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-secondary-dark rounded-2xl border border-border-light dark:border-border-dark group">
+                <div className="flex items-center gap-4">
+                  <div className="w-2 h-2 rounded-full bg-error animate-pulse"></div>
+                  <div>
+                    <p className="text-sm font-black dark:text-white font-mono">{item.ip}</p>
+                    <p className="text-[10px] text-text-secondary-light font-bold uppercase tracking-wide">{item.reason} • {item.date}</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => addNotification({ title: 'IP Unblocked', message: `The restriction on ${item.ip} has been lifted.`, type: 'info' })}
+                  className="p-2 hover:bg-success/10 text-success rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                >
+                  <RefreshCw size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="p-8 border-t dark:border-border-dark bg-gray-50/50 dark:bg-secondary-dark/30">
+          <button onClick={onClose} className="w-full py-4 border-2 border-border-light dark:border-border-dark dark:text-white rounded-2xl font-black text-sm hover:bg-gray-100 dark:hover:bg-secondary-dark transition-all">Close Security Manager</button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 
 
