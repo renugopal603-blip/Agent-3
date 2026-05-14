@@ -920,6 +920,19 @@ const AdminDashboard = () => {
     { id: 'WAL-503', user: 'Meera Seth', role: 'Delivery Partner', balance: '₹3,450', status: 'Restricted', lastTxn: '2d ago' }
   ]);
 
+  const [loginHistory, setLoginHistory] = useState([
+    { id: 1, user: 'Anil Kapoor', role: 'Agent', time: '10 mins ago', ip: '192.168.1.45', device: 'Chrome / Windows', status: 'Success' },
+    { id: 2, user: 'Meera Seth', role: 'Delivery Partner', time: '45 mins ago', ip: '103.44.12.89', device: 'Safari / iPhone', status: 'Success' },
+    { id: 3, user: 'Unknown', role: 'Guest', time: '2 hours ago', ip: '45.12.88.3', device: 'Firefox / Linux', status: 'Failed' },
+    { id: 4, user: 'Zoya Khan', role: 'Shop Owner', time: 'Yesterday', ip: '152.11.4.22', device: 'Chrome / Android', status: 'Success' }
+  ]);
+
+  const [ipTracking, setIpTracking] = useState([
+    { ip: '192.168.1.45', location: 'Mumbai, IN', attempts: 12, lastActive: '10 mins ago', risk: 'Low' },
+    { ip: '45.12.88.3', location: 'Moscow, RU', attempts: 450, lastActive: '2 hours ago', risk: 'High' },
+    { ip: '103.44.12.89', location: 'Delhi, IN', attempts: 5, lastActive: '45 mins ago', risk: 'Low' }
+  ]);
+
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -5028,6 +5041,99 @@ const AdminDashboard = () => {
                   </tbody>
                 </table>
               </div>
+            </div>
+          </div>
+        );
+
+      case 'Login History':
+        return (
+          <div className="p-8 space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-2xl font-black dark:text-white tracking-tight">Login History</h3>
+                <p className="text-sm text-text-secondary-light">Audit trail of all administrative and partner access.</p>
+              </div>
+              <div className="flex gap-3">
+                <button className="btn-outline px-4 py-2 text-sm flex items-center gap-2"><Download size={16} /> Export Logs</button>
+              </div>
+            </div>
+
+            <div className="card-premium overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-gray-50 dark:bg-secondary-dark/30 text-left border-b dark:border-border-dark">
+                      <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest">User Info</th>
+                      <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest">IP Address</th>
+                      <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest">Device / OS</th>
+                      <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest">Login Time</th>
+                      <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border-light dark:divide-border-dark">
+                    {loginHistory.map((log) => (
+                      <tr key={log.id} className="hover:bg-gray-50/50 dark:hover:bg-secondary-dark/20 transition-colors">
+                        <td className="p-4">
+                          <p className="text-sm font-bold dark:text-white">{log.user}</p>
+                          <p className="text-[10px] text-text-secondary-light font-bold uppercase">{log.role}</p>
+                        </td>
+                        <td className="p-4 text-xs font-mono dark:text-white">{log.ip}</td>
+                        <td className="p-4 text-xs font-medium dark:text-white">{log.device}</td>
+                        <td className="p-4 text-xs font-bold text-text-secondary-light">{log.time}</td>
+                        <td className="p-4">
+                          <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest ${log.status === 'Success' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}`}>{log.status}</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'IP Tracking':
+        return (
+          <div className="p-8 space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-2xl font-black dark:text-white tracking-tight">IP Activity & Tracking</h3>
+                <p className="text-sm text-text-secondary-light">Monitor geographic distribution and suspicious IP behavior.</p>
+              </div>
+              <button className="btn-primary px-6 py-2.5 bg-error text-white shadow-lg shadow-error/20">Manage Blocklist</button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {ipTracking.map((track) => (
+                <div key={track.ip} className="card-premium space-y-4 group hover:scale-105 transition-all">
+                  <div className="flex justify-between items-center">
+                    <div className="p-3 bg-gray-100 dark:bg-secondary-dark rounded-xl text-primary-light"><Globe size={20} /></div>
+                    <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest ${track.risk === 'High' ? 'bg-error/10 text-error animate-pulse' : 'bg-success/10 text-success'}`}>{track.risk} Risk</span>
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-black dark:text-white font-mono">{track.ip}</h4>
+                    <p className="text-xs text-text-secondary-light font-bold uppercase tracking-widest">{track.location}</p>
+                  </div>
+                  <div className="pt-4 border-t dark:border-border-dark flex justify-between items-center">
+                    <p className="text-[10px] font-bold text-text-secondary-light uppercase">Attempts: {track.attempts}</p>
+                    <p className="text-[10px] font-bold text-text-secondary-light uppercase">{track.lastActive}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="card-premium p-8 bg-background-dark text-white overflow-hidden relative group">
+              <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
+                <div className="space-y-4 text-center md:text-left">
+                  <h3 className="text-2xl font-black tracking-tight italic">Security Insight</h3>
+                  <p className="text-sm text-gray-400 max-w-md">We've detected a significant increase in failed login attempts from decentralized IP ranges. Recommend enabling mandatory 2FA for all sub-admins.</p>
+                  <button className="btn-primary px-6 py-3 bg-white text-background-dark font-black hover:bg-gray-100 transition-all">Enable Enhanced Security</button>
+                </div>
+                <div className="w-32 h-32 bg-primary-light/20 rounded-full flex items-center justify-center animate-bounce shadow-2xl shadow-primary-light/20">
+                  <ShieldAlert size={64} className="text-primary-light" />
+                </div>
+              </div>
+              <div className="absolute top-0 right-0 w-64 h-64 bg-primary-light/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
             </div>
           </div>
         );
