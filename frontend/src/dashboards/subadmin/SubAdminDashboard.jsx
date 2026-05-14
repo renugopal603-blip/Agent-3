@@ -70,10 +70,35 @@ const SubAdminDashboard = () => {
     };
 
     fetchAndSyncShops();
+    
+    // Also sync from globalShops in localStorage for real-time local updates
+    const syncLocal = () => {
+      const globalShops = JSON.parse(localStorage.getItem('globalShops') || '[]');
+      if (globalShops.length > 0) {
+        setVerifyShops(prev => {
+          const normalizedGlobal = globalShops.map(gs => ({
+            id: gs._id || gs.id,
+            name: gs.name || gs.shopName,
+            cat: gs.category || gs.cat || 'General',
+            owner: gs.owner || gs.ownerName || 'N/A',
+            loc: gs.location || gs.loc || 'N/A',
+            agent: gs.agent || 'Unknown',
+            status: gs.status || 'Pending Review',
+            date: gs.date || new Date(gs.createdAt || Date.now()).toLocaleDateString()
+          }));
+          const existingIds = new Set(normalizedGlobal.map(s => s.id));
+          const mockData = prev.filter(s => !existingIds.has(s.id));
+          return [...normalizedGlobal, ...mockData];
+        });
+      }
+    };
+
+    syncLocal();
 
     const handleStorageChange = (e) => {
       if (e.key === 'globalShops' || e.key === 'shop_updated') {
         fetchAndSyncShops();
+        syncLocal();
       }
     };
 

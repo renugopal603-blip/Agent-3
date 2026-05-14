@@ -241,6 +241,43 @@ const AdminDashboard = () => {
       type: 'error'
     });
   };
+
+  // Sync Shops from global registry for approval
+  useEffect(() => {
+    const syncShops = () => {
+      const globalShops = JSON.parse(localStorage.getItem('globalShops') || '[]');
+      if (globalShops.length > 0) {
+        setShopTieUps(prev => {
+          // Normalize global shops to match shopTieUps structure
+          const normalizedGlobal = globalShops.map(gs => ({
+            id: gs._id || gs.id,
+            shopName: gs.name || gs.shopName,
+            ownerName: gs.owner || gs.ownerName,
+            phone: gs.contact || gs.phone || 'N/A',
+            category: gs.category || gs.cat || 'General',
+            location: gs.location || gs.loc || 'N/A',
+            assignedAgent: gs.agent || 'N/A',
+            submittedBy: gs.agent || 'N/A',
+            status: gs.status,
+            docs: ['Shop License', 'GST Certificate']
+          }));
+
+          // Merge: Keep existing mock data but prioritize/add global shops
+          const existingIds = new Set(normalizedGlobal.map(s => s.id));
+          const mockData = prev.filter(s => !existingIds.has(s.id));
+          return [...normalizedGlobal, ...mockData];
+        });
+      }
+    };
+
+    syncShops();
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'globalShops' || e.key === 'shop_updated') {
+        syncShops();
+      }
+    });
+    return () => window.removeEventListener('storage', syncShops);
+  }, []);
   const [globalShops, setGlobalShops] = useState([]);
 
   const handleAdminApproveShop = async (id) => {
