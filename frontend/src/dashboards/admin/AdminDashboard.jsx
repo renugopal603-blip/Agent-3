@@ -924,6 +924,16 @@ const AdminDashboard = () => {
     navigate('/login');
   };
 
+  const handleApproveWithdrawal = (id) => {
+    setWithdrawals(prev => prev.map(w => w.id === id ? { ...w, status: 'Completed' } : w));
+    addNotification({ title: 'Request Approved', message: 'The funds have been transferred successfully.', type: 'success' });
+  };
+
+  const handleHoldWithdrawal = (id) => {
+    setWithdrawals(prev => prev.map(w => w.id === id ? { ...w, status: 'Held' } : w));
+    addNotification({ title: 'Request Held', message: 'The withdrawal is now under review.', type: 'warning' });
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -4857,8 +4867,20 @@ const AdminDashboard = () => {
                         </td>
                         <td className="p-4 text-right">
                           <div className="flex justify-end gap-2">
-                            <button onClick={() => addNotification({ title: 'Request Held', message: 'Withdrawal put on hold.', type: 'warning' })} className="p-2 text-warning hover:bg-warning/10 rounded-lg transition-all"><Clock size={16} /></button>
-                            <button onClick={() => addNotification({ title: 'Request Approved', message: 'Fund transfer initiated.', type: 'success' })} className="p-2 bg-success text-white rounded-lg shadow-lg shadow-success/20 hover:scale-110 transition-all"><Check size={16} /></button>
+                            <button 
+                              onClick={() => handleHoldWithdrawal(w.id)} 
+                              className="p-2 text-warning hover:bg-warning/10 rounded-lg transition-all"
+                              title="Hold Request"
+                            >
+                              <Clock size={16} />
+                            </button>
+                            <button 
+                              onClick={() => handleApproveWithdrawal(w.id)} 
+                              className="p-2 bg-success text-white rounded-lg shadow-lg shadow-success/20 hover:scale-110 transition-all"
+                              title="Approve & Pay"
+                            >
+                              <Check size={16} />
+                            </button>
                           </div>
                         </td>
                       </tr>
