@@ -1309,7 +1309,7 @@ const AgentDashboard = () => {
                                 isActive || isVerified ? 'bg-primary-light scale-110' : 'bg-gray-300'
                               }`}>
                                 {isVerified && <div className="w-full h-full rounded-full animate-ping bg-primary-light/30 absolute"></div>}
-                                isActive ? <Check size={10} className="text-white" /> : <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                                {isActive ? <Check size={10} className="text-white" /> : <div className="w-1.5 h-1.5 bg-white rounded-full"></div>}
                               </div>
                               <div className="text-center">
                                 <span className={`text-[9px] font-black uppercase tracking-tighter block ${
