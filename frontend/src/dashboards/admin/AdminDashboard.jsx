@@ -108,10 +108,10 @@ const AdminDashboard = () => {
   ]);
 
   const registrationStats = [
-    { label: 'Today', value: '24', trend: '+12%', color: 'text-emerald-500' },
-    { label: 'This Week', value: '156', trend: '+8%', color: 'text-blue-500' },
-    { label: 'This Month', value: '642', trend: '+22%', color: 'text-purple-500' },
-    { label: 'Total Users', value: '4,820', trend: '+15%', color: 'text-orange-500' }
+    { label: 'Today', value: `${24 + userApplications.filter(a => a.appliedOn === new Date().toLocaleDateString()).length}`, trend: '+12%', color: 'text-emerald-500' },
+    { label: 'This Week', value: `${156 + userApplications.length}`, trend: '+8%', color: 'text-blue-500' },
+    { label: 'This Month', value: `${642 + userApplications.length}`, trend: '+22%', color: 'text-purple-500' },
+    { label: 'Total Users', value: `${4820 + userApplications.length}`, trend: '+15%', color: 'text-orange-500' }
   ];
 
   const [selectedUserApp, setSelectedUserApp] = useState(null);
@@ -148,6 +148,81 @@ const AdminDashboard = () => {
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [showDocumentPreview, setShowDocumentPreview] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState(null);
+
+  // Sync User Applications from localStorage
+  useEffect(() => {
+    const syncApplications = () => {
+      const stored = JSON.parse(localStorage.getItem('agentRegistrations') || '[]');
+      if (stored.length > 0) {
+        const mapped = stored.map(reg => ({
+          id: reg.id,
+          name: reg.name,
+          role: reg.agentType,
+          appliedOn: reg.submittedAt ? new Date(reg.submittedAt).toLocaleDateString() : 'N/A',
+          status: reg.status,
+          location: reg.territory ? `${reg.territory.district}, ${reg.territory.state}` : 'N/A',
+          docs: reg.kycDocuments ? Object.keys(reg.kycDocuments).filter(k => typeof reg.kycDocuments[k] === 'string' && reg.kycDocuments[k] !== 'uploaded') : [],
+          fullData: reg
+        }));
+        
+        // Merge with existing mock data if needed, or just replace
+        setUserApplications(prev => {
+          // Keep mock data but prepend new ones
+          const mockIds = [1, 2, 3, 4];
+          const mocks = prev.filter(a => mockIds.includes(a.id));
+          return [...mapped, ...mocks];
+        });
+      }
+    };
+
+    syncApplications();
+    window.addEventListener('storage', syncApplications);
+    return () => window.removeEventListener('storage', syncApplications);
+  }, []);
+
+  const handleApproveUserApplication = (appId) => {
+    const app = userApplications.find(a => a.id === appId);
+    if (!app) return;
+
+    // Update state
+    setUserApplications(prev => prev.map(a => a.id === appId ? { ...a, status: 'Approved' } : a));
+
+    // Update localStorage
+    const stored = JSON.parse(localStorage.getItem('agentRegistrations') || '[]');
+    const updated = stored.map(reg => reg.id === appId ? { ...reg, status: 'Approved' } : reg);
+    localStorage.setItem('agentRegistrations', JSON.stringify(updated));
+
+    // Simulate sending credentials
+    addNotification({
+      title: 'Credentials Generated',
+      message: `Welcome email with login details sent to ${app.name}.`,
+      type: 'success'
+    });
+
+    pushGlobalNotification({
+      title: 'Account Activated',
+      message: `${app.name} is now an active ${app.role}.`,
+      type: 'success'
+    });
+  };
+
+  const handleRejectUserApplication = (appId) => {
+    const app = userApplications.find(a => a.id === appId);
+    if (!app) return;
+
+    setUserApplications(prev => prev.filter(a => a.id !== appId));
+
+    // Update localStorage
+    const stored = JSON.parse(localStorage.getItem('agentRegistrations') || '[]');
+    const updated = stored.filter(reg => reg.id !== appId);
+    localStorage.setItem('agentRegistrations', JSON.stringify(updated));
+
+    addNotification({
+      title: 'Application Rejected',
+      message: `Rejection notice sent to ${app.name}.`,
+      type: 'error'
+    });
+  };
   const [globalShops, setGlobalShops] = useState([]);
 
   const handleAdminApproveShop = async (id) => {
@@ -4504,20 +4579,14 @@ const AdminDashboard = () => {
                         <td className="p-4 text-right">
                           <div className="flex justify-end gap-2">
                             <button 
-                              onClick={() => {
-                                setUserApplications(userApplications.filter(a => a.id !== app.id));
-                                addNotification({ title: 'Application Rejected', message: `Notified ${app.name} about the decision.`, type: 'error' });
-                              }}
+                              onClick={() => handleRejectUserApplication(app.id)}
                               className="p-2 text-error hover:bg-error/10 rounded-lg transition-all"
                               title="Reject Application"
                             >
                               <Trash2 size={16} />
                             </button>
                             <button 
-                              onClick={() => {
-                                setUserApplications(userApplications.map(a => a.id === app.id ? { ...a, status: 'Approved' } : a));
-                                addNotification({ title: 'Success', message: `${app.name}'s application approved!`, type: 'success' });
-                              }}
+                              onClick={() => handleApproveUserApplication(app.id)}
                               className="p-2 bg-success text-white rounded-lg shadow-lg shadow-success/20 hover:scale-105 transition-all"
                               title="Approve Application"
                             >
@@ -4584,9 +4653,8 @@ const AdminDashboard = () => {
                   <div className="p-6 bg-gray-50/50 dark:bg-secondary-dark/30 border-t dark:border-border-dark flex gap-3">
                     <button 
                       onClick={() => {
-                        setUserApplications(userApplications.filter(a => a.id !== selectedUserApp.id));
+                        handleRejectUserApplication(selectedUserApp.id);
                         setShowAppDetailModal(false);
-                        addNotification({ title: 'Application Rejected', message: 'Applicant notified.', type: 'error' });
                       }}
                       className="flex-1 py-3 bg-error/10 text-error rounded-xl font-bold text-sm hover:bg-error/20 transition-all"
                     >
@@ -4594,9 +4662,8 @@ const AdminDashboard = () => {
                     </button>
                     <button 
                       onClick={() => {
-                        setUserApplications(userApplications.map(a => a.id === selectedUserApp.id ? { ...a, status: 'Approved' } : a));
+                        handleApproveUserApplication(selectedUserApp.id);
                         setShowAppDetailModal(false);
-                        addNotification({ title: 'Approved', message: 'Account credentials sent to user.', type: 'success' });
                       }}
                       className="flex-[2] py-3 bg-success text-white rounded-xl font-bold text-sm shadow-xl shadow-success/20 hover:scale-105 transition-all"
                     >
