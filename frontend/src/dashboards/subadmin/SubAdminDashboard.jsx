@@ -417,7 +417,7 @@ const SubAdminDashboard = () => {
                   <span>{timeRange}</span>
                 </button>
                 {showTimeDropdown && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl shadow-2xl z-[100] py-2 animate-in zoom-in-95 duration-200">
+                  <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-2xl shadow-2xl z-[100] p-2 animate-in zoom-in-95 duration-200">
                     {['Today', 'Yesterday', 'Last 7 Days', 'Last 30 Days', 'This Quarter', 'Custom Range'].map(range => (
                       <div 
                         key={range}
@@ -426,9 +426,16 @@ const SubAdminDashboard = () => {
                           setShowTimeDropdown(false);
                           addNotification({ title: 'Filter Applied', message: `Showing data for ${range}`, type: 'info' });
                         }}
-                        className={`px-4 py-2.5 text-sm font-medium cursor-pointer transition-colors ${timeRange === range ? 'bg-primary-light text-white' : 'dark:text-white hover:bg-primary-light/10 hover:text-primary-light'}`}
+                        className={`flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-bold cursor-pointer transition-all ${
+                          timeRange === range 
+                            ? 'bg-primary-light text-white shadow-md shadow-primary-light/20' 
+                            : 'dark:text-white text-gray-700 hover:bg-primary-light/10 hover:text-primary-light'
+                        }`}
                       >
-                        {range}
+                        <span>{range}</span>
+                        {timeRange === range && (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -2816,20 +2823,26 @@ const SidebarLink = ({ icon, label, active, onClick, collapsed }) => (
   <div 
     onClick={onClick}
     className={`
-      flex items-center gap-3 px-4 py-3.5 rounded-2xl cursor-pointer transition-all duration-300 group relative
+      flex items-center gap-3 px-4 py-3.5 rounded-2xl cursor-pointer transition-all duration-200 group relative overflow-hidden
       ${active 
-        ? 'bg-primary-light text-white shadow-lg shadow-primary-light/20 scale-[1.02]' 
+        ? 'bg-primary-light text-white shadow-lg shadow-primary-light/30 scale-[1.02]' 
         : 'text-text-secondary-light hover:bg-gray-100 dark:hover:bg-secondary-dark hover:text-primary-light dark:hover:text-primary-light'
       }
       ${collapsed ? 'justify-center px-0 w-12 mx-auto' : ''}
     `}
   >
-    <div className={`transition-transform duration-300 ${active ? 'scale-110' : 'group-hover:scale-110'}`}>
+    {/* Active left-edge accent bar */}
+    {active && !collapsed && (
+      <div className="absolute left-0 top-2 bottom-2 w-1 bg-white/50 rounded-full"></div>
+    )}
+    <div className={`transition-transform duration-200 ${active ? 'scale-110' : 'group-hover:scale-105'}`}>
       {icon}
     </div>
-    {!collapsed && <span className="text-sm font-bold tracking-tight">{label}</span>}
+    {!collapsed && <span className={`text-sm tracking-tight ${active ? 'font-black' : 'font-semibold'}`}>{label}</span>}
     {active && !collapsed && (
-      <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-white animate-pulse"></div>
+      <div className="ml-auto flex items-center gap-1">
+        <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></div>
+      </div>
     )}
     {collapsed && (
       <div className="absolute left-full ml-4 px-2 py-1 bg-gray-900 text-white text-[10px] font-black rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
