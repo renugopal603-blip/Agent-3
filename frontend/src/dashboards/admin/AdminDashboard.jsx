@@ -4860,11 +4860,7 @@ const AdminDashboard = () => {
             <SidebarLink icon={<Layout size={18} />} label="Categories" active={activeTab === 'Categories'} onClick={() => setActiveTab('Categories')} />
           </SidebarSection>
 
-          <SidebarSection title="Marketing & Growth">
-            <SidebarLink icon={<Award size={18} />} label="Coupons & Offers" active={activeTab === 'Coupons & Offers'} onClick={() => setActiveTab('Coupons & Offers')} />
-            <SidebarLink icon={<Globe size={18} />} label="Banners & Ads" active={activeTab === 'Banners & Ads'} onClick={() => setActiveTab('Banners & Ads')} />
-            <SidebarLink icon={<Zap size={18} />} label="Campaigns" active={activeTab === 'Campaigns'} onClick={() => setActiveTab('Campaigns')} />
-          </SidebarSection>
+
 
           <SidebarSection title="Finance">
             <SidebarLink icon={<Wallet size={18} />} label="Withdrawals" active={activeTab === 'Withdrawals'} onClick={() => setActiveTab('Withdrawals')} badge="New" />
