@@ -395,9 +395,21 @@ const AgentDashboard = () => {
     };
 
     syncGlobalShops();
-    window.addEventListener('storage', syncGlobalShops);
-    return () => window.removeEventListener('storage', syncGlobalShops);
-  }, []);
+    const pollInterval = setInterval(() => {
+      fetchShops();
+      syncGlobalShops();
+    }, 10000); // Poll every 10 seconds
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'globalShops' || e.key === 'shop_updated') {
+        syncGlobalShops();
+      }
+    });
+    return () => {
+      window.removeEventListener('storage', syncGlobalShops);
+      clearInterval(pollInterval);
+    };
+  }, [user?.token]);
 
   const handleDeleteShop = async (id) => {
     if (window.confirm('Are you sure you want to remove this shop onboarding?')) {
