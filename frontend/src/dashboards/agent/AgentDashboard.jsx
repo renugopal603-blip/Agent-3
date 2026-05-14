@@ -3290,6 +3290,8 @@ const AgentDashboard = () => {
         isOpen={showTicketDetails} 
         onClose={() => setShowTicketDetails(false)} 
         ticket={selectedTicket} 
+        pushGlobalNotification={pushGlobalNotification}
+        user={user}
       />
       <FileViewModal 
         isOpen={!!viewingFile} 
@@ -3610,7 +3612,7 @@ const SidebarSection = ({ title, children }) => (
   </div>
 );
 
-const TicketDetailsModal = ({ isOpen, onClose, ticket }) => {
+const TicketDetailsModal = ({ isOpen, onClose, ticket, pushGlobalNotification, user }) => {
   const [message, setMessage] = useState('');
   const [chatLogs, setChatLogs] = useState([
     { sender: 'System', message: 'Ticket created successfully.', time: '2h ago' },
@@ -3643,6 +3645,22 @@ const TicketDetailsModal = ({ isOpen, onClose, ticket }) => {
 
     setChatLogs([...chatLogs, newMsg]);
     setMessage('');
+
+    // Send notification to Admin Dashboard
+    pushGlobalNotification?.({
+      title: 'New Chat Message',
+      message: `Agent ${user?.name || 'AgentHub'} sent a message on ticket ${ticket.id}: "${message.trim()}"`,
+      type: 'info'
+    });
+
+    // Simulate Admin Response after 2 seconds
+    setTimeout(() => {
+      setChatLogs(prev => [...prev, {
+        sender: 'Admin',
+        message: 'Thank you for your message. We have received it and are looking into it.',
+        time: 'Just now'
+      }]);
+    }, 2000);
   };
 
   return (
