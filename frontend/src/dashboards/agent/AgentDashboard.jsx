@@ -1289,39 +1289,80 @@ const AgentDashboard = () => {
                           <div className="flex items-center justify-between relative z-10">
                             {/* Step 1: Submitted */}
                             <div className="flex flex-col items-center gap-3">
-                              <div className={`w-5 h-5 rounded-full border-4 border-white dark:border-surface-dark shadow-md transition-all duration-500 ${
+                              <div className={`w-6 h-6 rounded-full border-4 border-white dark:border-surface-dark shadow-md transition-all duration-500 flex items-center justify-center ${
                                 isActive || isVerified || isPending ? 'bg-warning scale-110' : 'bg-gray-300'
                               }`}>
-                                {(isActive || isVerified || isPending) && <div className="w-full h-full rounded-full animate-ping bg-warning/30"></div>}
+                                {isPending && <div className="w-full h-full rounded-full animate-ping bg-warning/30 absolute"></div>}
+                                {(isActive || isVerified) ? <Check size={10} className="text-white" /> : <div className="w-1.5 h-1.5 bg-white rounded-full"></div>}
                               </div>
-                              <span className={`text-[9px] font-black uppercase tracking-tighter transition-colors ${
-                                isActive || isVerified || isPending ? 'text-warning' : 'text-text-secondary-light'
-                              }`}>1. Submitted</span>
+                              <div className="text-center">
+                                <span className={`text-[9px] font-black uppercase tracking-tighter block ${
+                                  isActive || isVerified || isPending ? 'text-warning' : 'text-text-secondary-light'
+                                }`}>1. Submitted</span>
+                                <span className="text-[8px] text-text-secondary-light font-bold">Registration Done</span>
+                              </div>
                             </div>
                             
                             {/* Step 2: Sub Admin Verified */}
                             <div className="flex flex-col items-center gap-3">
-                              <div className={`w-5 h-5 rounded-full border-4 border-white dark:border-surface-dark shadow-md transition-all duration-500 ${
+                              <div className={`w-6 h-6 rounded-full border-4 border-white dark:border-surface-dark shadow-md transition-all duration-500 flex items-center justify-center ${
                                 isActive || isVerified ? 'bg-primary-light scale-110' : 'bg-gray-300'
                               }`}>
-                                {isVerified && <div className="w-full h-full rounded-full animate-ping bg-primary-light/30"></div>}
+                                {isVerified && <div className="w-full h-full rounded-full animate-ping bg-primary-light/30 absolute"></div>}
+                                isActive ? <Check size={10} className="text-white" /> : <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
                               </div>
-                              <span className={`text-[9px] font-black uppercase tracking-tighter transition-colors ${
-                                isActive || isVerified ? 'text-primary-light' : 'text-text-secondary-light'
-                              }`}>2. Sub-Admin Verified</span>
+                              <div className="text-center">
+                                <span className={`text-[9px] font-black uppercase tracking-tighter block ${
+                                  isActive || isVerified ? 'text-primary-light' : 'text-text-secondary-light'
+                                }`}>2. Sub-Admin</span>
+                                <span className="text-[8px] text-text-secondary-light font-bold">Verification Phase</span>
+                              </div>
                             </div>
                             
                             {/* Step 3: Admin Approved */}
                             <div className="flex flex-col items-center gap-3">
-                              <div className={`w-5 h-5 rounded-full border-4 border-white dark:border-surface-dark shadow-md transition-all duration-500 ${
+                              <div className={`w-6 h-6 rounded-full border-4 border-white dark:border-surface-dark shadow-md transition-all duration-500 flex items-center justify-center ${
                                 isActive ? 'bg-success scale-110' : 'bg-gray-300'
                               }`}>
-                                {isActive && <div className="w-full h-full rounded-full animate-ping bg-success/30"></div>}
+                                {isActive && <div className="w-full h-full rounded-full animate-ping bg-success/30 absolute"></div>}
+                                {isActive ? <Check size={10} className="text-white" /> : <div className="w-1.5 h-1.5 bg-white rounded-full"></div>}
                               </div>
-                              <span className={`text-[9px] font-black uppercase tracking-tighter transition-colors ${
-                                isActive ? 'text-success' : 'text-text-secondary-light'
-                              }`}>3. Final Admin Approved</span>
+                              <div className="text-center">
+                                <span className={`text-[9px] font-black uppercase tracking-tighter block ${
+                                  isActive ? 'text-success' : 'text-text-secondary-light'
+                                }`}>3. Final Admin</span>
+                                <span className="text-[8px] text-text-secondary-light font-bold">Activation Phase</span>
+                              </div>
                             </div>
+                          </div>
+                        </div>
+
+                        {/* Step-by-Step Status Log */}
+                        <div className="mt-8 pt-6 border-t border-dashed border-border-light dark:border-border-dark">
+                          <div className="flex items-center gap-2 mb-4">
+                            <Activity size={14} className="text-primary-light" />
+                            <span className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light">Approval Timeline</span>
+                          </div>
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-3">
+                              <div className="w-1.5 h-1.5 rounded-full bg-warning"></div>
+                              <p className="text-[10px] font-bold dark:text-white">Registration submitted successfully by you.</p>
+                              <span className="text-[9px] text-text-secondary-light ml-auto">{shop.date || 'Today'}</span>
+                            </div>
+                            {(isVerified || isActive) && (
+                              <div className="flex items-center gap-3">
+                                <div className="w-1.5 h-1.5 rounded-full bg-primary-light"></div>
+                                <p className="text-[10px] font-bold dark:text-white">Sub-Admin verification completed. Waiting for final Admin approval.</p>
+                                <span className="text-[9px] text-text-secondary-light ml-auto">Verified</span>
+                              </div>
+                            )}
+                            {isActive && (
+                              <div className="flex items-center gap-3">
+                                <div className="w-1.5 h-1.5 rounded-full bg-success"></div>
+                                <p className="text-[10px] font-bold dark:text-white">Final Admin approval granted. Shop is now LIVE!</p>
+                                <span className="text-[9px] text-text-secondary-light ml-auto">Activated</span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
