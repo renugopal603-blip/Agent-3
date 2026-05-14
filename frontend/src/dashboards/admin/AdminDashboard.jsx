@@ -284,6 +284,7 @@ const AdminDashboard = () => {
   const handleAdminApproveShop = async (id) => {
     try {
       const dbId = id?._id || id;
+      console.log('DEBUG: Approving shop with ID:', dbId);
       setIsProcessing(true);
 
       // 1. API call to approve in MongoDB (only for real IDs)
@@ -293,21 +294,33 @@ const AdminDashboard = () => {
         try {
           const config = { headers: { Authorization: `Bearer ${user.token}` } };
           await axios.put(`/api/shops/${dbId}/approve`, {}, config);
+          console.log('DEBUG: API Approval success');
         } catch (apiErr) {
-          console.warn('API Approval failed, proceeding with local update for demo purposes', apiErr);
+          console.warn('DEBUG: API Approval failed, proceeding with local update', apiErr);
         }
       }
 
-      // 2. Update local state
-      setShopTieUps(prev => prev.map(s => 
-        (s.id === dbId || s._id === dbId) ? { ...s, status: 'Active' } : s
-      ));
+      // 2. Update local state with robust matching
+      setShopTieUps(prev => prev.map(s => {
+        const sid = String(s._id || s.id);
+        const targetId = String(dbId);
+        if (sid === targetId) {
+          console.log('DEBUG: Matching shop found, updating status to Active');
+          return { ...s, status: 'Active' };
+        }
+        return s;
+      }));
 
       // 3. Update global storage for other tabs
       const currentGlobal = JSON.parse(localStorage.getItem('globalShops') || '[]');
-      const updatedGlobal = currentGlobal.map(s => 
-        (s._id === dbId || s.id === dbId) ? { ...s, status: 'Active' } : s
-      );
+      const updatedGlobal = currentGlobal.map(s => {
+        const sid = String(s._id || s.id);
+        const targetId = String(dbId);
+        if (sid === targetId) {
+          return { ...s, status: 'Active' };
+        }
+        return s;
+      });
       localStorage.setItem('globalShops', JSON.stringify(updatedGlobal));
       localStorage.setItem('shop_updated', Date.now().toString());
       
@@ -323,7 +336,7 @@ const AdminDashboard = () => {
         type: 'success' 
       });
     } catch (error) {
-      console.error('Approval error:', error);
+      console.error('DEBUG: Approval error:', error);
       addNotification({ title: 'Error', message: 'Failed to approve shop.', type: 'error' });
     } finally {
       setIsProcessing(false);
