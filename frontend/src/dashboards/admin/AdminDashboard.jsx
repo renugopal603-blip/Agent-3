@@ -80,6 +80,7 @@ const AdminDashboard = () => {
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showWalletFilters, setShowWalletFilters] = useState(false);
 
   const [docFilter, setDocFilter] = useState('Pending');
   const [showTwoFAModal, setShowTwoFAModal] = useState(false);
@@ -4900,21 +4901,46 @@ const AdminDashboard = () => {
                 <h3 className="text-2xl font-black dark:text-white tracking-tight">User Wallets</h3>
                 <p className="text-sm text-text-secondary-light">Monitor digital wallet balances and account health.</p>
               </div>
-              <div className="flex gap-3">
+               <div className="flex gap-3">
                 <button 
-                  onClick={() => addNotification({ title: 'Wallet Filters', message: 'Showing wallet filter options...', type: 'info' })}
-                  className="btn-outline px-4 py-2 text-sm flex items-center gap-2 hover:bg-primary-light hover:text-white transition-all"
+                  onClick={() => setShowWalletFilters(!showWalletFilters)}
+                  className={`btn-outline px-4 py-2 text-sm flex items-center gap-2 transition-all ${showWalletFilters ? 'bg-primary-light text-white border-primary-light' : 'hover:bg-primary-light hover:text-white'}`}
                 >
                   <Filter size={16} /> Filter
                 </button>
                 <button 
-                  onClick={() => addNotification({ title: 'Bulk Action', message: 'Select wallets to perform bulk operations.', type: 'info' })}
+                  onClick={() => setShowBulkPayoutModal(true)}
                   className="btn-primary px-4 py-2 text-sm hover:scale-105 transition-all shadow-lg shadow-primary-light/20"
                 >
                   Bulk Action
                 </button>
               </div>
             </div>
+
+            {showWalletFilters && (
+              <div className="card-premium p-6 border-2 border-primary-light/20 animate-in slide-in-from-top-4 duration-300">
+                <div className="flex flex-wrap gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-text-secondary-light tracking-widest">Account Status</label>
+                    <select className="bg-gray-50 dark:bg-secondary-dark px-4 py-2 rounded-xl text-xs font-bold outline-none border-2 border-transparent focus:border-primary-light transition-all dark:text-white">
+                      <option>All Status</option>
+                      <option>Active</option>
+                      <option>Restricted</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-text-secondary-light tracking-widest">User Role</label>
+                    <select className="bg-gray-50 dark:bg-secondary-dark px-4 py-2 rounded-xl text-xs font-bold outline-none border-2 border-transparent focus:border-primary-light transition-all dark:text-white">
+                      <option>All Roles</option>
+                      <option>Agent</option>
+                      <option>Shop Owner</option>
+                      <option>Delivery Partner</option>
+                    </select>
+                  </div>
+                  <button className="mt-auto mb-1 text-xs font-black text-error uppercase hover:underline" onClick={() => setShowWalletFilters(false)}>Clear Filters</button>
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {userWallets.map((wallet) => (
@@ -5236,6 +5262,11 @@ const AdminDashboard = () => {
           onApprove={handleApproveVerification}
           onReject={handleRejectVerification}
           setPreviewDoc={setPreviewDoc}
+        />
+        <BulkPayoutModal 
+          isOpen={showBulkPayoutModal}
+          onClose={() => setShowBulkPayoutModal(false)}
+          addNotification={addNotification}
         />
         <AddAgentModal 
           isOpen={showAddAgentModal} 
@@ -10565,5 +10596,72 @@ const UploadMaterialModal = ({ isOpen, onClose, addNotification }) => {
 };
 
 export default AdminDashboard;
+
+const BulkPayoutModal = ({ isOpen, onClose, addNotification }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-background-dark/80 backdrop-blur-md animate-in fade-in duration-300" onClick={onClose}></div>
+      <div className="relative w-full max-w-lg bg-surface-light dark:bg-surface-dark rounded-[2.5rem] shadow-2xl border border-border-light dark:border-border-dark overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="p-8 border-b dark:border-border-dark bg-primary-light text-white flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
+              <Wallet size={24} />
+            </div>
+            <div>
+              <h3 className="text-xl font-black">Bulk Wallet Actions</h3>
+              <p className="text-xs font-bold uppercase opacity-80">Batch Payment Processing</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-3 hover:bg-white/10 rounded-2xl transition-all"><X size={24} /></button>
+        </div>
+
+        <div className="p-8 space-y-6">
+          <div className="p-6 bg-gray-50 dark:bg-secondary-dark rounded-3xl border border-border-light dark:border-border-dark space-y-4">
+            <div className="flex justify-between items-center">
+              <p className="text-sm font-bold dark:text-white">Selected Users</p>
+              <span className="px-3 py-1 bg-primary-light text-white rounded-lg text-xs font-black">24 Users Selected</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <p className="text-sm font-bold dark:text-white">Total Payout Amount</p>
+              <p className="text-xl font-black text-primary-light">₹1,45,200.00</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black uppercase text-text-secondary-light tracking-widest ml-1">Payment Method</label>
+              <select className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all text-sm appearance-none">
+                <option>Bank Transfer (IMPS/NEFT)</option>
+                <option>UPI Bulk Payout</option>
+                <option>Digital Wallet Credit</option>
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black uppercase text-text-secondary-light tracking-widest ml-1">Admin Authorization PIN</label>
+              <input 
+                type="password" 
+                placeholder="••••" 
+                maxLength={4}
+                className="w-full px-4 py-4 rounded-2xl bg-gray-50 dark:bg-secondary-dark border-2 border-transparent focus:border-primary-light outline-none dark:text-white font-bold transition-all text-sm tracking-[1rem] text-center"
+              />
+            </div>
+          </div>
+
+          <button 
+            onClick={() => {
+              addNotification({ title: 'Payout Initiated', message: 'Bulk payment processing started for 24 users.', type: 'success' });
+              onClose();
+            }}
+            className="w-full py-5 bg-success text-white rounded-3xl font-black text-sm shadow-xl shadow-success/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+          >
+            Authorize Bulk Payout
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 
