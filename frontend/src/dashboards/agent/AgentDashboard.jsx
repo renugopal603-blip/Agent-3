@@ -10,7 +10,7 @@ import {
   Wallet, History, Award, ArrowUpRight, TrendingUp, BarChart2,
   Bell, LifeBuoy, MessageSquare, Settings, LogOut, Search, Filter,
   ChevronRight, ArrowRight, MoreVertical, Edit, Trash2, CheckCircle, Clock, ChevronDown, Send,
-  FileText, PieChart, Info, AlertCircle, Globe, Download, Sun, Moon, Star, X, UserPlus, Mail, Phone, Eye, Activity
+  FileText, PieChart, Info, AlertCircle, Globe, Download, Sun, Moon, Star, X, UserPlus, Mail, Phone, Eye, Activity, Check
 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
