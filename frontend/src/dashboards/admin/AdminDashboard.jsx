@@ -906,6 +906,18 @@ const AdminDashboard = () => {
 
   const [serviceSearchTerm, setServiceSearchTerm] = useState('');
   const [productSearchTerm, setProductSearchTerm] = useState('');
+  const [withdrawals, setWithdrawals] = useState([
+    { id: 'WDR-101', user: 'Amit Singh', amount: '₹12,500', method: 'Bank Transfer', requestedAt: '2h ago', status: 'Pending' },
+    { id: 'WDR-102', user: 'Priya Verma', amount: '₹8,200', method: 'UPI', requestedAt: '5h ago', status: 'Completed' },
+    { id: 'WDR-103', user: 'Rahul Dev', amount: '₹4,500', method: 'Bank Transfer', requestedAt: 'Yesterday', status: 'Processing' },
+    { id: 'WDR-104', user: 'Sanjay Dutt', amount: '₹15,000', method: 'UPI', requestedAt: '2d ago', status: 'Held' }
+  ]);
+
+  const [userWallets, setUserWallets] = useState([
+    { id: 'WAL-501', user: 'Anil Kapoor', role: 'Agent', balance: '₹45,200', status: 'Active', lastTxn: 'Today' },
+    { id: 'WAL-502', user: 'Zoya Khan', role: 'Shop Owner', balance: '₹12,800', status: 'Active', lastTxn: 'Yesterday' },
+    { id: 'WAL-503', user: 'Meera Seth', role: 'Delivery Partner', balance: '₹3,450', status: 'Restricted', lastTxn: '2d ago' }
+  ]);
 
   const handleLogout = () => {
     logout();
@@ -4788,6 +4800,167 @@ const AdminDashboard = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'Withdrawals':
+        return (
+          <div className="p-8 space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-2xl font-black dark:text-white tracking-tight">Withdrawal Requests</h3>
+                <p className="text-sm text-text-secondary-light">Manage and process fund withdrawal requests from partners.</p>
+              </div>
+              <button 
+                onClick={() => handleDownloadReport('Withdrawal_Requests')}
+                className="btn-primary px-6 py-2.5 flex items-center gap-2"
+              >
+                <Download size={18} /> Export List
+              </button>
+            </div>
+
+            <div className="card-premium overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-gray-50 dark:bg-secondary-dark/30 text-left border-b dark:border-border-dark">
+                      <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest">Request ID</th>
+                      <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest">User / Partner</th>
+                      <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest">Amount</th>
+                      <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest">Method</th>
+                      <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest">Status</th>
+                      <th className="p-4 text-right font-black text-[10px] text-text-secondary-light uppercase tracking-widest">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border-light dark:divide-border-dark">
+                    {withdrawals.map((w) => (
+                      <tr key={w.id} className="hover:bg-gray-50/50 dark:hover:bg-secondary-dark/20 transition-colors">
+                        <td className="p-4 font-bold text-xs dark:text-white">{w.id}</td>
+                        <td className="p-4">
+                          <p className="text-sm font-bold dark:text-white">{w.user}</p>
+                          <p className="text-[10px] text-text-secondary-light font-bold uppercase">{w.requestedAt}</p>
+                        </td>
+                        <td className="p-4 font-black text-sm text-primary-light">{w.amount}</td>
+                        <td className="p-4">
+                          <div className="flex items-center gap-2 text-xs font-bold dark:text-white">
+                            {w.method === 'UPI' ? <Smartphone size={14} className="text-emerald-500" /> : <CreditCard size={14} className="text-blue-500" />}
+                            {w.method}
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
+                            w.status === 'Pending' ? 'bg-warning/10 text-warning' : 
+                            w.status === 'Completed' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'
+                          }`}>{w.status}</span>
+                        </td>
+                        <td className="p-4 text-right">
+                          <div className="flex justify-end gap-2">
+                            <button onClick={() => addNotification({ title: 'Request Held', message: 'Withdrawal put on hold.', type: 'warning' })} className="p-2 text-warning hover:bg-warning/10 rounded-lg transition-all"><Clock size={16} /></button>
+                            <button onClick={() => addNotification({ title: 'Request Approved', message: 'Fund transfer initiated.', type: 'success' })} className="p-2 bg-success text-white rounded-lg shadow-lg shadow-success/20 hover:scale-110 transition-all"><Check size={16} /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'User Wallets':
+        return (
+          <div className="p-8 space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-2xl font-black dark:text-white tracking-tight">User Wallets</h3>
+                <p className="text-sm text-text-secondary-light">Monitor digital wallet balances and account health.</p>
+              </div>
+              <div className="flex gap-3">
+                <button className="btn-outline px-4 py-2 text-sm flex items-center gap-2"><Filter size={16} /> Filter</button>
+                <button className="btn-primary px-4 py-2 text-sm">Bulk Action</button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {userWallets.map((wallet) => (
+                <div key={wallet.id} className="card-premium space-y-6 group hover:border-primary-light/50 transition-all">
+                  <div className="flex justify-between items-start">
+                    <div className="w-12 h-12 bg-gray-100 dark:bg-secondary-dark rounded-2xl flex items-center justify-center text-primary-light group-hover:scale-110 transition-transform">
+                      <Wallet size={24} />
+                    </div>
+                    <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest ${wallet.status === 'Active' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}`}>{wallet.status}</span>
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-black dark:text-white">{wallet.user}</h4>
+                    <p className="text-xs text-text-secondary-light font-bold uppercase tracking-widest">{wallet.role} • {wallet.id}</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-secondary-dark/50 rounded-2xl border border-border-light dark:border-border-dark">
+                    <p className="text-[10px] font-black text-text-secondary-light uppercase tracking-widest mb-1">Available Balance</p>
+                    <p className="text-2xl font-black dark:text-white tracking-tight">{wallet.balance}</p>
+                  </div>
+                  <div className="flex justify-between items-center pt-2">
+                    <p className="text-[10px] font-bold text-text-secondary-light">Last Activity: {wallet.lastTxn}</p>
+                    <button className="text-xs font-black text-primary-light hover:underline uppercase tracking-widest">View History</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 'Transaction History':
+        return (
+          <div className="p-8 space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-2xl font-black dark:text-white tracking-tight">System Transactions</h3>
+                <p className="text-sm text-text-secondary-light">Audit trail of all platform financial movements.</p>
+              </div>
+              <button 
+                onClick={() => handleDownloadReport('Transaction_History')}
+                className="btn-primary px-6 py-2.5 flex items-center gap-2"
+              >
+                <FileSpreadsheet size={18} /> Export CSV
+              </button>
+            </div>
+
+            <div className="card-premium overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-gray-50 dark:bg-secondary-dark/30 text-left border-b dark:border-border-dark">
+                      <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest">Transaction Info</th>
+                      <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest">Type</th>
+                      <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest">Method</th>
+                      <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest">Amount</th>
+                      <th className="p-4 font-black text-[10px] text-text-secondary-light uppercase tracking-widest">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border-light dark:divide-border-dark">
+                    {transactions.map((tx) => (
+                      <tr key={tx.id} className="hover:bg-gray-50/50 dark:hover:bg-secondary-dark/20 transition-colors">
+                        <td className="p-4">
+                          <p className="text-sm font-bold dark:text-white">{tx.name}</p>
+                          <p className="text-[10px] text-text-secondary-light font-bold uppercase">{tx.date} • {tx.id}</p>
+                        </td>
+                        <td className="p-4">
+                          <span className="px-2 py-1 bg-gray-100 dark:bg-secondary-dark rounded text-[10px] font-bold dark:text-white uppercase tracking-widest">{tx.type}</span>
+                        </td>
+                        <td className="p-4 text-xs font-medium dark:text-white">{tx.method}</td>
+                        <td className={`p-4 font-black text-sm ${tx.amount.startsWith('+') ? 'text-success' : 'text-error'}`}>{tx.amount}</td>
+                        <td className="p-4">
+                          <div className="flex items-center gap-1.5">
+                            <div className={`w-1.5 h-1.5 rounded-full ${tx.status === 'Completed' ? 'bg-success' : tx.status === 'Processing' ? 'bg-warning' : 'bg-error'}`}></div>
+                            <span className="text-[10px] font-black uppercase tracking-widest dark:text-white">{tx.status}</span>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
