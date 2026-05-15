@@ -16,7 +16,7 @@ async function list() {
         const users = await User.find({});
         console.log('Total users:', users.length);
         users.forEach(u => {
-            console.log(`- Phone: ${u.phone} | Role: ${u.role} | Email: ${u.email}`);
+            console.log(`- Phone: ${u.phone} | Role: ${u.role} | Status: ${u.status} | Email: ${u.email}`);
         });
         process.exit();
     } catch (err) {

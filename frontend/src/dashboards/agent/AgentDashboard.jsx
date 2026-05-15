@@ -557,6 +557,7 @@ const AgentDashboard = () => {
   ];
 
   const renderContent = () => {
+    /*
     // LOCKDOWN: Restrict core features if agent is not active
     if (user?.status !== 'Active' && applicationStep < 5) {
       // DEV BYPASS: Commented out the strict gating to allow you to test all sidebar tabs.
@@ -704,9 +705,9 @@ const AgentDashboard = () => {
           </div>
         </div>
         );
-
       }
     }
+    */
 
     switch (activeTab) {
       case 'Dashboard':
