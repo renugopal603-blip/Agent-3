@@ -625,7 +625,7 @@ const AgentDashboard = () => {
                 <div className="flex-1 space-y-4">
                   {[
                     { title: 'Shop Registration', desc: 'New Shop: Fresh Mart', time: '5h ago', icon: <Store />, color: 'text-emerald-500', bgColor: 'bg-emerald-500/10', target: 'Shop Tie-Up' },
-                    { title: 'KYC Verified', desc: 'Your KYC was approved by Admin', time: '1d ago', icon: <ShieldCheck />, color: 'text-purple-500', bgColor: 'bg-purple-500/10', target: 'Security Deposit' },
+                    { title: 'KYC Verified', desc: 'Your KYC was approved by Admin', time: '1d ago', icon: <ShieldCheck />, color: 'text-purple-500', bgColor: 'bg-purple-500/10', target: 'KYC Status' },
                     { title: 'Payment Received', desc: 'Payout for April processed', time: '2d ago', icon: <Wallet />, color: 'text-blue-500', bgColor: 'bg-blue-500/10', target: 'Wallet / Earnings' },
                   ].map((activity, i) => (
                     <div 
