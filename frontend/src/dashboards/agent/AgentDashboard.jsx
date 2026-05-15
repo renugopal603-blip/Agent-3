@@ -3908,7 +3908,6 @@ const TicketDetailsModal = ({ isOpen, onClose, ticket, pushGlobalNotification, u
           </div>
         </form>
       </div>
-      </div>
     </div>
   );
 };
