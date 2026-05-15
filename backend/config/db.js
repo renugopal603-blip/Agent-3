@@ -3,7 +3,8 @@ const dns = require('dns');
 
 // Fix for ECONNREFUSED on querySrv in some environments
 try {
-  dns.setServers(['8.8.8.8', '8.8.4.4']);
+  // Use Cloudflare and Google DNS
+  dns.setServers(['1.1.1.1', '1.0.0.1', '8.8.8.8', '8.8.4.4']);
 } catch (e) {
   console.warn('Could not set custom DNS servers:', e.message);
 }
