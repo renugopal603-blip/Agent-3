@@ -602,25 +602,6 @@ const AgentDashboard = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-primary-light/5 p-6 rounded-3xl border border-primary-light/10">
-              <div className="space-y-1">
-                <p className="text-[10px] font-black uppercase tracking-widest text-primary-light/60">Registered Name</p>
-                <p className="font-bold dark:text-white">{user?.name}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-[10px] font-black uppercase tracking-widest text-primary-light/60">Phone Number</p>
-                <p className="font-bold dark:text-white">{user?.phone}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-[10px] font-black uppercase tracking-widest text-primary-light/60">Email Address</p>
-                <p className="font-bold dark:text-white">{user?.email}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-[10px] font-black uppercase tracking-widest text-primary-light/60">Current Status</p>
-                <p className="font-bold text-orange-500 uppercase text-xs">{user?.status || 'Pending Verification'}</p>
-              </div>
-            </div>
-
             <div className="relative pt-10">
               {/* Tracker Line */}
               <div className="absolute top-[84px] left-8 right-8 h-1.5 bg-gray-100 dark:bg-secondary-dark rounded-full"></div>
