@@ -27,6 +27,7 @@ const AgentDashboard = () => {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [applicationStep, setApplicationStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [txnSearchTerm, setTxnSearchTerm] = useState('');
   
   // Initialize application step based on user status
   useEffect(() => {
@@ -1863,7 +1864,13 @@ const AgentDashboard = () => {
                 </h4>
                 <div className="relative">
                   <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary-light" />
-                  <input type="text" placeholder="Search by ID or Shop..." className="pl-10 pr-4 py-2 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl text-sm font-bold dark:text-white outline-none focus:ring-2 focus:ring-primary-light/50 transition-all" />
+                  <input 
+                    type="text" 
+                    value={txnSearchTerm}
+                    onChange={(e) => setTxnSearchTerm(e.target.value)}
+                    placeholder="Search by ID or Shop..." 
+                    className="pl-10 pr-4 py-2 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl text-sm font-bold dark:text-white outline-none focus:ring-2 focus:ring-primary-light/50 transition-all" 
+                  />
                 </div>
               </div>
               
@@ -1886,7 +1893,12 @@ const AgentDashboard = () => {
                       { id: 'TXN-99795B', date: 'May 10, 2026', desc: 'Sub-Agent Recruitment Bonus', type: 'Credit', amount: '+₹200.00', status: 'Pending', color: 'orange' },
                       { id: 'TXN-99750C', date: 'May 05, 2026', desc: 'Bank Payout Withdrawal', type: 'Debit', amount: '-₹8,500.00', status: 'Processed', color: 'blue' },
                       { id: 'TXN-99710A', date: 'May 01, 2026', desc: 'Monthly Performance Bonus (Gold Tier)', type: 'Credit', amount: '+₹2,500.00', status: 'Cleared', color: 'emerald' },
-                    ].map((txn, i) => (
+                    ]
+                    .filter(txn => 
+                      txn.id.toLowerCase().includes(txnSearchTerm.toLowerCase()) || 
+                      txn.desc.toLowerCase().includes(txnSearchTerm.toLowerCase())
+                    )
+                    .map((txn, i) => (
                       <tr key={i} className="hover:bg-gray-50 dark:hover:bg-secondary-dark transition-colors group">
                         <td className="px-6 py-5">
                           <span className="text-xs font-black dark:text-white bg-gray-100 dark:bg-secondary-dark px-2 py-1 rounded-md">{txn.id}</span>
