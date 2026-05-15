@@ -28,8 +28,6 @@ const AgentDashboard = () => {
   const [applicationStep, setApplicationStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const [txnSearchTerm, setTxnSearchTerm] = useState('');
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [profileForm, setProfileForm] = useState({ name: user?.name || '', email: user?.email || '', phone: user?.phone || '' });
   
   // Initialize application step based on user status
   useEffect(() => {
@@ -754,7 +752,7 @@ const AgentDashboard = () => {
                   <h4 className="font-black dark:text-white uppercase tracking-widest text-sm">Quick Actions</h4>
                   <div className="space-y-3">
                     <button 
-                      onClick={() => setIsEditingProfile(true)}
+                      onClick={() => setShowEditProfile(true)}
                       className="w-full btn-primary py-3 rounded-xl font-bold text-sm shadow-lg shadow-primary-light/20 hover:scale-[1.02] transition-all"
                     >
                       Edit Profile Info
@@ -3910,45 +3908,7 @@ const TicketDetailsModal = ({ isOpen, onClose, ticket, pushGlobalNotification, u
           </div>
         </form>
       </div>
-
-      {/* Profile Edit Modal */}
-      {isEditingProfile && (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-surface-dark w-full max-w-md rounded-[32px] p-8 shadow-2xl animate-in zoom-in-95 duration-300">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-2xl font-black dark:text-white tracking-tighter">Edit Profile</h3>
-              <button onClick={() => setIsEditingProfile(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-secondary-dark rounded-full transition-all">
-                <X size={20} className="text-text-secondary-light" />
-              </button>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light">Full Name</label>
-                <input type="text" value={profileForm.name} onChange={(e) => setProfileForm({...profileForm, name: e.target.value})} className="w-full px-4 py-3 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl outline-none focus:ring-2 focus:ring-primary-light dark:text-white font-bold transition-all" />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light">Email Address</label>
-                <input type="email" value={profileForm.email} onChange={(e) => setProfileForm({...profileForm, email: e.target.value})} className="w-full px-4 py-3 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl outline-none focus:ring-2 focus:ring-primary-light dark:text-white font-bold transition-all" />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase tracking-widest text-text-secondary-light">Phone Number</label>
-                <input type="tel" value={profileForm.phone} onChange={(e) => setProfileForm({...profileForm, phone: e.target.value})} className="w-full px-4 py-3 bg-gray-50 dark:bg-secondary-dark border border-border-light dark:border-border-dark rounded-xl outline-none focus:ring-2 focus:ring-primary-light dark:text-white font-bold transition-all" />
-              </div>
-              
-              <button 
-                onClick={() => {
-                  setIsEditingProfile(false);
-                  addNotification({ title: 'Profile Updated', message: 'Your profile information has been saved successfully.', type: 'success' });
-                }}
-                className="w-full btn-primary py-4 rounded-xl font-black uppercase tracking-widest mt-4 shadow-lg shadow-primary-light/20 hover:scale-[1.02] active:scale-95 transition-all text-xs"
-              >
-                Save Changes
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 };
